@@ -1,5 +1,5 @@
 import XCTest
-import AppsOnAir-AppLink
+import AppsOnAir_AppLink
 
 class Tests: XCTestCase {
     

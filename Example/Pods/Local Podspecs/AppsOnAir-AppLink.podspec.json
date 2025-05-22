@@ -21,9 +21,9 @@
   },
   "dependencies": {
     "AppsOnAir-Core": [
-      "~> 0.0.2"
+      "0.0.4"
     ]
   },
-  "source_files": "AppsOnAir-AppLink/Classes/**/*",
+  "vendored_frameworks": "AppsOnAir_AppLink.xcframework",
   "swift_version": "5.0"
 }

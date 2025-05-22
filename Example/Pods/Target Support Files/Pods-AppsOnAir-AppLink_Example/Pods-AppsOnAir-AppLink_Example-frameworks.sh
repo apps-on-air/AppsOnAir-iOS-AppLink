@@ -176,14 +176,12 @@ code_sign_if_enabled() {
 }
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

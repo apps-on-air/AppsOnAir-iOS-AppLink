@@ -21,8 +21,8 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '13.0'
   
   # AppsOnAir Core pod
-  s.dependency 'AppsOnAir-Core', '~> 0.0.2'
+  s.dependency 'AppsOnAir-Core', '0.0.4'
   
-  s.source_files = 'AppsOnAir-AppLink/Classes/**/*'
+  s.vendored_frameworks = 'AppsOnAir_AppLink.xcframework'
   
 end
