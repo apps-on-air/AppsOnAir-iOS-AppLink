@@ -1,0 +1,4 @@
+framework module AppsOnAir_AppLink {
+  header "AppsOnAir_AppLink-Swift.h"
+  requires objc
+}
