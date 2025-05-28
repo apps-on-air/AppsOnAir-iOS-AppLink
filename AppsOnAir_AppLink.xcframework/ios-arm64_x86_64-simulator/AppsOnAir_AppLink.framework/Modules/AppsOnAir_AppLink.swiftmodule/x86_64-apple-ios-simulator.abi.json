@@ -718,49 +718,49 @@
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 652,
+      "offset": 620,
       "length": 5,
       "value": "\"URL\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 673,
+      "offset": 641,
       "length": 18,
       "value": "\"Api Passing Data\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 725,
+      "offset": 693,
       "length": 38,
       "value": "\"Error retrieving appInstallationDate\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 785,
+      "offset": 753,
       "length": 23,
       "value": "\"Invalid response type\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 832,
+      "offset": 800,
       "length": 20,
       "value": "\"Public IP Address:\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 876,
+      "offset": 844,
       "length": 22,
       "value": "\"IP Addresses by Wifi\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 926,
+      "offset": 894,
       "length": 26,
       "value": "\"IP Addresses by Cellular\""
     },
@@ -802,28 +802,28 @@
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3224,
+      "offset": 3251,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3262,
+      "offset": 3289,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3342,
+      "offset": 3369,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3387,
+      "offset": 3414,
       "length": 5,
       "value": "false"
     },
