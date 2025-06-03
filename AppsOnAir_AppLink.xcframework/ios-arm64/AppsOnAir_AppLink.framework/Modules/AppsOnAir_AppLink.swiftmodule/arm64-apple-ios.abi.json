@@ -1,0 +1,803 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "AppsOnAir_AppLink",
+    "printedName": "AppsOnAir_AppLink",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "ObjectiveC",
+        "printedName": "ObjectiveC",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "AppsOnAir_Core",
+        "printedName": "AppsOnAir_Core",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "AppsOnAir_Core",
+        "printedName": "AppsOnAir_Core",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "AppsOnAir_Core",
+        "printedName": "AppsOnAir_Core",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "AppLinkService",
+        "printedName": "AppLinkService",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "shared",
+            "printedName": "shared",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AppLinkService",
+                "printedName": "AppsOnAir_AppLink.AppLinkService",
+                "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(cpy)shared",
+            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC6sharedACvpZ",
+            "moduleName": "AppsOnAir_AppLink",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AppLinkService",
+                    "printedName": "AppsOnAir_AppLink.AppLinkService",
+                    "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(cm)shared",
+                "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC6sharedACvgZ",
+                "moduleName": "AppsOnAir_AppLink",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "initialize",
+            "printedName": "initialize(completion:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Foundation.URL?, [Swift.String : Any]) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Tuple",
+                    "printedName": "(Foundation.URL?, [Swift.String : Any])",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.URL?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "URL",
+                            "printedName": "Foundation.URL",
+                            "usr": "s:10Foundation3URLV"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(im)initializeWithCompletion:",
+            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC10initialize10completionyy10Foundation3URLVSg_SDySSypGtc_tF",
+            "moduleName": "AppsOnAir_AppLink",
+            "objc_name": "initializeWithCompletion:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "handleAppLink",
+            "printedName": "handleAppLink(incomingURL:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "URL",
+                "printedName": "Foundation.URL",
+                "usr": "s:10Foundation3URLV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(im)handleAppLinkWithIncomingURL:",
+            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC06handledE011incomingURLy10Foundation0I0V_tF",
+            "moduleName": "AppsOnAir_AppLink",
+            "objc_name": "handleAppLinkWithIncomingURL:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "createAppLink",
+            "printedName": "createAppLink(url:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "([Swift.String : Any]) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(im)createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:",
+            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC06createdE03url4name0H6Prefix7shortId10socialMeta20isOpenInBrowserApple0opq3IosD014iOSFallbackUrl0opq7AndroidD00opqrW0015androidFallbackV010completionySS_S3SSgSDySSypGSgS2bAQS2bAQyARctF",
+            "moduleName": "AppsOnAir_AppLink",
+            "objc_name": "createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AppLinkService",
+                "printedName": "AppsOnAir_AppLink.AppLinkService",
+                "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(im)init",
+            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceCACycfc",
+            "moduleName": "AppsOnAir_AppLink",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService",
+        "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC",
+        "moduleName": "AppsOnAir_AppLink",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AppsOnAir_Core",
+        "printedName": "AppsOnAir_Core",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "ObjectiveC",
+        "printedName": "ObjectiveC",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "AppsOnAir_Core",
+        "printedName": "AppsOnAir_Core",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "ObjectiveC",
+        "printedName": "ObjectiveC",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 82,
+      "length": 16,
+      "value": "\"AppsOnAir-Link\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 119,
+      "length": 14,
+      "value": "\"ReferralData\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 194,
+      "length": 40,
+      "value": "\"Something went wrong please try again!\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 251,
+      "length": 8,
+      "value": "\"error:\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 284,
+      "length": 20,
+      "value": "\"Failed to fetch IP\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 323,
+      "length": 14,
+      "value": "\"Status code:\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 368,
+      "length": 24,
+      "value": "\"Failed to get response\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 418,
+      "length": 17,
+      "value": "\"App id missing!\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 456,
+      "length": 16,
+      "value": "\"Response JSON:\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 498,
+      "length": 17,
+      "value": "\"Failed to load:\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 532,
+      "length": 20,
+      "value": "\"Failed to get URL:\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 573,
+      "length": 35,
+      "value": "\"Please check internet connection!\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 620,
+      "length": 5,
+      "value": "\"URL\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 641,
+      "length": 18,
+      "value": "\"Api Passing Data\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 693,
+      "length": 38,
+      "value": "\"Error retrieving appInstallationDate\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 753,
+      "length": 23,
+      "value": "\"Invalid response type\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 800,
+      "length": 20,
+      "value": "\"Public IP Address:\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 844,
+      "length": 22,
+      "value": "\"IP Addresses by Wifi\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 894,
+      "length": 26,
+      "value": "\"IP Addresses by Cellular\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppDelegateSwizzler.swift",
+      "kind": "Dictionary",
+      "offset": 8153,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 936,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 974,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1054,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1099,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5400,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5438,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5518,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5563,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
+      "kind": "StringLiteral",
+      "offset": 93,
+      "length": 39,
+      "value": "\"https:\/\/server.dev.appsonair.link\/api\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
+      "kind": "StringLiteral",
+      "offset": 164,
+      "length": 23,
+      "value": "\"https:\/\/api.ipify.org\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
+      "kind": "StringLiteral",
+      "offset": 277,
+      "length": 15,
+      "value": "\"\/dynamic-link\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
+      "kind": "StringLiteral",
+      "offset": 341,
+      "length": 10,
+      "value": "\"\/config\/\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
+      "kind": "StringLiteral",
+      "offset": 404,
+      "length": 3,
+      "value": "\"\/\""
+    }
+  ]
+}

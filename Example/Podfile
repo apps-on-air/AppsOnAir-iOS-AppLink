@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '13.0'
+
+target 'AppsOnAir-AppLink_Example' do
+  pod 'AppsOnAir-AppLink', :path => '../'
+
+  target 'AppsOnAir-AppLink_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
