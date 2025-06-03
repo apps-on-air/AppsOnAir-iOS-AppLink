@@ -58,6 +58,8 @@ how to get APIKey for more details check this [URL](https://documentation.appson
 </array>
 ```
 
+> ℹ️ **Note:** After configuring the Associated Domain for Universal Links, it may take up to 24 hours for the changes to be reflected and become active. The Associated Domain setup and verification process is managed by Apple.
+
 #### If you want to add Custom URL schema for add below code to the app's `info.plist` file for. 
 
 ```
@@ -90,7 +92,58 @@ Objective-C
 
 ### App-Link Implement Code
 
-Swift / SwiftUI
+**When using SwiftUI, it is necessary to add the **.onOpenURL** modifier in ContentView.swift, directly after any layout container such as VStack, Button, or similar views.**
+
+
+```swift
+VStack {
+    // Your UI components here
+}
+.onOpenURL { url in
+    AppLinkService.shared.handleAppLink(incomingURL: url)
+}
+```
+
+**When using Swift with a SceneDelegate, it is necessary to add the following method inside SceneDelegate.swift**
+
+```swift
+func scene(_ scene: UIScene, openURLContexts URLContexts:   Set<UIOpenURLContext>) {
+
+}
+
+func scene(_ scene: UIScene, continue userActivity:NSUserActivity) {
+
+}
+```
+
+SwiftUI
+
+```swift
+import SwiftUI
+import AppsOnAir_AppLink
+
+@main
+struct appsonairApp: App {
+  
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+class AppDelegate: UIResponder, UIApplicationDelegate {
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+      AppLinkService.shared.initialize { incomingURL,linkInfo in
+          //write the code for handling flow based o url
+      }
+      return true
+  }
+}
+```
+
+Swift
 ```swift
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -151,7 +204,52 @@ Objective-C
 
 ### App-Link Implement Code
 
-Swift / SwiftUI
+Swift UI
+```swift
+import SwiftUI
+import AppsOnAir_AppLink
+
+struct ContentView: View {
+    @State private var showToast = false
+    @State private var message = ""
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Button(action: {
+                AppLinkService.shared.createAppLink(
+                    url: "https://example.com",
+                    name: "YOUR_LINK_NAME",
+                    urlPrefix: "YOUR_DOMAIN_NAME",
+                    shortId: "LINK_ID",
+                    socialMeta: [:],
+                    isOpenInBrowserApple: false,
+                    isOpenInIosApp: true,
+                    iOSFallbackUrl: "",
+                    isOpenInAndroidApp: true,
+                    isOpenInBrowserAndroid: false,
+                    androidFallbackUrl: ""
+                ) { linkInfo in
+                     //write the code for handling create link
+                }
+            }) {
+                Text("Create Link")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+        .padding()
+        .toast(isPresented: $showToast, message: message)
+        .onOpenURL { url in
+            AppLinkService.shared.handleAppLink(incomingURL: url)
+        }
+    }
+}
+```
+
+Swift
 ```swift
 class ViewController: UIViewController {
     let appOnAirLinkService = AppLinkService.shared
@@ -180,7 +278,8 @@ class ViewController: UIViewController {
            @objc func buttonPressed() {
                // Help to create the link
                // <urlPrefix> shouldn't contain http or https
-               appOnAirLinkService.createAppLink(url: "https://example.com", name: "YOUR_LINK_NAME",  urlPrefix: "YOUR_DOMAIN_NAME",prefixId: "LINK_ID") { linkInfo  in
+               appOnAirLinkService.createAppLink(url: "https://example.com",name: "YOUR_LINK_NAME",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: [:],isOpenInBrowserApple: false,isOpenInIosApp: true,iOSFallbackUrl: "",isOpenInAndroidApp: true,isOpenInBrowserAndroid: false,androidFallbackUrl: ""
+        ) { linkInfo  in
                     //write the code for handling create link
                 }
            }
@@ -228,7 +327,7 @@ Objective-c
 - (void)openNextScreen {
      // Help to create link
      // <urlPrefix> shouldn't contain http or https
-    [self.appLinkService createAppLinkWithUrl:@"https://example.com" name:@"YOUR_LINK_NAME" urlPrefix:@"YOUR_DOMAIN_NAME" prefixId: @"LINK_ID"customParams:@{} socialMeta:@{} analytics:@{} isOpenInBrowserApple:false isOpenInIosApp:true iOSFallbackUrl:@"https://example1.com" isOpenInAndroidApp:true isOpenInBrowserAndroid:false androidFallbackUrl:@"https://example.com" completion:^(NSDictionary<NSString *,id> * linkInfo) {
+    [self.appLinkService createAppLinkWithUrl:@"https://example.com" name:@"YOUR_LINK_NAME" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{}isOpenInBrowserApple:true isOpenInIosApp:true iOSFallbackUrl:@"www.google.com" isOpenInAndroidApp:true isOpenInBrowserAndroid:false androidFallbackUrl:@"www.google.com" completion:^(NSDictionary<NSString *,id> * linkInfo) {
         //write the code for handling create link
     }];
 }

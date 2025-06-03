@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 6.0.3 effective-5.10 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)
-// swift-module-flags: -target arm64-apple-ios18.2 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-bare-slash-regex -module-name AppsOnAir_AppLink
+// swift-module-flags: -target arm64-apple-ios13.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-bare-slash-regex -module-name AppsOnAir_AppLink
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface
 import AppsOnAir_Core
 import Combine
@@ -16,6 +16,6 @@ import _SwiftConcurrencyShims
   @objc deinit
   @objc public func initialize(completion: @escaping (Foundation.URL?, [Swift.String : Any]) -> ())
   @objc public func handleAppLink(incomingURL: Foundation.URL)
-  @objc public func createAppLink(url: Swift.String, name: Swift.String, urlPrefix: Swift.String, prefixId: Swift.String? = nil, customParams: [Swift.String : Any]? = nil, socialMeta: [Swift.String : Any]? = nil, analytics: [Swift.String : Any]? = nil, isOpenInBrowserApple: Swift.Bool = false, isOpenInIosApp: Swift.Bool = true, iOSFallbackUrl: Swift.String? = nil, isOpenInAndroidApp: Swift.Bool = true, isOpenInBrowserAndroid: Swift.Bool = false, androidFallbackUrl: Swift.String? = nil, completion: @escaping ([Swift.String : Any]) -> Swift.Void)
+  @objc public func createAppLink(url: Swift.String, name: Swift.String, urlPrefix: Swift.String, shortId: Swift.String? = nil, socialMeta: [Swift.String : Any]? = nil, isOpenInBrowserApple: Swift.Bool = false, isOpenInIosApp: Swift.Bool = true, iOSFallbackUrl: Swift.String? = nil, isOpenInAndroidApp: Swift.Bool = true, isOpenInBrowserAndroid: Swift.Bool = false, androidFallbackUrl: Swift.String? = nil, completion: @escaping ([Swift.String : Any]) -> Swift.Void)
   @objc override dynamic public init()
 }

@@ -62,13 +62,6 @@
       },
       {
         "kind": "Import",
-        "name": "Foundation",
-        "printedName": "Foundation",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
-      },
-      {
-        "kind": "Import",
         "name": "Combine",
         "printedName": "Combine",
         "declKind": "Import",
@@ -246,7 +239,7 @@
           {
             "kind": "Function",
             "name": "createAppLink",
-            "printedName": "createAppLink(url:name:urlPrefix:prefixId:customParams:socialMeta:analytics:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:)",
+            "printedName": "createAppLink(url:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -281,62 +274,6 @@
                     "name": "String",
                     "printedName": "Swift.String",
                     "usr": "s:SS"
-                  }
-                ],
-                "hasDefaultArg": true,
-                "usr": "s:Sq"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "[Swift.String : Any]?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Dictionary",
-                    "printedName": "[Swift.String : Any]",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "String",
-                        "printedName": "Swift.String",
-                        "usr": "s:SS"
-                      },
-                      {
-                        "kind": "TypeNominal",
-                        "name": "ProtocolComposition",
-                        "printedName": "Any"
-                      }
-                    ],
-                    "usr": "s:SD"
-                  }
-                ],
-                "hasDefaultArg": true,
-                "usr": "s:Sq"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "[Swift.String : Any]?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Dictionary",
-                    "printedName": "[Swift.String : Any]",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "String",
-                        "printedName": "Swift.String",
-                        "usr": "s:SS"
-                      },
-                      {
-                        "kind": "TypeNominal",
-                        "name": "ProtocolComposition",
-                        "printedName": "Any"
-                      }
-                    ],
-                    "usr": "s:SD"
                   }
                 ],
                 "hasDefaultArg": true,
@@ -461,10 +398,10 @@
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(im)createAppLinkWithUrl:name:urlPrefix:prefixId:customParams:socialMeta:analytics:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:",
-            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC06createdE03url4name0H6Prefix8prefixId12customParams10socialMeta9analytics20isOpenInBrowserApple0rst3IosD014iOSFallbackUrl0rst7AndroidD00rstuZ0015androidFallbackY010completionySS_S3SSgSDySSypGSgA2US2bASS2bASyATctF",
+            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(im)createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:",
+            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC06createdE03url4name0H6Prefix7shortId10socialMeta20isOpenInBrowserApple0opq3IosD014iOSFallbackUrl0opq7AndroidD00opqrW0015androidFallbackV010completionySS_S3SSgSDySSypGSgS2bAQS2bAQyARctF",
             "moduleName": "AppsOnAir_AppLink",
-            "objc_name": "createAppLinkWithUrl:name:urlPrefix:prefixId:customParams:socialMeta:analytics:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:",
+            "objc_name": "createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iOSFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:",
             "declAttributes": [
               "AccessControl",
               "ObjC",
@@ -774,91 +711,91 @@
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1029,
+      "offset": 936,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1067,
+      "offset": 974,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1147,
+      "offset": 1054,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1192,
+      "offset": 1099,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3810,
+      "offset": 5400,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3848,
+      "offset": 5438,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3928,
+      "offset": 5518,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 3973,
+      "offset": 5563,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 94,
+      "offset": 93,
       "length": 39,
       "value": "\"https:\/\/server.dev.appsonair.link\/api\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 165,
+      "offset": 164,
       "length": 23,
       "value": "\"https:\/\/api.ipify.org\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 278,
+      "offset": 277,
       "length": 15,
       "value": "\"\/dynamic-link\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 342,
+      "offset": 341,
       "length": 10,
       "value": "\"\/config\/\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 405,
+      "offset": 404,
       "length": 3,
       "value": "\"\/\""
     }
