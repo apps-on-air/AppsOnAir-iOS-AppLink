@@ -315,7 +315,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) AppLinkServi
 /// help to handle the latest link for universal link and custom URL schema
 - (void)handleAppLinkWithIncomingURL:(NSURL * _Nonnull)incomingURL;
 /// help to create the link
-- (void)createAppLinkWithUrl:(NSString * _Nonnull)url name:(NSString * _Nonnull)name urlPrefix:(NSString * _Nonnull)urlPrefix prefixId:(NSString * _Nullable)prefixId customParams:(NSDictionary<NSString *, id> * _Nullable)customParams socialMeta:(NSDictionary<NSString *, id> * _Nullable)socialMeta analytics:(NSDictionary<NSString *, id> * _Nullable)analytics isOpenInBrowserApple:(BOOL)isOpenInBrowserApple isOpenInIosApp:(BOOL)isOpenInIosApp iOSFallbackUrl:(NSString * _Nullable)iOSFallbackUrl isOpenInAndroidApp:(BOOL)isOpenInAndroidApp isOpenInBrowserAndroid:(BOOL)isOpenInBrowserAndroid androidFallbackUrl:(NSString * _Nullable)androidFallbackUrl completion:(void (^ _Nonnull)(NSDictionary<NSString *, id> * _Nonnull))completion;
+- (void)createAppLinkWithUrl:(NSString * _Nonnull)url name:(NSString * _Nonnull)name urlPrefix:(NSString * _Nonnull)urlPrefix shortId:(NSString * _Nullable)shortId socialMeta:(NSDictionary<NSString *, id> * _Nullable)socialMeta isOpenInBrowserApple:(BOOL)isOpenInBrowserApple isOpenInIosApp:(BOOL)isOpenInIosApp iOSFallbackUrl:(NSString * _Nullable)iOSFallbackUrl isOpenInAndroidApp:(BOOL)isOpenInAndroidApp isOpenInBrowserAndroid:(BOOL)isOpenInBrowserAndroid androidFallbackUrl:(NSString * _Nullable)androidFallbackUrl completion:(void (^ _Nonnull)(NSDictionary<NSString *, id> * _Nonnull))completion;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -645,7 +645,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) AppLinkServi
 /// help to handle the latest link for universal link and custom URL schema
 - (void)handleAppLinkWithIncomingURL:(NSURL * _Nonnull)incomingURL;
 /// help to create the link
-- (void)createAppLinkWithUrl:(NSString * _Nonnull)url name:(NSString * _Nonnull)name urlPrefix:(NSString * _Nonnull)urlPrefix prefixId:(NSString * _Nullable)prefixId customParams:(NSDictionary<NSString *, id> * _Nullable)customParams socialMeta:(NSDictionary<NSString *, id> * _Nullable)socialMeta analytics:(NSDictionary<NSString *, id> * _Nullable)analytics isOpenInBrowserApple:(BOOL)isOpenInBrowserApple isOpenInIosApp:(BOOL)isOpenInIosApp iOSFallbackUrl:(NSString * _Nullable)iOSFallbackUrl isOpenInAndroidApp:(BOOL)isOpenInAndroidApp isOpenInBrowserAndroid:(BOOL)isOpenInBrowserAndroid androidFallbackUrl:(NSString * _Nullable)androidFallbackUrl completion:(void (^ _Nonnull)(NSDictionary<NSString *, id> * _Nonnull))completion;
+- (void)createAppLinkWithUrl:(NSString * _Nonnull)url name:(NSString * _Nonnull)name urlPrefix:(NSString * _Nonnull)urlPrefix shortId:(NSString * _Nullable)shortId socialMeta:(NSDictionary<NSString *, id> * _Nullable)socialMeta isOpenInBrowserApple:(BOOL)isOpenInBrowserApple isOpenInIosApp:(BOOL)isOpenInIosApp iOSFallbackUrl:(NSString * _Nullable)iOSFallbackUrl isOpenInAndroidApp:(BOOL)isOpenInAndroidApp isOpenInBrowserAndroid:(BOOL)isOpenInBrowserAndroid androidFallbackUrl:(NSString * _Nullable)androidFallbackUrl completion:(void (^ _Nonnull)(NSDictionary<NSString *, id> * _Nonnull))completion;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
