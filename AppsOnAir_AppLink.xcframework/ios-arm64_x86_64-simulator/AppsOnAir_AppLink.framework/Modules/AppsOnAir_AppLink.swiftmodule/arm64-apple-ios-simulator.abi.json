@@ -41,8 +41,50 @@
       },
       {
         "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "WebKit",
+        "printedName": "WebKit",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "ObjectiveC",
+        "printedName": "ObjectiveC",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "AppsOnAir_Core",
+        "printedName": "AppsOnAir_Core",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "AppsOnAir_AppLink"
+      },
+      {
+        "kind": "Import",
+        "name": "WebKit",
+        "printedName": "WebKit",
         "declKind": "Import",
         "moduleName": "AppsOnAir_AppLink"
       },
@@ -200,6 +242,60 @@
             "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC10initialize10completionyy10Foundation3URLVSg_SDySSypGtc_tF",
             "moduleName": "AppsOnAir_AppLink",
             "objc_name": "initializeWithCompletion:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "getReferralDetails",
+            "printedName": "getReferralDetails(completion:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "([Swift.String : Any]) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@AppsOnAir_AppLink@objc(cs)AppLinkService(im)getReferralDetailsWithCompletion:",
+            "mangledName": "$s17AppsOnAir_AppLink0dE7ServiceC18getReferralDetails10completionyySDySSypGc_tF",
+            "moduleName": "AppsOnAir_AppLink",
+            "objc_name": "getReferralDetailsWithCompletion:",
             "declAttributes": [
               "AccessControl",
               "ObjC",
@@ -514,55 +610,6 @@
             "mangledName": "$ss28CustomDebugStringConvertibleP"
           }
         ]
-      },
-      {
-        "kind": "Import",
-        "name": "AppsOnAir_Core",
-        "printedName": "AppsOnAir_Core",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
-      },
-      {
-        "kind": "Import",
-        "name": "Foundation",
-        "printedName": "Foundation",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
-      },
-      {
-        "kind": "Import",
-        "name": "ObjectiveC",
-        "printedName": "ObjectiveC",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
-      },
-      {
-        "kind": "Import",
-        "name": "AppsOnAir_Core",
-        "printedName": "AppsOnAir_Core",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
-      },
-      {
-        "kind": "Import",
-        "name": "UIKit",
-        "printedName": "UIKit",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
-      },
-      {
-        "kind": "Import",
-        "name": "Foundation",
-        "printedName": "Foundation",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
-      },
-      {
-        "kind": "Import",
-        "name": "ObjectiveC",
-        "printedName": "ObjectiveC",
-        "declKind": "Import",
-        "moduleName": "AppsOnAir_AppLink"
       }
     ],
     "json_format_version": 8
@@ -578,128 +625,135 @@
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 119,
-      "length": 14,
-      "value": "\"ReferralData\""
+      "offset": 153,
+      "length": 23,
+      "value": "\"appsOnAirReferralData\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 194,
+      "offset": 204,
       "length": 40,
       "value": "\"Something went wrong please try again!\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 251,
+      "offset": 261,
       "length": 8,
       "value": "\"error:\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 284,
+      "offset": 292,
+      "length": 19,
+      "value": "\"getUserAgentError\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 338,
       "length": 20,
-      "value": "\"Failed to fetch IP\""
+      "value": "\"Failed to save key\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 323,
-      "length": 14,
-      "value": "\"Status code:\""
-    },
-    {
-      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
-      "kind": "StringLiteral",
-      "offset": 368,
-      "length": 24,
-      "value": "\"Failed to get response\""
-    },
-    {
-      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
-      "kind": "StringLiteral",
-      "offset": 418,
+      "offset": 384,
       "length": 17,
       "value": "\"App id missing!\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 456,
-      "length": 16,
-      "value": "\"Response JSON:\""
-    },
-    {
-      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
-      "kind": "StringLiteral",
-      "offset": 498,
+      "offset": 427,
       "length": 17,
       "value": "\"Failed to load:\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 532,
-      "length": 20,
-      "value": "\"Failed to get URL:\""
-    },
-    {
-      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
-      "kind": "StringLiteral",
-      "offset": 573,
+      "offset": 465,
       "length": 35,
       "value": "\"Please check internet connection!\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 620,
-      "length": 5,
-      "value": "\"URL\""
+      "offset": 536,
+      "length": 37,
+      "value": "\"Failed to decode JSON from Keychain\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 641,
-      "length": 18,
-      "value": "\"Api Passing Data\""
-    },
-    {
-      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
-      "kind": "StringLiteral",
-      "offset": 693,
-      "length": 38,
-      "value": "\"Error retrieving appInstallationDate\""
-    },
-    {
-      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
-      "kind": "StringLiteral",
-      "offset": 753,
+      "offset": 595,
       "length": 23,
       "value": "\"Invalid response type\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 800,
-      "length": 20,
-      "value": "\"Public IP Address:\""
+      "offset": 638,
+      "length": 14,
+      "value": "\"Content-Type\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 844,
-      "length": 22,
-      "value": "\"IP Addresses by Wifi\""
+      "offset": 670,
+      "length": 12,
+      "value": "\"User-Agent\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 894,
-      "length": 26,
-      "value": "\"IP Addresses by Cellular\""
+      "offset": 698,
+      "length": 9,
+      "value": "\"Updated\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 721,
+      "length": 7,
+      "value": "\"Added\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 749,
+      "length": 16,
+      "value": "\"Response JSON:\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 777,
+      "length": 5,
+      "value": "\"URL\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 805,
+      "length": 19,
+      "value": "\"x-application-key\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 847,
+      "length": 13,
+      "value": "\"isFirstOpen\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 882,
+      "length": 16,
+      "value": "\"isUserReferral\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppDelegateSwizzler.swift",
@@ -709,58 +763,72 @@
       "value": "[]"
     },
     {
-      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppHelper.swift",
       "kind": "BooleanLiteral",
-      "offset": 936,
+      "offset": 529,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppHelper.swift",
+      "kind": "BooleanLiteral",
+      "offset": 575,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 974,
+      "offset": 1004,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1042,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1054,
+      "offset": 1122,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1099,
+      "offset": 1167,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 5400,
+      "offset": 5900,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 5438,
+      "offset": 5938,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 5518,
+      "offset": 6018,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkService.swift",
       "kind": "BooleanLiteral",
-      "offset": 5563,
+      "offset": 6063,
       "length": 5,
       "value": "false"
     },
@@ -774,14 +842,14 @@
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 164,
+      "offset": 160,
       "length": 23,
       "value": "\"https:\/\/api.ipify.org\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 277,
+      "offset": 273,
       "length": 15,
       "value": "\"\/dynamic-link\""
     },
@@ -789,15 +857,22 @@
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
       "offset": 341,
-      "length": 10,
-      "value": "\"\/config\/\""
+      "length": 3,
+      "value": "\"\/\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 404,
-      "length": 3,
-      "value": "\"\/\""
+      "offset": 396,
+      "length": 25,
+      "value": "\"\/dynamic-link-analytics\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
+      "kind": "StringLiteral",
+      "offset": 475,
+      "length": 19,
+      "value": "\"\/referral\/details\""
     }
   ]
 }

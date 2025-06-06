@@ -8,6 +8,7 @@ import Foundation
 import ObjectiveC
 import Swift
 import UIKit
+import WebKit
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
@@ -15,6 +16,7 @@ import _SwiftConcurrencyShims
   @objc public static let shared: AppsOnAir_AppLink.AppLinkService
   @objc deinit
   @objc public func initialize(completion: @escaping (Foundation.URL?, [Swift.String : Any]) -> ())
+  @objc public func getReferralDetails(completion: @escaping ([Swift.String : Any]) -> ())
   @objc public func handleAppLink(incomingURL: Foundation.URL)
   @objc public func createAppLink(url: Swift.String, name: Swift.String, urlPrefix: Swift.String, shortId: Swift.String? = nil, socialMeta: [Swift.String : Any]? = nil, isOpenInBrowserApple: Swift.Bool = false, isOpenInIosApp: Swift.Bool = true, iOSFallbackUrl: Swift.String? = nil, isOpenInAndroidApp: Swift.Bool = true, isOpenInBrowserAndroid: Swift.Bool = false, androidFallbackUrl: Swift.String? = nil, completion: @escaping ([Swift.String : Any]) -> Swift.Void)
   @objc override dynamic public init()

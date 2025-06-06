@@ -19,6 +19,7 @@ This plugin is currently in **pre-production**. While the plugin is fully functi
 - ✅ Deep link support (URI scheme, App Links)
 - ✅ Fallback behavior (e.g., open App Store)
 - ✅ Custom domain support
+- ✅ Referral tracking
 - ✅ Firebase dynamic link migration to AppLink(Coming Soon)
 
 ## Installation
@@ -329,6 +330,137 @@ Objective-c
      // <urlPrefix> shouldn't contain http or https
     [self.appLinkService createAppLinkWithUrl:@"https://example.com" name:@"YOUR_LINK_NAME" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{}isOpenInBrowserApple:true isOpenInIosApp:true iOSFallbackUrl:@"www.google.com" isOpenInAndroidApp:true isOpenInBrowserAndroid:false androidFallbackUrl:@"www.google.com" completion:^(NSDictionary<NSString *,id> * linkInfo) {
         //write the code for handling create link
+    }];
+}
+```
+
+
+## 3. To Retrieving Referral Link  
+You can also retrieving linkInfo, such as from a button action:
+### Firstly, import AppsOnAir_AppLink in your ViewController file or swift code file
+
+Swift / SwiftUI
+```swift
+import AppsOnAir_AppLink
+```
+Objective-C
+
+```swift
+#import "AppsOnAir_AppLink-Swift.h"
+```
+
+### App-Link Implement Code
+
+Swift UI
+```swift
+import SwiftUI
+import AppsOnAir_AppLink
+
+struct ContentView: View {
+    @State private var showToast = false
+    @State private var message = ""
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Button(action: {
+                AppLinkService.shared.getReferralDetails { linkInfo in
+                   //write the code for handling referral linkInfo
+                }
+            }) {
+                Text("Fetch Referral Link")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+        .padding()
+        .toast(isPresented: $showToast, message: message)
+        .onOpenURL { url in
+            AppLinkService.shared.handleAppLink(incomingURL: url)
+        }
+    }
+}
+```
+
+Swift
+```swift
+class ViewController: UIViewController {
+    let appOnAirLinkService = AppLinkService.shared
+  
+    override func viewDidLoad() {
+        super.viewDidLoad()
+       
+            
+        let button = UIButton(type: .system)
+                button.setTitle("Button", for: .normal)
+                button.backgroundColor = .systemBlue
+                button.setTitleColor(.white, for: .normal)
+                button.layer.cornerRadius = 10
+                
+                // Set button frame (size and position)
+                button.frame = CGRect(x: 100, y: 200, width: 150, height: 50)
+                
+                // Add target for onPressed (TouchUpInside)
+                button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
+                
+                // Add the button to the view
+                self.view.addSubview(button)
+          }
+    
+          // Define the action when button is pressed
+           @objc func buttonPressed() {
+               // Help to retrieving referral linkInfo
+                appOnAirLinkService.getReferralDetails { linkInfo in
+                   //write the code for handling referral linkInfo
+                }
+           }
+
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+}
+```
+
+Objective-c
+```swift
+#import "ViewController.h"
+#import "AppsOnAir_AppLink-Swift.h"
+
+
+@interface ViewController ()
+@property (nonatomic, strong) AppLinkService *appLinkService;
+@end
+
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.appLinkService = [AppLinkService shared];
+    // Create a UIButton programmatically
+       UIButton *ctaButton = [UIButton buttonWithType:UIButtonTypeSystem];
+       
+       // Set button title
+       [ctaButton setTitle:@"Fetch Referral Link" forState:UIControlStateNormal];
+       
+       // Set button frame (position and size)
+       ctaButton.frame = CGRectMake(100, 200, 200, 50);
+       
+       // Add target-action for button tap
+       [ctaButton addTarget:self action:@selector(openNextScreen) forControlEvents:UIControlEventTouchUpInside];
+       
+       // Add button to the view
+       [self.view addSubview:ctaButton];
+}
+- (void)openNextScreen {
+    // Help to retrieving referral linkInfo
+    [self.appLinkService getReferralDetailsWithCompletion:^(NSDictionary<NSString *,id> * linkInfo) {
+         //write the code for handling referral linkInfo
     }];
 }
 ```
