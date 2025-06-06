@@ -28,6 +28,9 @@ class ViewController: UIViewController {
     }
 
     @objc func createLinkTapped() {
+        appsOnAirLinkService.getReferralDetails { referralLinkInfo in
+            //write code for handle referral link information
+        }
         appsOnAirLinkService.createAppLink(url: "YOUR_DEEP_LINK_URL", name: "YOUR_LINK_NAME", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: [:], isOpenInBrowserApple: false,isOpenInIosApp: true,iOSFallbackUrl: "",isOpenInAndroidApp: true,isOpenInBrowserAndroid: false,androidFallbackUrl: "") { linkInfo in
             //write code for handle create link
         }
