@@ -312,6 +312,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) AppLinkServi
 + (AppLinkService * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
 /// fetch the latest link for universal link and custom URL schema
 - (void)initializeWithCompletion:(void (^ _Nonnull)(NSURL * _Nullable, NSDictionary<NSString *, id> * _Nonnull))completion;
+/// help to handle the get link for referral info
+- (void)getReferralDetailsWithCompletion:(void (^ _Nonnull)(NSDictionary<NSString *, id> * _Nonnull))completion;
 /// help to handle the latest link for universal link and custom URL schema
 - (void)handleAppLinkWithIncomingURL:(NSURL * _Nonnull)incomingURL;
 /// help to create the link
@@ -642,6 +644,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) AppLinkServi
 + (AppLinkService * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
 /// fetch the latest link for universal link and custom URL schema
 - (void)initializeWithCompletion:(void (^ _Nonnull)(NSURL * _Nullable, NSDictionary<NSString *, id> * _Nonnull))completion;
+/// help to handle the get link for referral info
+- (void)getReferralDetailsWithCompletion:(void (^ _Nonnull)(NSDictionary<NSString *, id> * _Nonnull))completion;
 /// help to handle the latest link for universal link and custom URL schema
 - (void)handleAppLinkWithIncomingURL:(NSURL * _Nonnull)incomingURL;
 /// help to create the link
