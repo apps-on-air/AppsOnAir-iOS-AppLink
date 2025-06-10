@@ -88,7 +88,7 @@ import AppsOnAir_AppLink
 Objective-C
 
 ```swift
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 ```
 
 ### App-Link Implement Code
@@ -165,7 +165,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 Objective-c
 ```swift
 #import "AppDelegate.h"
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 
 @interface AppDelegate ()
 @property (nonatomic, strong) AppLinkService *appLinkServices;
@@ -200,7 +200,7 @@ import AppsOnAir_AppLink
 Objective-C
 
 ```swift
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 ```
 
 ### App-Link Implement Code
@@ -297,7 +297,7 @@ class ViewController: UIViewController {
 Objective-c
 ```swift
 #import "ViewController.h"
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 
 
 @interface ViewController ()
@@ -346,7 +346,7 @@ import AppsOnAir_AppLink
 Objective-C
 
 ```swift
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 ```
 
 ### App-Link Implement Code
@@ -429,7 +429,7 @@ class ViewController: UIViewController {
 Objective-c
 ```swift
 #import "ViewController.h"
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 
 
 @interface ViewController ()
@@ -523,7 +523,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 **AppDelegate.m**
 ```swift
 #import "AppDelegate.h"
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 
 @interface AppDelegate ()
 @property (nonatomic, strong) AppLinkService *appLinkServices;
@@ -560,7 +560,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 
 ```swift
 #import "SceneDelegate.h"
-#import "AppsOnAir_AppLink-Swift.h"
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 #import "ViewController.h"
 
 @interface SceneDelegate ()
@@ -572,6 +572,26 @@ continueUserActivity:(NSUserActivity *)userActivity
 - (void)scene:(UIScene *)scene
 willConnectToSession:(UISceneSession *)session
      options:(UISceneConnectionOptions *)connectionOptions {
+    
+    // Handle URLs when app is cold started
+    if (connectionOptions.URLContexts.count > 0) {
+        UIOpenURLContext *urlContext = connectionOptions.URLContexts.allObjects.firstObject;
+        NSURL *url = urlContext.URL;
+        if (url) {
+            [self.appLinkServices handleAppLinkWithIncomingURL:url];
+        }
+    }
+
+    // Handle Universal Link via user activity when app is cold started
+    if (connectionOptions.userActivities.count > 0) {
+        NSUserActivity *userActivity = connectionOptions.userActivities.allObjects.firstObject;
+        if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+            NSURL *url = userActivity.webpageURL;
+            if (url) {
+                [self.appLinkServices handleAppLinkWithIncomingURL:url];
+            }
+        }
+    }
     self.appLinkServices = [AppLinkService shared];
     UIWindowScene *windowScene = (UIWindowScene *)scene;
     self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
@@ -599,6 +619,14 @@ willConnectToSession:(UISceneSession *)session
 @end
 
 ```
+
+### Note:
+
+For testing purposes:
+
+- Click the referral link, it should redirect you to the App Store.
+
+- To retrieve the latest referral data, you must uninstall the app, then reinstall it, and fetch the referral again.
 
 ## Author
 
