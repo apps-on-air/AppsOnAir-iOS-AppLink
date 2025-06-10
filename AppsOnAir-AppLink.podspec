@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
 
   s.name             = 'AppsOnAir-AppLink'
-  s.version          = '0.0.2'
+  s.version          = '0.0.3'
   s.summary          = 'AppsOnAir-AppLink'
   s.description      = "A self-hosted dynamic link service for app download tracking, deep linking, and engagement analytics for ios - an alternative to Firebase Dynamic Links"
   s.homepage         = 'https://documentation.appsonair.com'

@@ -1,3 +1,7 @@
+## 0.0.3 (Beta)
+
+* Add URL validation and error handling for short link generation
+
 ## 0.0.2 (Beta)
 
 * Added referral link support
