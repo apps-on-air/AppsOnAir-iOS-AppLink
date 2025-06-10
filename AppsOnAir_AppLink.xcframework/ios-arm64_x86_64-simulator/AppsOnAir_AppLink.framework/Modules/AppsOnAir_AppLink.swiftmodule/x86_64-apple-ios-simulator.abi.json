@@ -681,77 +681,91 @@
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 536,
+      "offset": 524,
+      "length": 19,
+      "value": "\"Enter a valid URL\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 566,
+      "length": 44,
+      "value": "\"Only lowercase letters and numbers allowed\""
+    },
+    {
+      "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
+      "kind": "StringLiteral",
+      "offset": 646,
       "length": 37,
       "value": "\"Failed to decode JSON from Keychain\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 595,
+      "offset": 705,
       "length": 23,
       "value": "\"Invalid response type\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 638,
+      "offset": 748,
       "length": 14,
       "value": "\"Content-Type\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 670,
+      "offset": 780,
       "length": 12,
       "value": "\"User-Agent\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 698,
+      "offset": 808,
       "length": 9,
       "value": "\"Updated\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 721,
+      "offset": 831,
       "length": 7,
       "value": "\"Added\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 749,
+      "offset": 859,
       "length": 16,
       "value": "\"Response JSON:\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 777,
+      "offset": 887,
       "length": 5,
       "value": "\"URL\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 805,
+      "offset": 915,
       "length": 19,
       "value": "\"x-application-key\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 847,
+      "offset": 957,
       "length": 13,
       "value": "\"isFirstOpen\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppConst.swift",
       "kind": "StringLiteral",
-      "offset": 882,
+      "offset": 992,
       "length": 16,
       "value": "\"isUserReferral\""
     },
@@ -779,28 +793,28 @@
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1004,
+      "offset": 1014,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1042,
+      "offset": 1052,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1122,
+      "offset": 1132,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/AppLinkApiService.swift",
       "kind": "BooleanLiteral",
-      "offset": 1167,
+      "offset": 1177,
       "length": 5,
       "value": "false"
     },
