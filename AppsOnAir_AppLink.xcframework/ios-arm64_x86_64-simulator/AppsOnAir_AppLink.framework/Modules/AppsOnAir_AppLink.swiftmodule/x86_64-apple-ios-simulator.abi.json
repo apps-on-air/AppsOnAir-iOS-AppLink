@@ -850,41 +850,41 @@
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
       "offset": 93,
-      "length": 39,
-      "value": "\"https:\/\/server.dev.appsonair.link\/api\""
+      "length": 43,
+      "value": "\"https:\/\/server.feature.appsonair.link\/api\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 160,
+      "offset": 164,
       "length": 23,
       "value": "\"https:\/\/api.ipify.org\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 273,
+      "offset": 277,
       "length": 15,
       "value": "\"\/dynamic-link\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 341,
+      "offset": 345,
       "length": 3,
       "value": "\"\/\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 396,
+      "offset": 400,
       "length": 25,
       "value": "\"\/dynamic-link-analytics\""
     },
     {
       "filePath": "\/Users\/harshil-gandhi-us\/Documents\/AppsOnAirPrivateRepo\/AppLink-iOS-AppLink-framework\/AppsOnAir_AppLink\/AppsOnAir_AppLink\/EnvironmentConfig.swift",
       "kind": "StringLiteral",
-      "offset": 475,
+      "offset": 479,
       "length": 19,
       "value": "\"\/referral\/details\""
     }

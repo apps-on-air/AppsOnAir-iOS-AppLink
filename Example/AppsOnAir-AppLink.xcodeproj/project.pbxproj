@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		247B97915F5B811A05847A19 /* Pods_AppsOnAir_AppLink_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81FDE24D5D16817313AED153 /* Pods_AppsOnAir_AppLink_Tests.framework */; };
-		5BC36698BD7A5B9D9D59287C /* Pods_AppsOnAir_AppLink_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC57C3D4271D94F44EB8F60F /* Pods_AppsOnAir_AppLink_Example.framework */; };
+		579D3DA16EB3B72A8D3196F2 /* Pods_AppsOnAir_AppLink_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 900FFB7ACD5595F6340C9869 /* Pods_AppsOnAir_AppLink_Example.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
+		7EEF0606F5B1F2E64D9B6EE5 /* Pods_AppsOnAir_AppLink_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B51A2163B9E102A38C52F0B4 /* Pods_AppsOnAir_AppLink_Tests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,7 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		40C32160D6CEE3F79ABCAA4F /* Pods-AppsOnAir-AppLink_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Example.release.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example.release.xcconfig"; sourceTree = "<group>"; };
+		47C8FCA5E3917D66CAFAF2E6 /* Pods-AppsOnAir-AppLink_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Example.debug.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		490D4A3E6AC12F83D6CDA2A9 /* AppsOnAir-AppLink.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = "AppsOnAir-AppLink.podspec"; path = "../AppsOnAir-AppLink.podspec"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		607FACD01AFB9204008FA782 /* AppsOnAir-AppLink_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AppsOnAir-AppLink_Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -40,14 +40,14 @@
 		607FACE51AFB9204008FA782 /* AppsOnAir-AppLink_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AppsOnAir-AppLink_Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
-		818A6967EF92770B91117D96 /* Pods-AppsOnAir-AppLink_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Tests.release.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Tests/Pods-AppsOnAir-AppLink_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		81FDE24D5D16817313AED153 /* Pods_AppsOnAir_AppLink_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AppsOnAir_AppLink_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8929658056624D3EE901163B /* Pods-AppsOnAir-AppLink_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Tests.debug.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Tests/Pods-AppsOnAir-AppLink_Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		8D465A9098745924710CAC05 /* Pods-AppsOnAir-AppLink_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Example.debug.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		633972C4EFAA3FFC3AB1ABF3 /* Pods-AppsOnAir-AppLink_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Tests.release.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Tests/Pods-AppsOnAir-AppLink_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		900FFB7ACD5595F6340C9869 /* Pods_AppsOnAir_AppLink_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AppsOnAir_AppLink_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B51A2163B9E102A38C52F0B4 /* Pods_AppsOnAir_AppLink_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AppsOnAir_AppLink_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6C2A15E2DDF589D0005025E /* AppsOnAir-AppLink_Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "AppsOnAir-AppLink_Example.entitlements"; sourceTree = "<group>"; };
-		BC57C3D4271D94F44EB8F60F /* Pods_AppsOnAir_AppLink_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AppsOnAir_AppLink_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB496752EB4F46DBC1B288EC /* Pods-AppsOnAir-AppLink_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Tests.debug.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Tests/Pods-AppsOnAir-AppLink_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		D909F9407C20F73AA7DC9484 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		EC0162ED39D858752ADD8E2F /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		F90C60895D3C507987677A3B /* Pods-AppsOnAir-AppLink_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsOnAir-AppLink_Example.release.xcconfig"; path = "Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,7 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5BC36698BD7A5B9D9D59287C /* Pods_AppsOnAir_AppLink_Example.framework in Frameworks */,
+				579D3DA16EB3B72A8D3196F2 /* Pods_AppsOnAir_AppLink_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,7 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				247B97915F5B811A05847A19 /* Pods_AppsOnAir_AppLink_Tests.framework in Frameworks */,
+				7EEF0606F5B1F2E64D9B6EE5 /* Pods_AppsOnAir_AppLink_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,10 +73,10 @@
 		478F172690B18CDC9B973E15 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				8D465A9098745924710CAC05 /* Pods-AppsOnAir-AppLink_Example.debug.xcconfig */,
-				40C32160D6CEE3F79ABCAA4F /* Pods-AppsOnAir-AppLink_Example.release.xcconfig */,
-				8929658056624D3EE901163B /* Pods-AppsOnAir-AppLink_Tests.debug.xcconfig */,
-				818A6967EF92770B91117D96 /* Pods-AppsOnAir-AppLink_Tests.release.xcconfig */,
+				47C8FCA5E3917D66CAFAF2E6 /* Pods-AppsOnAir-AppLink_Example.debug.xcconfig */,
+				F90C60895D3C507987677A3B /* Pods-AppsOnAir-AppLink_Example.release.xcconfig */,
+				BB496752EB4F46DBC1B288EC /* Pods-AppsOnAir-AppLink_Tests.debug.xcconfig */,
+				633972C4EFAA3FFC3AB1ABF3 /* Pods-AppsOnAir-AppLink_Tests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -90,7 +90,7 @@
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
 				478F172690B18CDC9B973E15 /* Pods */,
-				B0DD72D76491D2473F5A7309 /* Frameworks */,
+				E8B41F3C611B9CEB94B1A83A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -152,11 +152,11 @@
 			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
-		B0DD72D76491D2473F5A7309 /* Frameworks */ = {
+		E8B41F3C611B9CEB94B1A83A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				BC57C3D4271D94F44EB8F60F /* Pods_AppsOnAir_AppLink_Example.framework */,
-				81FDE24D5D16817313AED153 /* Pods_AppsOnAir_AppLink_Tests.framework */,
+				900FFB7ACD5595F6340C9869 /* Pods_AppsOnAir_AppLink_Example.framework */,
+				B51A2163B9E102A38C52F0B4 /* Pods_AppsOnAir_AppLink_Tests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -168,11 +168,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "AppsOnAir-AppLink_Example" */;
 			buildPhases = (
-				67A375D5CC2D1DADA90E579A /* [CP] Check Pods Manifest.lock */,
+				DA3028A0369E12979D4B17A9 /* [CP] Check Pods Manifest.lock */,
 				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
-				FAC84581C9216E57C01AF7E8 /* [CP] Embed Pods Frameworks */,
+				2ED3A45920171B1B2683B38C /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -187,7 +187,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "AppsOnAir-AppLink_Tests" */;
 			buildPhases = (
-				CCD3347053F2D03D091EFBF7 /* [CP] Check Pods Manifest.lock */,
+				F394C3D14A6B93B95F422DBE /* [CP] Check Pods Manifest.lock */,
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
@@ -265,7 +265,27 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		67A375D5CC2D1DADA90E579A /* [CP] Check Pods Manifest.lock */ = {
+		2ED3A45920171B1B2683B38C /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework/AppsOnAir_AppLink",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework/AppsOnAir_Core",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AppsOnAir_AppLink.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AppsOnAir_Core.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DA3028A0369E12979D4B17A9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -287,7 +307,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		CCD3347053F2D03D091EFBF7 /* [CP] Check Pods Manifest.lock */ = {
+		F394C3D14A6B93B95F422DBE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -307,26 +327,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FAC84581C9216E57C01AF7E8 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework/AppsOnAir_AppLink",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework/AppsOnAir_Core",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AppsOnAir_AppLink.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AppsOnAir_Core.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -480,7 +480,7 @@
 		};
 		607FACF01AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8D465A9098745924710CAC05 /* Pods-AppsOnAir-AppLink_Example.debug.xcconfig */;
+			baseConfigurationReference = 47C8FCA5E3917D66CAFAF2E6 /* Pods-AppsOnAir-AppLink_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "AppsOnAir-AppLink_Example.entitlements";
@@ -499,7 +499,7 @@
 		};
 		607FACF11AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 40C32160D6CEE3F79ABCAA4F /* Pods-AppsOnAir-AppLink_Example.release.xcconfig */;
+			baseConfigurationReference = F90C60895D3C507987677A3B /* Pods-AppsOnAir-AppLink_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "AppsOnAir-AppLink_Example.entitlements";
@@ -518,7 +518,7 @@
 		};
 		607FACF31AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8929658056624D3EE901163B /* Pods-AppsOnAir-AppLink_Tests.debug.xcconfig */;
+			baseConfigurationReference = BB496752EB4F46DBC1B288EC /* Pods-AppsOnAir-AppLink_Tests.debug.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
@@ -540,7 +540,7 @@
 		};
 		607FACF41AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 818A6967EF92770B91117D96 /* Pods-AppsOnAir-AppLink_Tests.release.xcconfig */;
+			baseConfigurationReference = 633972C4EFAA3FFC3AB1ABF3 /* Pods-AppsOnAir-AppLink_Tests.release.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
