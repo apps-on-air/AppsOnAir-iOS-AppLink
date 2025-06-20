@@ -220,6 +220,7 @@
 					607FACE41AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
 						LastSwiftMigration = 0900;
+						ProvisioningStyle = Manual;
 						TestTargetID = 607FACCF1AFB9204008FA782;
 					};
 				};
@@ -272,13 +273,15 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AppsOnAir-AppLink_Example/Pods-AppsOnAir-AppLink_Example-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework/AppsOnAir_AppLink",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework/AppsOnAir_Core",
+				"${BUILT_PRODUCTS_DIR}/AppsOnAir-AppLink/AppsOnAir_AppLink.framework",
+				"${BUILT_PRODUCTS_DIR}/AppsOnAir-Core/AppsOnAir_Core.framework",
+				"${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AppsOnAir_AppLink.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AppsOnAir_Core.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Reachability.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -520,6 +523,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BB496752EB4F46DBC1B288EC /* Pods-AppsOnAir-AppLink_Tests.debug.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -532,6 +537,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AppsOnAir-AppLink_Example.app/AppsOnAir-AppLink_Example";
@@ -542,6 +548,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 633972C4EFAA3FFC3AB1ABF3 /* Pods-AppsOnAir-AppLink_Tests.release.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -550,6 +558,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AppsOnAir-AppLink_Example.app/AppsOnAir-AppLink_Example";

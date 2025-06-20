@@ -1,0 +1,189 @@
+import UIKit
+import Combine
+import AppsOnAir_Core
+
+public class AppLinkService: NSObject {
+    
+    @objc public static let shared = AppLinkService()
+    
+    //Core Services initialization
+    let appsOnAirCoreServices = AppsOnAirCoreServices()
+    
+    //App Helper service initialization
+    let appHelper = AppHelper.shared
+    
+    //Latest link for Dynamic Link
+    @Published var latestLink: URL?
+    
+    // Listener for whenever link is Update
+    private var linkListener: AnyCancellable?
+    
+    deinit {
+        // Cancel the listener when the object is deallocated
+        linkListener?.cancel()
+    }
+    
+    //initialize the common services like AppsOnAir-Core and swizzling method and fetch the latest Link
+    ///fetch the latest link for universal link and custom URL schema
+    @objc public func initialize(completion: @escaping (URL?,[String:Any]) -> ()) {
+        
+        //initialize the AppsOnAir-core
+        appsOnAirCoreServices.initialize()
+        
+        // Initialize swizzling
+        _  = AppSwizzler.shared
+
+        // handle the internet connectivity abd listen for network status changes
+        appsOnAirCoreServices.networkStatusListenerHandler { isConnected in
+            guard self.linkListener == nil else { return }
+            // Listener for link and link info
+            self.linkListener = self.$latestLink.sink { [weak self] _ in
+                self?.onAppLinkHandler(isNetworkConnected: isConnected) { url, linkInfo in
+                    completion(url,linkInfo)
+                }
+            }
+        }
+        
+        // help to referral handling
+        referralHandler()
+    }
+    
+    
+    ///handling when appLink is listen
+    private func onAppLinkHandler(isNetworkConnected:Bool,completion: @escaping (URL?,[String:Any]) -> ()){
+        DispatchQueue.main.async {
+            // Ensure we have a valid link and network connectivity before proceeding
+            if let appLink = self.latestLink, !appLink.absoluteString.trimmed.isEmpty {
+                // check internet connectivity
+                if isNetworkConnected {
+                    // Resolve final deep link: use Universal Link directly or extract `link` param from custom URI
+                    //To identify the incoming URL is URL scheme or Universal Link
+                    let isUniversalLink = ["http", "https"].contains(appLink.scheme?.lowercased() ?? "")
+                    
+                    let appLinkURL = isUniversalLink ? appLink : URLComponents(url: appLink, resolvingAgainstBaseURL: false)?
+                        .queryItems?
+                        .first(where: { $0.name == "link" })?
+                        .value
+                        .flatMap { URL(string: $0) }
+                    
+                    // Ensure URL starts with scheme (default to https)
+                    let resolvedAppLink = appLinkURL.flatMap {
+                        URL(string: $0.absoluteString.hasPrefix("http") ? $0.absoluteString : "https://" + $0.absoluteString)
+                    }
+                    
+                    // Extract domain with percent decoding on iOS 16+
+                    let domain = {
+                        if #available(iOS 16.0, *) {
+                            return resolvedAppLink?.host(percentEncoded: false) ?? ""
+                        }
+                        return resolvedAppLink?.host ?? ""
+                    }()
+                    
+                    // Get last path component as link ID
+                    let linkId = resolvedAppLink?.lastPathComponent ?? ""
+                    
+                    // Always fetch link info after optional count tracking
+                    let fetchLinkInfo = {
+                        if(isUniversalLink) {AppLinkApiService.apiLinkAnalytics(isClicked: true,urlPrefix: domain, shortId:linkId) { _ in }}
+                        AppLinkApiService.apiFetchLinkInfo(domain: domain, linkId: linkId) { latestLinkData in
+                            let linkInfo = latestLinkData["data"] as? [String: Any] ?? latestLinkData
+                            completion(self.latestLink, linkInfo)
+                        }
+                    }
+                    
+                    // Fetch link info via API
+                    fetchLinkInfo()
+                }
+                // If network is not available, log and return error
+                else {
+                    Logger.logInfo(errorNetwork, prefix: appsOnAirLink)
+                    completion(nil, [errorStr: errorNetwork])
+                }
+            }
+        }
+    }
+    
+    private func referralHandler(){
+        let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
+        if((referralInfoFromKeyChain?.isEmpty ?? false) || AppHelper.shared.isAppFirstOpen){
+            AppLinkApiService.apiReferralInfo { referralLinkInfo in
+                if let status = referralLinkInfo["status"] as? String, status == "SUCCESS" {
+                      AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
+                   }
+                self.appHelper.saveToKeychain(key: referralData, value: referralLinkInfo)
+            }
+        }
+    }
+    
+    ///help to handle the get link for referral info
+    @objc public func getReferralDetails(completion: @escaping ([String:Any]) -> ()) {
+        let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
+        completion(referralInfoFromKeyChain ?? [:])
+    }
+    
+    ///help to handle the latest link for universal link and custom URL schema
+    @objc public func handleAppLink(incomingURL: URL) {
+        self.appLinkHandler(inComingURL: incomingURL)
+    }
+    
+    ///help to create the link
+    @objc public func createAppLink(
+        url: String,
+        name: String,
+        urlPrefix: String,
+        shortId: String? = nil,
+        socialMeta: [String: Any]? = nil,
+        isOpenInBrowserApple: Bool = false,
+        isOpenInIosApp: Bool = true,
+        iOSFallbackUrl: String? = nil,
+        isOpenInAndroidApp: Bool = true,
+        isOpenInBrowserAndroid: Bool = false,
+        androidFallbackUrl: String? = nil,
+        completion: @escaping ([String:Any]) -> Void
+    ) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            if (self.appsOnAirCoreServices.isNetworkConnected ?? false) {
+                
+                // Prepare URLs to validate
+                let urls = [
+                    "url": url,
+                    "iOSFallbackUrl": iOSFallbackUrl ?? "",
+                    "androidFallbackUrl": androidFallbackUrl ?? "",
+                    "imageUrl": (socialMeta?["imageUrl"] as? String) ?? ""
+                ]
+
+                // Validate URLs
+                if let invalidField = urls.first(where: { !$0.value.isEmpty && !$0.value.isValidHttpUrl }) {
+                    completion([errorStr: "\(errorURLInvalid) in \(invalidField.key) field!"])
+                    return
+                }
+
+                // Validate urlPrefix if shortId is present
+                if !((shortId ?? "").trimmed.isEmpty), !(shortId ?? "").isValidLowercaseAlphanumeric {
+                    completion([errorStr: "\(errorURLPrefix) in shortId!"])
+                    return
+                }
+
+                // Construct cleaned social meta dictionary
+                let socialMetaData: [String: Any] = (socialMeta ?? [:]).isEmpty ? [:] :  [
+                    "title": socialMeta?["title"] ?? NSNull(),
+                    "description": socialMeta?["description"] ?? NSNull(),
+                    "imageUrl": socialMeta?["imageUrl"] ?? NSNull()
+                ]
+                
+                AppLinkApiService.apiGenerateShortLink(url: url, name: name,urlPrefix: urlPrefix, shortId: shortId,socialMeta: socialMetaData,isOpenInBrowserApple: isOpenInBrowserApple,isOpenInIosApp: isOpenInIosApp,iOSFallbackUrl: iOSFallbackUrl,isOpenInAndroidApp: isOpenInAndroidApp,isOpenInBrowserAndroid: isOpenInBrowserAndroid,androidFallbackUrl: androidFallbackUrl) { shortLinkData in
+                    completion(shortLinkData)
+                }
+            } else {
+                Logger.logInfo(errorNetwork, prefix: appsOnAirLink)
+                completion([errorStr:errorNetwork])
+            }
+        }
+    }
+    
+    //manage links form override methods
+    internal func appLinkHandler(inComingURL: URL, completion: @escaping ([String:Any]) -> Void = { _ in }) -> Void {
+        self.latestLink = inComingURL
+    }
+}
+
