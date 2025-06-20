@@ -3,8 +3,6 @@ struct EnvironmentConfig{
     // MARK: - Server API URL:
     static let serverBaseURl = "https://server.appsonair.link/api"
 
-    static let getIpURL = "https://api.ipify.org"
-    
     // MARK: - API Endpoints:
     
     static let createShortLink = serverBaseURl + "/dynamic-link"
