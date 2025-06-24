@@ -34,8 +34,11 @@ class ViewController: UIViewController {
             //write code for handle referral link information
         }
         
+        //help to set social meta
+        let socialMeta = ["imageUrl":"YOUR_IMAGE_URL","title":"","description":""]
+        
         //help to create appLink
-        appsOnAirLinkService.createAppLink(url: "YOUR_DEEP_LINK_URL", name: "YOUR_LINK_NAME", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: [:], isOpenInBrowserApple: false,isOpenInIosApp: true,iOSFallbackUrl: "",isOpenInAndroidApp: true,isOpenInBrowserAndroid: false,androidFallbackUrl: "") { linkInfo in
+        appsOnAirLinkService.createAppLink(url: "YOUR_DEEP_LINK_URL", name: "YOUR_LINK_NAME", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: socialMeta, isOpenInBrowserApple: false,isOpenInIosApp: true,iOSFallbackUrl: "",isOpenInAndroidApp: true,isOpenInBrowserAndroid: false,androidFallbackUrl: "") { linkInfo in
             //write code for handle create link
         }
     }

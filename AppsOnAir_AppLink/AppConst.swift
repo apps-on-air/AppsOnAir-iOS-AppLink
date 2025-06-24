@@ -25,7 +25,9 @@ let errorNetwork = "Please check internet connection!"
 
 let errorURLInvalid = "Enter a valid URL"
 
-let errorURLPrefix = "Only lowercase letters and numbers allowed"
+let errorURLName = "Use only letters, numbers, dots (.), dashes (-), or underscores (_) up to 50 characters in AppLink name"
+
+let errorURLSuffix = "Only letters and numbers allowed (max 50 characters) in shortId!"
 
 let errorFailedToDecodeKeychain = "Failed to decode JSON from Keychain"
 

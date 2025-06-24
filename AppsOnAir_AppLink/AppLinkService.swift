@@ -153,14 +153,19 @@ public class AppLinkService: NSObject {
                 ]
 
                 // Validate URLs
-                if let invalidField = urls.first(where: { !$0.value.isEmpty && !$0.value.isValidHttpUrl }) {
+                if let invalidField = urls.first(where: { !$0.value.trimmed.isEmpty && !$0.value.isValidHttpUrl }) {
                     completion([errorStr: "\(errorURLInvalid) in \(invalidField.key) field!"])
                     return
                 }
 
                 // Validate urlPrefix if shortId is present
-                if !((shortId ?? "").trimmed.isEmpty), !(shortId ?? "").isValidLowercaseAlphanumeric {
-                    completion([errorStr: "\(errorURLPrefix) in shortId!"])
+                if !name.trimmed.isEmpty && !name.isValidUrlName {
+                    completion([errorStr: errorURLName])
+                    return
+                }
+
+                if let id = shortId?.trimmed, !id.isEmpty, !id.isValidShortID {
+                    completion([errorStr: errorURLSuffix])
                     return
                 }
 
