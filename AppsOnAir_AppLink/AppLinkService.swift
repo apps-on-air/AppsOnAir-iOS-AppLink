@@ -158,17 +158,6 @@ public class AppLinkService: NSObject {
                     return
                 }
 
-                // Validate urlPrefix if shortId is present
-                if !name.trimmed.isEmpty && !name.isValidUrlName {
-                    completion([errorStr: errorURLName])
-                    return
-                }
-
-                if let id = shortId?.trimmed, !id.isEmpty, !id.isValidShortID {
-                    completion([errorStr: errorURLSuffix])
-                    return
-                }
-
                 // Construct cleaned social meta dictionary
                 let socialMetaData: [String: Any] = (socialMeta ?? [:]).isEmpty ? [:] :  [
                     "title": socialMeta?["title"] ?? NSNull(),

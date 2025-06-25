@@ -11,7 +11,7 @@ let referralData = "appsOnAirReferralData"
 
 let errorSomeThingWrong = "Something went wrong please try again!"
 
-let errorStr = "error:"
+let errorStr = "error"
 
 let errorUserAgent = "getUserAgentError"
 
@@ -24,10 +24,6 @@ let errorFailedToLoad = "Failed to load:"
 let errorNetwork = "Please check internet connection!"
 
 let errorURLInvalid = "Enter a valid URL"
-
-let errorURLName = "Use only letters, numbers, dots (.), dashes (-), or underscores (_) up to 50 characters in AppLink name"
-
-let errorURLSuffix = "Only letters and numbers allowed (max 50 characters) in shortId!"
 
 let errorFailedToDecodeKeychain = "Failed to decode JSON from Keychain"
 

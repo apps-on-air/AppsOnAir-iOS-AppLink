@@ -112,28 +112,13 @@ internal class AppHelper: NSObject {
 }
 
 internal extension String {
-    
-    /// Checks if the string contains only lowercase letters and numbers
-    var isValidLowercaseAlphanumeric: Bool {
-        return range(of: #"^[a-z0-9]+$"#, options: .regularExpression) != nil
-    }
 
     /// Checks if the string is a valid http/https URL
     var isValidHttpUrl: Bool {
-        let pattern = #"^https?:\/\/(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+([\/?#][^\s]*)?$"#
-        return self.range(of: pattern, options: .regularExpression) != nil
-    }
-
-    /// Checks if the string is a valid AppLink name
-    var isValidUrlName: Bool {
-        let pattern = #"^[A-Za-z0-9 .\-_]{1,50}$"#
-        return self.range(of: pattern, options: .regularExpression) != nil
-    }
-
-    /// Checks if the string is a valid short ID
-    var isValidShortID: Bool {
-        let pattern = #"^[a-zA-Z0-9]{1,50}$"#
-        return self.range(of: pattern, options: .regularExpression) != nil
+        guard self.hasPrefix("http://") || self.hasPrefix("https://") else {
+            return false
+        }
+        return true
     }
 
     /// Returns trimmed version of string
