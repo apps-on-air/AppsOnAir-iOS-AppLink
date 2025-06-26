@@ -11,7 +11,7 @@ let referralData = "appsOnAirReferralData"
 
 let errorSomeThingWrong = "Something went wrong please try again!"
 
-let errorStr = "error:"
+let errorStr = "error"
 
 let errorUserAgent = "getUserAgentError"
 
@@ -24,8 +24,6 @@ let errorFailedToLoad = "Failed to load:"
 let errorNetwork = "Please check internet connection!"
 
 let errorURLInvalid = "Enter a valid URL"
-
-let errorURLPrefix = "Only lowercase letters and numbers allowed"
 
 let errorFailedToDecodeKeychain = "Failed to decode JSON from Keychain"
 

@@ -112,17 +112,13 @@ internal class AppHelper: NSObject {
 }
 
 internal extension String {
-    
-    /// Checks if the string contains only lowercase letters and numbers
-    var isValidLowercaseAlphanumeric: Bool {
-        return range(of: #"^[a-z0-9]+$"#, options: .regularExpression) != nil
-    }
 
     /// Checks if the string is a valid http/https URL
     var isValidHttpUrl: Bool {
-            let regex = #"^https?:\/\/(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$"#
-            let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
-            return predicate.evaluate(with: self)
+        guard self.hasPrefix("http://") || self.hasPrefix("https://") else {
+            return false
+        }
+        return true
     }
 
     /// Returns trimmed version of string
