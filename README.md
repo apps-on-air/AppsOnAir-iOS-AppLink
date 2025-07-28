@@ -16,7 +16,7 @@
 - ✅ Fallback behavior (e.g., open App Store)
 - ✅ Custom domain support
 - ✅ Referral tracking
-- ✅ Firebase dynamic link migration to AppLink(Coming Soon)
+- ✅ Seamless firebase dynamic link migration to AppLink
 
 ## Installation
 
