@@ -223,7 +223,7 @@ struct ContentView: View {
                     socialMeta: ["title": "link title","description": "link description","imageUrl": "https://image.png"],
                     isOpenInBrowserApple: false,
                     isOpenInIosApp: true,
-                    iosFallbackUrl: "https://appstore/app.com",
+                    iosFallbackUrl: "https://appstore.com",
                 ) { linkInfo in
                      //write the code for handling create link
                 }
@@ -275,7 +275,7 @@ class ViewController: UIViewController {
                // Help to create the link
                // <urlPrefix> shouldn't contain http or https
                // <shortId>  If not set, it will be auto-generated
-               appOnAirLinkService.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore/app.com"
+               appOnAirLinkService.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com"
         ) { linkInfo  in
                     //write the code for handling create link
                 }
@@ -325,7 +325,8 @@ Objective-c
      // Help to create link
      // <urlPrefix> shouldn't contain http or https
      // <shortId>  If not set, it will be auto-generated
-    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore/app.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://playstore/app.com" completion:^(NSDictionary<NSString *,id> * linkInfo) {
+    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com
+    " completion:^(NSDictionary<NSString *,id> * linkInfo) {
         //write the code for handling create link
     }];
 }
