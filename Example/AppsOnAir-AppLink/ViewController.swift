@@ -35,10 +35,11 @@ class ViewController: UIViewController {
         }
         
         //help to set social meta
-        let socialMeta = ["imageUrl":"YOUR_IMAGE_URL","title":"","description":""]
+        let socialMeta = ["imageUrl":"https://image.png","title":"link title","description":"link description"]
         
         //help to create appLink
-        appsOnAirLinkService.createAppLink(url: "YOUR_DEEP_LINK_URL", name: "YOUR_LINK_NAME", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: socialMeta, isOpenInBrowserApple: false,isOpenInIosApp: true,iOSFallbackUrl: "",isOpenInAndroidApp: true,isOpenInBrowserAndroid: false,androidFallbackUrl: "") { linkInfo in
+        // <urlPrefix> shouldn't contain http or https
+        appsOnAirLinkService.createAppLink(url: "https://appsonair.com", name: "AppsOnAir", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: socialMeta, isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore/app.com") { linkInfo in
             //write code for handle create link
         }
     }
