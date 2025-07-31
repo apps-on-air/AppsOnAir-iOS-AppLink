@@ -213,18 +213,17 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 20) {
             Button(action: {
+                // Help to create the link
+
                 AppLinkService.shared.createAppLink(
-                    url: "https://example.com",
-                    name: "YOUR_LINK_NAME",
-                    urlPrefix: "YOUR_DOMAIN_NAME",
-                    shortId: "LINK_ID",
-                    socialMeta: [:],
+                    url: "https://appsonair.com",
+                    name: "AppsOnAir",
+                    urlPrefix: "YOUR_DOMAIN_NAME", //  <urlPrefix> shouldn't contain http or https
+                    shortId: "LINK_ID",   // <shortId>  If not set, it will be auto-generated
+                    socialMeta: ["title": "link title","description": "link description","imageUrl": "https://image.png"],
                     isOpenInBrowserApple: false,
                     isOpenInIosApp: true,
-                    iOSFallbackUrl: "",
-                    isOpenInAndroidApp: true,
-                    isOpenInBrowserAndroid: false,
-                    androidFallbackUrl: ""
+                    iosFallbackUrl: "https://appstore/app.com",
                 ) { linkInfo in
                      //write the code for handling create link
                 }
@@ -275,7 +274,8 @@ class ViewController: UIViewController {
            @objc func buttonPressed() {
                // Help to create the link
                // <urlPrefix> shouldn't contain http or https
-               appOnAirLinkService.createAppLink(url: "https://example.com",name: "YOUR_LINK_NAME",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: [:],isOpenInBrowserApple: false,isOpenInIosApp: true,iOSFallbackUrl: "",isOpenInAndroidApp: true,isOpenInBrowserAndroid: false,androidFallbackUrl: ""
+               // <shortId>  If not set, it will be auto-generated
+               appOnAirLinkService.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore/app.com"
         ) { linkInfo  in
                     //write the code for handling create link
                 }
@@ -324,7 +324,8 @@ Objective-c
 - (void)openNextScreen {
      // Help to create link
      // <urlPrefix> shouldn't contain http or https
-    [self.appLinkService createAppLinkWithUrl:@"https://example.com" name:@"YOUR_LINK_NAME" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{}isOpenInBrowserApple:true isOpenInIosApp:true iOSFallbackUrl:@"www.google.com" isOpenInAndroidApp:true isOpenInBrowserAndroid:false androidFallbackUrl:@"www.google.com" completion:^(NSDictionary<NSString *,id> * linkInfo) {
+     // <shortId>  If not set, it will be auto-generated
+    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore/app.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://playstore/app.com" completion:^(NSDictionary<NSString *,id> * linkInfo) {
         //write the code for handling create link
     }];
 }

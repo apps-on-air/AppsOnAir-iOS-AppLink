@@ -126,18 +126,81 @@ public class AppLinkService: NSObject {
         self.appLinkHandler(inComingURL: incomingURL)
     }
     
-    ///help to create the link
+    /// Helps create a dynamic app link compatible with iOS, Android, and web browsers.
+    /// - Parameters:
+    ///   - url: The deep link URL that the user should be direct.
+    ///   - name: A human-readable name for the link, useful for display or analytics.
+    ///   - urlPrefix: The domain prefix for the app link. **Do not include** `https://` or `http://`. Example: `example.page.link`.
+    ///   - shortId: *(Optional)* A custom short ID to uniquely identify the link. If not provided, one will be generated automatically.
+    ///   - socialMeta: *(Optional)* Dictionary containing metadata for social sharing (e.g., title, image URL, description).
+    ///   - isOpenInBrowserApple: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open in a browser on iOS.
+    ///   - isOpenInIosApp: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open directly in the iOS app.
+    ///   - iosFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on iOS.
+    ///   - isOpenInAndroidApp: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open directly in the Android app.
+    ///   - isOpenInBrowserAndroid: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open in a browser on Android.
+    ///   - androidFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on Android.
+    ///   - completion: A closure that returns a dictionary containing the result of the link creation.
     @objc public func createAppLink(
         url: String,
         name: String,
         urlPrefix: String,
         shortId: String? = nil,
         socialMeta: [String: Any]? = nil,
-        isOpenInBrowserApple: Bool = false,
-        isOpenInIosApp: Bool = true,
-        iOSFallbackUrl: String? = nil,
-        isOpenInAndroidApp: Bool = true,
-        isOpenInBrowserAndroid: Bool = false,
+        isOpenInBrowserApple: NSNumber?,
+        isOpenInIosApp: NSNumber?,
+        iosFallbackUrl: String? = nil,
+        isOpenInAndroidApp: NSNumber?,
+        isOpenInBrowserAndroid: NSNumber?,
+        androidFallbackUrl: String? = nil,
+        completion: @escaping ([String: Any]) -> Void
+    ) {
+        // Convert NSNumber? to Bool? for Swift compatibility
+        let isOpenInBrowserAppleNumber:Bool? = isOpenInBrowserApple?.boolValue
+        let isOpenInIosAppNumber: Bool? = isOpenInIosApp?.boolValue
+        let isOpenInAndroidAppNumber: Bool? = isOpenInAndroidApp?.boolValue
+        let isOpenInBrowserAndroidNumber: Bool? = isOpenInBrowserAndroid?.boolValue
+
+        // Call the Swift-native function
+        self.createAppLink(
+            url: url,
+            name: name,
+            urlPrefix: urlPrefix,
+            shortId: shortId,
+            socialMeta: socialMeta,
+            isOpenInBrowserApple: isOpenInBrowserAppleNumber,
+            isOpenInIosApp: isOpenInIosAppNumber,
+            iosFallbackUrl: iosFallbackUrl,
+            isOpenInAndroidApp: isOpenInAndroidAppNumber,
+            isOpenInBrowserAndroid: isOpenInBrowserAndroidNumber,
+            androidFallbackUrl: androidFallbackUrl,
+            completion: completion
+        )
+    }
+    
+    /// Internal helper to create a dynamic app link. Used by both Swift and Objective-C wrappers.
+    ///   - url: The deep link URL that the user should be direct.
+    ///   - name: A human-readable name for the link, useful for display or analytics.
+    ///   - urlPrefix: The domain prefix for the app link. **Do not include** `https://` or `http://`. Example: `example.page.link`.
+    ///   - shortId: *(Optional)* A custom short ID to uniquely identify the link. If not provided, one will be generated automatically.
+    ///   - socialMeta: *(Optional)* Dictionary containing metadata for social sharing (e.g., title, image URL, description).
+    ///   - isOpenInBrowserApple: `Bool` indicating whether the link should open in a browser on iOS.
+    ///   - isOpenInIosApp: `Bool` indicating whether the link should open directly in the iOS app.
+    ///   - iosFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on iOS.
+    ///   - isOpenInAndroidApp: `Bool` indicating whether the link should open directly in the Android app.
+    ///   - isOpenInBrowserAndroid: `Bool` indicating whether the link should open in a browser on Android.
+    ///   - androidFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on Android.
+    ///   - completion: A closure that returns a dictionary containing the result of the link creation.
+    public func createAppLink(
+        url: String,
+        name: String,
+        urlPrefix: String,
+        shortId: String? = nil,
+        socialMeta: [String: Any]? = nil,
+        isOpenInBrowserApple: Bool? = nil,
+        isOpenInIosApp: Bool? = nil,
+        iosFallbackUrl: String? = nil,
+        isOpenInAndroidApp: Bool? = nil,
+        isOpenInBrowserAndroid: Bool? = nil,
         androidFallbackUrl: String? = nil,
         completion: @escaping ([String:Any]) -> Void
     ) {
@@ -147,7 +210,7 @@ public class AppLinkService: NSObject {
                 // Prepare URLs to validate
                 let urls = [
                     "url": url,
-                    "iOSFallbackUrl": iOSFallbackUrl ?? "",
+                    "iosFallbackUrl": iosFallbackUrl ?? "",
                     "androidFallbackUrl": androidFallbackUrl ?? "",
                     "imageUrl": (socialMeta?["imageUrl"] as? String) ?? ""
                 ]
@@ -165,7 +228,7 @@ public class AppLinkService: NSObject {
                     "imageUrl": socialMeta?["imageUrl"] ?? NSNull()
                 ]
                 
-                AppLinkApiService.apiGenerateShortLink(url: url, name: name,urlPrefix: urlPrefix, shortId: shortId,socialMeta: socialMetaData,isOpenInBrowserApple: isOpenInBrowserApple,isOpenInIosApp: isOpenInIosApp,iOSFallbackUrl: iOSFallbackUrl,isOpenInAndroidApp: isOpenInAndroidApp,isOpenInBrowserAndroid: isOpenInBrowserAndroid,androidFallbackUrl: androidFallbackUrl) { shortLinkData in
+                AppLinkApiService.apiGenerateShortLink(url: url, name: name,urlPrefix: urlPrefix, shortId: shortId,socialMeta: socialMetaData,isOpenInBrowserApple: isOpenInBrowserApple,isOpenInIosApp: isOpenInIosApp,iosFallbackUrl: iosFallbackUrl,isOpenInAndroidApp: isOpenInAndroidApp,isOpenInBrowserAndroid: isOpenInBrowserAndroid,androidFallbackUrl: androidFallbackUrl) { shortLinkData in
                     completion(shortLinkData)
                 }
             } else {
