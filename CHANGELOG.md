@@ -2,7 +2,7 @@
 
 **Breaking Changes:**
 
-* Changed `iOSFallbackUrl` to `iosFallbackUrl` in `createAppLink` method.
+* Changed parameter `iOSFallbackUrl` to `iosFallbackUrl` in the `createAppLink` method.
 * Bugs fixes and improvements
 
 ## 1.0.0
