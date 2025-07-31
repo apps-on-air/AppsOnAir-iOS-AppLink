@@ -39,7 +39,7 @@ class ViewController: UIViewController {
         
         //help to create appLink
         // <urlPrefix> shouldn't contain http or https
-        appsOnAirLinkService.createAppLink(url: "https://appsonair.com", name: "AppsOnAir", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: socialMeta, isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore/app.com") { linkInfo in
+        appsOnAirLinkService.createAppLink(url: "https://appsonair.com", name: "AppsOnAir", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: socialMeta, isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com") { linkInfo in
             //write code for handle create link
         }
     }
