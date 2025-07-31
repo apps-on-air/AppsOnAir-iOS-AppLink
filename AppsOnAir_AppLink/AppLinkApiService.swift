@@ -22,17 +22,17 @@ internal class AppLinkApiService {
     /// then [isOpenInBrowserAndroid] and [isOpenInBrowserApple] must be true.
     /// Otherwise, an error will be thrown.
     ///
-    @objc internal static func apiGenerateShortLink(
+    internal static func apiGenerateShortLink(
         url: String,
         name: String,
         urlPrefix: String,
         shortId: String? = nil,
         socialMeta: [String: Any]? = nil,
-        isOpenInBrowserApple: Bool = false,
-        isOpenInIosApp: Bool = true,
-        iOSFallbackUrl: String? = nil,
-        isOpenInAndroidApp: Bool = true,
-        isOpenInBrowserAndroid: Bool = false,
+        isOpenInBrowserApple: Bool? = nil,
+        isOpenInIosApp: Bool? = nil,
+        iosFallbackUrl: String? = nil,
+        isOpenInAndroidApp: Bool? = nil,
+        isOpenInBrowserAndroid: Bool? = nil,
         androidFallbackUrl: String? = nil,
         completion: @escaping ([String:Any]) -> Void
     ) {
@@ -70,8 +70,8 @@ internal class AppLinkApiService {
         //IOS Params
         shortLinkData["isOpenInBrowserApple"] = isOpenInBrowserApple
         shortLinkData["isOpenInIosApp"] = isOpenInIosApp
-        if let iOSFallbackUrl = iOSFallbackUrl {
-            shortLinkData["customUrlForIos"] = iOSFallbackUrl
+        if let iosFallbackUrl = iosFallbackUrl {
+            shortLinkData["customUrlForIos"] = iosFallbackUrl
         }
         
         //Android Params
