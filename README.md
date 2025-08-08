@@ -12,11 +12,13 @@
 
 ## 🚀 Features
 
-- ✅ Deep link support (URI scheme, App Links)
+- ✅ Deep link support (URI scheme, AppLinks)
 - ✅ Fallback behavior (e.g., open App Store)
 - ✅ Custom domain support
 - ✅ Referral tracking
-- ✅ Seamless firebase dynamic link migration to AppLink
+- ✅ Seamless migration from Firebase Dynamic Links to AppLink
+
+**Note:** For comprehensive instructions on migrating Firebase Dynamic Links to AppLink, refer to the [documentation](https://documentation.appsonair.com/MobileQuickstart/AppLink/firebase-dynamiclinks-migration).
 
 ## Installation
 
@@ -133,7 +135,7 @@ struct appsonairApp: App {
 class AppDelegate: UIResponder, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
       AppLinkService.shared.initialize { incomingURL,linkInfo in
-          //write the code for handling flow based o url
+          //Write the code for handling flow based o url
       }
       return true
   }
@@ -146,12 +148,12 @@ Swift
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    let appOnAirLinkService = AppLinkService.shared
+    let appLinkService = AppLinkService.shared
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // help to initialize link services
-        appOnAirLinkService.initialize { url,linkInfo in
-           //write the code for handling flow based o url
+        // Help to initialize link services
+        appLinkService.initialize { url,linkInfo in
+           //Write the code for handling flow based o url
         }
         return true
     }
@@ -172,12 +174,12 @@ Objective-c
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
        
-    // App Link Class instance create
+    // AppLink Class instance create
     self.appLinkServices = [AppLinkService shared];
     
-    // help to initialize link services
+    // Help to initialize link services
     [self.appLinkServices initializeWithCompletion:^(NSURL * url, NSDictionary<NSString *,id> * linkInfo) {
-        //write the code for handling flow based on url
+        //Write the code for handling flow based on url
     }];
     // Override point for customization after application launch.
     return YES;
@@ -225,7 +227,7 @@ struct ContentView: View {
                     isOpenInIosApp: true,
                     iosFallbackUrl: "https://appstore.com",
                 ) { linkInfo in
-                     //write the code for handling create link
+                     //Write the code for handling create link
                 }
             }) {
                 Text("Create Link")
@@ -248,7 +250,7 @@ struct ContentView: View {
 Swift
 ```swift
 class ViewController: UIViewController {
-    let appOnAirLinkService = AppLinkService.shared
+    let appLinkService = AppLinkService.shared
   
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -275,9 +277,9 @@ class ViewController: UIViewController {
                // Help to create the link
                // <urlPrefix> shouldn't contain http or https
                // <shortId>  If not set, it will be auto-generated
-               appOnAirLinkService.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com"
+               appLinkService.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com"
         ) { linkInfo  in
-                    //write the code for handling create link
+                    //Write the code for handling create link
                 }
            }
 
@@ -325,9 +327,8 @@ Objective-c
      // Help to create link
      // <urlPrefix> shouldn't contain http or https
      // <shortId>  If not set, it will be auto-generated
-    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com
-    " completion:^(NSDictionary<NSString *,id> * linkInfo) {
-        //write the code for handling create link
+    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com"completion:^(NSDictionary<NSString *,id> * linkInfo) {
+        //Write the code for handling create link
     }];
 }
 ```
@@ -362,7 +363,7 @@ struct ContentView: View {
         VStack(spacing: 20) {
             Button(action: {
                 AppLinkService.shared.getReferralDetails { linkInfo in
-                   //write the code for handling referral linkInfo
+                   // Write the code for handling referral linkInfo
                 }
             }) {
                 Text("Fetch Referral Link")
@@ -385,7 +386,7 @@ struct ContentView: View {
 Swift
 ```swift
 class ViewController: UIViewController {
-    let appOnAirLinkService = AppLinkService.shared
+    let appLinkService = AppLinkService.shared
   
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -410,8 +411,8 @@ class ViewController: UIViewController {
           // Define the action when button is pressed
            @objc func buttonPressed() {
                // Help to retrieving referral linkInfo
-                appOnAirLinkService.getReferralDetails { linkInfo in
-                   //write the code for handling referral linkInfo
+                appLinkService.getReferralDetails { linkInfo in
+                   //Write the code for handling referral linkInfo
                 }
            }
 
@@ -458,7 +459,7 @@ Objective-c
 - (void)openNextScreen {
     // Help to retrieving referral linkInfo
     [self.appLinkService getReferralDetailsWithCompletion:^(NSDictionary<NSString *,id> * linkInfo) {
-         //write the code for handling referral linkInfo
+         //Write the code for handling referral linkInfo
     }];
 }
 ```
@@ -474,19 +475,19 @@ If your app isn’t handling Universal or Deep Links as expected, make sure the 
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    let appOnAirLinkService = AppLinkService.shared
+    let appLinkService = AppLinkService.shared
   
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let url = userActivity.webpageURL else {
             return false
         }
-        appOnAirLinkService.handleAppLink(incomingURL: url)
+        appLinkService.handleAppLink(incomingURL: url)
         return true
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        appOnAirLinkService.handleAppLink(incomingURL: url)
+        appLinkService.handleAppLink(incomingURL: url)
         return true
     }
 }
@@ -498,20 +499,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 import AppsOnAir_AppLink
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-    let appOnAirLinkService = AppLinkService.shared
+    let appLinkService = AppLinkService.shared
     var window: UIWindow?
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let urlContext = URLContexts.first else { return }
         let url = urlContext.url
-        appOnAirLinkService.handleAppLink(incomingURL: url)
+        appLinkService.handleAppLink(incomingURL: url)
     }
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let incomingURL = userActivity.webpageURL else {
             return
         }
-        appOnAirLinkService.handleAppLink(incomingURL: incomingURL)
+        appLinkService.handleAppLink(incomingURL: incomingURL)
     }
 }
 ```
