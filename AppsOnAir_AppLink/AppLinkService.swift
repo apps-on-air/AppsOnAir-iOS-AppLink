@@ -126,11 +126,11 @@ public class AppLinkService: NSObject {
         self.appLinkHandler(inComingURL: incomingURL)
     }
     
-    /// Helps create a dynamic app link compatible with iOS, Android, and web browsers.
+    /// Helps create a dynamic AppLink compatible with iOS, Android, and web browsers.
     /// - Parameters:
     ///   - url: The deep link URL that the user should be direct.
     ///   - name: A human-readable name for the link, useful for display or analytics.
-    ///   - urlPrefix: The domain prefix for the app link. **Do not include** `https://` or `http://`. Example: `example.page.link`.
+    ///   - urlPrefix: The domain prefix for the AppLink. **Do not include** `https://` or `http://`. Example: `example.page.link`.
     ///   - shortId: *(Optional)* A custom short ID to uniquely identify the link. If not provided, one will be generated automatically.
     ///   - socialMeta: *(Optional)* Dictionary containing metadata for social sharing (e.g., title, image URL, description).
     ///   - isOpenInBrowserApple: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open in a browser on iOS.
@@ -177,10 +177,10 @@ public class AppLinkService: NSObject {
         )
     }
     
-    /// Internal helper to create a dynamic app link. Used by both Swift and Objective-C wrappers.
+    /// Internal helper to create a dynamic AppLink. Used by both Swift and Objective-C wrappers.
     ///   - url: The deep link URL that the user should be direct.
     ///   - name: A human-readable name for the link, useful for display or analytics.
-    ///   - urlPrefix: The domain prefix for the app link. **Do not include** `https://` or `http://`. Example: `example.page.link`.
+    ///   - urlPrefix: The domain prefix for the AppLink. **Do not include** `https://` or `http://`. Example: `example.page.link`.
     ///   - shortId: *(Optional)* A custom short ID to uniquely identify the link. If not provided, one will be generated automatically.
     ///   - socialMeta: *(Optional)* Dictionary containing metadata for social sharing (e.g., title, image URL, description).
     ///   - isOpenInBrowserApple: `Bool` indicating whether the link should open in a browser on iOS.

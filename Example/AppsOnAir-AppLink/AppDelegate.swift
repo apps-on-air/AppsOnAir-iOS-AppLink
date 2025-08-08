@@ -3,20 +3,20 @@ import AppsOnAir_AppLink
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    let appsOnAirLinkService = AppLinkService.shared
+    let appLinkService = AppLinkService.shared
     var window: UIWindow?
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        appsOnAirLinkService.initialize { url,linkInfo in
+        appLinkService.initialize { url,linkInfo in
            // write the code for handling url and link information
         }
         return true
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        appsOnAirLinkService.handleAppLink(incomingURL: url)
+        appLinkService.handleAppLink(incomingURL: url)
             return true
     }
 

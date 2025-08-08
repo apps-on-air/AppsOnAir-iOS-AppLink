@@ -2,7 +2,7 @@ import UIKit
 import AppsOnAir_AppLink
 
 class ViewController: UIViewController {
-    let appsOnAirLinkService = AppLinkService.shared
+    let appLinkService = AppLinkService.shared
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,9 +29,9 @@ class ViewController: UIViewController {
 
     @objc func createLinkTapped() {
         
-        //help to get referral information 
-        appsOnAirLinkService.getReferralDetails { referralLinkInfo in
-            //write code for handle referral link information
+        //Help to get referral information 
+        appLinkService.getReferralDetails { referralLinkInfo in
+            //Write code for handle referral link information
         }
         
         //help to set social meta
@@ -39,7 +39,7 @@ class ViewController: UIViewController {
         
         //help to create appLink
         // <urlPrefix> shouldn't contain http or https
-        appsOnAirLinkService.createAppLink(url: "https://appsonair.com", name: "AppsOnAir", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: socialMeta, isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com") { linkInfo in
+        appLinkService.createAppLink(url: "https://appsonair.com", name: "AppsOnAir", urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: socialMeta, isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com") { linkInfo in
             //write code for handle create link
         }
     }
