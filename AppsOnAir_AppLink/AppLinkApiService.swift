@@ -172,8 +172,8 @@ internal class AppLinkApiService {
     }
     
     /// API for Get Config ID from AppId
-    @objc internal static func apiLinkAnalytics(isClicked:Bool,urlPrefix: String,
-                                                shortId: String? = nil,  completion: @escaping ([String:Any]) -> Void) {
+    @objc internal static func apiLinkAnalytics(isClicked:Bool = true,urlPrefix: String,
+                                                shortId: String? = nil,isInstalled:Bool = false,isFirstOpen:Bool = false,completion: @escaping ([String:Any]) -> Void) {
         
         if(appsOnAirCoreServices.appId.isEmpty){
             Logger.logInfo(errorAppIdMissing, prefix: appsOnAirLink)
@@ -194,9 +194,9 @@ internal class AppLinkApiService {
             "shortId": shortId as Any,
             "domain": urlPrefix,
             "isClicked": isClicked,
-            "isInstalled":  appHelper.isUserReferral,
-            "isFirstOpen":  appHelper.isUserReferral,
-            "isReOpen":   !appHelper.isUserReferral && !appHelper.isAppFirstOpen
+            "isInstalled":  isInstalled,
+            "isFirstOpen":  isFirstOpen,
+            "isReOpen": !isInstalled
         ]
         
         let httpBody = try? JSONSerialization.data(withJSONObject: apiShortLinkPassData, options: [])
