@@ -104,13 +104,39 @@ public class AppLinkService: NSObject {
     }
     
     private func referralHandler(){
+        // Retrieve stored data from the device keychain
         let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
+        
+        // If referral data is missing or the app was reinstalled, retrieve it from the server
         if((referralInfoFromKeyChain?.isEmpty ?? false) || AppHelper.shared.isAppFirstOpen){
+            
             AppLinkApiService.apiReferralInfo { referralLinkInfo in
-                if let status = referralLinkInfo["status"] as? String, status == "SUCCESS" {
-                      AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
-                   }
-                self.appHelper.saveToKeychain(key: referralData, value: referralLinkInfo)
+
+                // Check referral API response
+                if let referralStatus = referralLinkInfo["status"] as? String,
+                   referralStatus == "SUCCESS",
+                   let referralInfo = referralLinkInfo["data"] as? [String: Any],
+                   let referralLink = referralInfo["referralLink"] as? String,
+                   let shortId = referralInfo["shortId"] as? String,
+                   let domain = URL(string: referralLink)?.host {
+                    
+                    // Call analytics of referral result
+                    AppLinkApiService.apiLinkAnalytics(
+                        isClicked: false,
+                        urlPrefix: domain,
+                        shortId: shortId,
+                        isInstalled: true,
+                        isFirstOpen: true
+                    ) { analyticsInfo in
+                        if let analyticsStatus = analyticsInfo["status"] as? String,
+                           analyticsStatus == "SUCCESS" {
+                            DispatchQueue.main.async {
+                                AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
+                                self.appHelper.saveToKeychain(key: referralData, value: referralInfo)
+                            }
+                        }
+                    }
+                }
             }
         }
     }

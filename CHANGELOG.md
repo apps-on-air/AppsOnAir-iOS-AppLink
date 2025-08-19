@@ -1,3 +1,8 @@
+## 1.1.1
+
+* Upgrade dependency
+* Minor fixes and improvements
+
 ## 1.1.0
 
 **Breaking Changes:**
