@@ -2,7 +2,7 @@ import UIKit
 import Combine
 import AppsOnAir_Core
 
-public class AppLinkService: NSObject {
+@objc public class AppLinkService: NSObject {
     
     @objc public static let shared = AppLinkService()
     
@@ -132,7 +132,7 @@ public class AppLinkService: NSObject {
                            analyticsStatus == "SUCCESS" {
                             DispatchQueue.main.async {
                                 AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
-                                self.appHelper.saveToKeychain(key: referralData, value: referralInfo)
+                                self.appHelper.saveToKeychain(key: referralData, value: referralLinkInfo)
                             }
                         }
                     }
