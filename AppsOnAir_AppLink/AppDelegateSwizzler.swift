@@ -28,15 +28,25 @@ internal class AppSwizzler {
     
     // MARK: - SceneDelegate Swizzling
     private func getSceneDelegateClass() -> NSObject.Type? {
-        let moduleName = Bundle.main.object(forInfoDictionaryKey: "CFBundleExecutable")
-                guard
-                    let sceneDelegateClass = NSClassFromString("\(moduleName ?? "").SceneDelegate") as? NSObject.Type
-                    ?? NSClassFromString("SceneDelegate") as? NSObject.Type
-                else {
-                    Logger.logInternal("Swizzling failed: Could not find SceneDelegate class.")
-                    return nil
-                }
-        return sceneDelegateClass
+        let moduleName = Bundle.main.object(forInfoDictionaryKey: "CFBundleExecutable") as? String ?? ""
+        
+        // Try multiple class name patterns for different project types
+        let classNameCandidates = [
+            "\(moduleName).SceneDelegate",
+            "SceneDelegate",
+            "\(moduleName)_SceneDelegate",  // Common in C++ projects
+            "\(Bundle.main.bundleIdentifier?.replacingOccurrences(of: ".", with: "_") ?? "")_SceneDelegate"
+        ]
+        
+        for className in classNameCandidates {
+            if let sceneDelegateClass = NSClassFromString(className) as? NSObject.Type {
+                Logger.logInternal("✅ Found SceneDelegate class: \(className)")
+                return sceneDelegateClass
+            }
+        }
+        
+        Logger.logInternal("❌ Swizzling failed: Could not find SceneDelegate class. Tried: \(classNameCandidates)")
+        return nil
     }
 
     /// Main function to trigger swizzling of SceneDelegate methods
@@ -205,16 +215,34 @@ extension NSObject {
     @objc func swizzled_scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Logger.logInternal("🔥 Swizzled method called: scene(_:willConnectTo:options:)")
         
+        // Always call original implementation first to ensure UI setup
+        self.swizzled_scene(scene, willConnectTo: session, options: connectionOptions)
+        
+        // Then handle deep links after UI is initialized
+        var handledLink = false
+        
+        // Check for Universal Links
         if let userActivity = connectionOptions.userActivities.first,
            userActivity.activityType == NSUserActivityTypeBrowsingWeb,
            let url = userActivity.webpageURL {
             
-            Logger.logInternal("Opened with deep link (main scene) :::::: \(url)")
-            AppLinkService.shared.appLinkHandler(inComingURL: url)
-            return
+            Logger.logInternal("🔗 Handling Universal Link from kill state: \(url)")
+            // Add slight delay to ensure UI is fully rendered, especially critical for C++ projects
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                AppLinkService.shared.appLinkHandler(inComingURL: url)
+            }
+            handledLink = true
         }
         
-        self.swizzled_scene(scene, willConnectTo: session, options: connectionOptions)
+        // Check for Custom URL Schemes
+        if !handledLink, let urlContext = connectionOptions.urlContexts.first {
+            let url = urlContext.url
+            Logger.logInternal("🔗 Handling Custom URL from kill state: \(url)")
+            // Add slight delay to ensure UI is fully rendered, especially critical for C++ projects
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                AppLinkService.shared.appLinkHandler(inComingURL: url)
+            }
+        }
     }
     
     /// Swizzled: scene(_:continue:)

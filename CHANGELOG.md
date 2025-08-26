@@ -1,3 +1,8 @@
+## 1.1.2
+
+* Add Support of Objc C ++
+* Minor fixes and improvements
+
 ## 1.1.1
 
 * Upgrade dependency
