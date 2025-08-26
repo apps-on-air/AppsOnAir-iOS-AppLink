@@ -88,7 +88,7 @@ Objective-C
 ```swift
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 ```
-Objective-C ++
+Objective-C++
 
 ```swift
 #import "AppsOnAir-AppLink/AppLinkService.h"
@@ -192,7 +192,7 @@ Objective-C
 
 ```
 
-Objective-C ++
+Objective-C++
 
 ```swift
 #import "AppDelegate.h"
@@ -229,7 +229,7 @@ Objective-C
 ```swift
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 ```
-Objective-C ++
+Objective-C++
 
 ```swift
 #import "AppsOnAir-AppLink/AppLinkService.h"
@@ -368,7 +368,7 @@ Objective-C
 ```
 
 
-Objective-C ++
+Objective-C++
 ```swift
 #import "AppsOnAir-AppLink/AppLinkService.h"
 
@@ -404,7 +404,7 @@ Objective-C
 ```swift
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 ```
-Objective-C ++ 
+Objective-C++ 
 ```swift
 #import "AppsOnAir-AppLink/AppLinkService.h"
 ```
@@ -526,7 +526,7 @@ Objective-C
 ```
 
 
-Objective-C ++
+Objective-C++
 ```swift
 #import "AppsOnAir-AppLink/AppLinkService.h"
 
@@ -702,7 +702,7 @@ willConnectToSession:(UISceneSession *)session
 
 ```
 
-### Objective-C ++ Implementation
+### Objective-C++ Implementation
 
 ```swift
 #import "AppsOnAir-AppLink/AppLinkService.h"
