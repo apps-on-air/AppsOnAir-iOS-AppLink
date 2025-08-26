@@ -30,7 +30,7 @@ public class AppLinkWrapper: NSObject {
     }
     
     /// Create a new dynamic AppLink
-    /// - Parameters mirror Swift API but are ObjC friendly (NSString/NSNumber/NSDictionary)
+    /// - Parameters mirror Swift API but are Objective-C++ friendly (NSString/NSNumber/NSDictionary)
     @objc(createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iosFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:)
     public class func createAppLink(
         url: String,

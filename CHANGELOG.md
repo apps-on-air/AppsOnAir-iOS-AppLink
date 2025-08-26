@@ -1,6 +1,6 @@
 ## 1.1.2
 
-* Add Support of Objc C ++
+* Add Objective-C++ support
 * Minor fixes and improvements
 
 ## 1.1.1
