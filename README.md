@@ -88,6 +88,11 @@ Objective-C
 ```swift
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
 ```
+Objective-C++
+
+```swift
+#import "AppsOnAir-AppLink/AppLinkService.h"
+```
 
 ### App-Link Implement Code
 
@@ -160,7 +165,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 ```
 
-Objective-c
+Objective-C
 ```swift
 #import "AppDelegate.h"
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
@@ -187,6 +192,30 @@ Objective-c
 
 ```
 
+Objective-C++
+
+```swift
+#import "AppDelegate.h"
+#import "AppsOnAir-AppLink/AppLinkService.h"
+
+@interface AppDelegate ()
+@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  self.appLinkServices = [AppLinkServices shared];
+  [self.appLinkServices initializeWithCompletion:^(NSURL * _Nullable url, NSDictionary * _Nonnull info) {
+    //Write the code for handling flow based on url
+  }];
+  
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+```
+
 ## 2. Creating the AppLink 
 You can also create link, such as from a button action:
 ### Firstly, import AppsOnAir_AppLink in your ViewController file or swift code file
@@ -199,6 +228,11 @@ Objective-C
 
 ```swift
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
+```
+Objective-C++
+
+```swift
+#import "AppsOnAir-AppLink/AppLinkService.h"
 ```
 
 ### App-Link Implement Code
@@ -292,7 +326,7 @@ class ViewController: UIViewController {
 }
 ```
 
-Objective-c
+Objective-C
 ```swift
 #import "ViewController.h"
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
@@ -334,6 +368,29 @@ Objective-c
 ```
 
 
+Objective-C++
+```swift
+#import "AppsOnAir-AppLink/AppLinkService.h"
+
+@interface AppDelegate ()
+@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+
+  self.appLinkServices = [AppLinkServices shared];
+
+  [self.appLinkServices createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID" socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com" completion:^(NSDictionary<NSString*,id> * linkInfo) {
+    //Write the code for handling create link
+    }];
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+```
+
+
 ## 3. To Retrieving Referral Link  
 You can also retrieving linkInfo, such as from a button action:
 ### Firstly, import AppsOnAir_AppLink in your ViewController file or swift code file
@@ -346,6 +403,10 @@ Objective-C
 
 ```swift
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
+```
+Objective-C++ 
+```swift
+#import "AppsOnAir-AppLink/AppLinkService.h"
 ```
 
 ### App-Link Implement Code
@@ -425,7 +486,7 @@ class ViewController: UIViewController {
 }
 ```
 
-Objective-c
+Objective-C
 ```swift
 #import "ViewController.h"
 #import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
@@ -461,6 +522,28 @@ Objective-c
     [self.appLinkService getReferralDetailsWithCompletion:^(NSDictionary<NSString *,id> * linkInfo) {
          //Write the code for handling referral linkInfo
     }];
+}
+```
+
+
+Objective-C++
+```swift
+#import "AppsOnAir-AppLink/AppLinkService.h"
+
+@interface AppDelegate ()
+@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@end
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+
+  self.appLinkServices = [AppLinkServices shared];
+
+  [self.appLinkServices getReferralDetailsWithCompletion:^(NSDictionary * _Nonnull info) {
+     //Write the code for handling referral linkInfo
+  }];
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 ```
 
@@ -617,6 +700,46 @@ willConnectToSession:(UISceneSession *)session
 }
 @end
 
+```
+
+### Objective-C++ Implementation
+
+```swift
+#import "AppsOnAir-AppLink/AppLinkService.h"
+
+@interface AppDelegate ()
+@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  
+  self.appLinkServices = [AppLinkServices shared];
+  
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
+
+  [self.appLinkServices handleAppLinkWithURL:url];
+  
+    return YES;
+}
+
+- (BOOL)application:(UIApplication *)application
+continueUserActivity:(NSUserActivity *)userActivity
+ restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
+
+    if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+        NSURL *url = userActivity.webpageURL;
+        [self.appLinkServices handleAppLinkWithURL:url];
+    }
+    return NO;
+}
 ```
 
 ### Note:
