@@ -28,7 +28,7 @@ public class AppLinkWrapper: NSObject {
     }
     
     /// Get cached referral details (if available)
-    /// - Parameter completion: Returns the referral info dictionary
+    /// - Returns the referral info dictionary
     @objc(getReferralInfoWithCompletion:)
     public class func getReferralInfo(withCompletion completion: @escaping (NSDictionary) -> Void) {
         AppLinkService.shared.getReferralInfo { info in
