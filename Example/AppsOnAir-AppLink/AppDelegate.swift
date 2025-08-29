@@ -9,8 +9,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        appLinkService.initialize { url,linkInfo in
-           // write the code for handling url and link information
+        appLinkService.initialize { url, linkInfo in
+            // write the code for handling flow based on url
+        } onReferralLinkDetected: { referralInfo in
+            // write the code for handling referral flow based on url
         }
         return true
     }

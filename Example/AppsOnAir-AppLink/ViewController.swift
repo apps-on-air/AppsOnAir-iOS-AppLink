@@ -30,7 +30,7 @@ class ViewController: UIViewController {
     @objc func createLinkTapped() {
         
         //Help to get referral information 
-        appLinkService.getReferralDetails { referralLinkInfo in
+        appLinkService.getReferralInfo { referralLinkInfo in
             //Write code for handle referral link information
         }
         
