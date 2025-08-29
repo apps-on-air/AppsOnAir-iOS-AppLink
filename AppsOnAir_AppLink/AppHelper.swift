@@ -93,6 +93,20 @@ internal class AppHelper: NSObject {
         return nil
     }
     
+    //handle for delete data from keychain
+    internal func removeDataFromKeychain(key: String) -> Any {
+           let query: [String: Any] = [
+               kSecClass as String: kSecClassGenericPassword,
+               kSecAttrAccount as String: key
+           ]
+           let status = SecItemDelete(query as CFDictionary)
+           if status == errSecSuccess {
+               return true
+           } else {
+               return false
+           }
+       }
+    
     // MARK: - User Agent Handling
     
     internal func getUserAgent(completion: @escaping (String?) -> Void) {

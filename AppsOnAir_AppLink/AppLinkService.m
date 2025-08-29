@@ -22,16 +22,13 @@
     return instance;
 }
 
-+ (void)initializeWithCompletion:(void (^)(NSURL * _Nullable url, NSDictionary *info))completion {
-    [[AppLinkService shared] initializeWithCompletion:^(NSURL *url, NSDictionary<NSString *,id> *linkInfo) {
-        completion(url, linkInfo);
-    }];
+
+- (void)initializeWithOnDeepLinkProcessed:(nonnull void (^)(NSURL * _Nullable __strong, NSDictionary * _Nonnull __strong))onDeepLinkProcessed onReferralLinkDetected:(nonnull void (^)(NSDictionary * _Nonnull __strong))onReferralLinkDetected{
+    [[AppLinkService shared] initializeOnDeepLinkProcessed:onDeepLinkProcessed onReferralLinkDetected:onReferralLinkDetected];
 }
 
-- (void)initializeWithCompletion:(void (^)(NSURL * _Nullable url, NSDictionary *info))completion {
-    [[AppLinkService shared] initializeWithCompletion:^(NSURL *url, NSDictionary<NSString *,id> *linkInfo) {
-        completion(url, linkInfo);
-    }];
++ (void)initializeWithOnDeepLinkProcessed:(nonnull void (^)(NSURL * _Nullable __strong, NSDictionary * _Nonnull __strong))onDeepLinkProcessed onReferralLinkDetected:(nonnull void (^)(NSDictionary * _Nonnull __strong))onReferralLinkDetected{
+    [[AppLinkService shared] initializeOnDeepLinkProcessed:onDeepLinkProcessed onReferralLinkDetected:onReferralLinkDetected];
 }
 
 + (void)handleAppLinkWithURL:(NSURL *)incomingURL {
@@ -42,16 +39,27 @@
     [[AppLinkService shared] handleAppLinkWithIncomingURL:incomingURL];
 }
 
+
 + (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion {
-    [[AppLinkService shared] getReferralDetailsWithCompletion:^(NSDictionary<NSString *,id> *linkInfo) {
+    // Deprecated — forward to new API
+    [self getReferralInfoWithCompletion:completion];
+}
+
+- (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion {
+    // Deprecated — forward to new API
+    [self getReferralInfoWithCompletion:completion];
+}
+
++ (void)getReferralInfoWithCompletion:(void (^)(NSDictionary *info))completion {
+    [[AppLinkService shared] getReferralInfoWithCompletion:^(NSDictionary<NSString *,id> * _Nonnull linkInfo) {
         completion(linkInfo);
     }];
 }
 
-- (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion {
-   [[AppLinkService shared] getReferralDetailsWithCompletion:^(NSDictionary<NSString *,id> *linkInfo) {
-       completion(linkInfo);
-   }];
+- (void)getReferralInfoWithCompletion:(void (^)(NSDictionary *info))completion {
+    [[AppLinkService shared] getReferralInfoWithCompletion:^(NSDictionary<NSString *,id> * _Nonnull linkInfo) {
+        completion(linkInfo);
+    }];
 }
 
 + (void)createAppLinkWithUrl:(NSString *)url
