@@ -4,10 +4,7 @@ import UIKit
 @objcMembers
 public class AppLinkWrapper: NSObject {
     
-    /// Initialize the SDK and start listening for app links
-    /// - Parameters:
-    ///   - onDeepLinkProcessed: Returns latest URL (if any) and link info payload
-    ///   - onReferralLinkDetected: Returns referral link info dictionary when a referral link is detected
+    /// Set up the SDK and start tracking app links and referral events.
     @objc(initializeWithOnDeepLinkProcessed:onReferralLinkDetected:)
     public class func initialize(
         withOnDeepLinkProcessed onDeepLinkProcessed: @escaping (URL?, NSDictionary) -> Void,
@@ -20,15 +17,13 @@ public class AppLinkWrapper: NSObject {
         })
     }
     
-    /// Handle an incoming app link URL (custom scheme or universal link)
-    /// - Parameter incomingURL: The URL to handle
+    /// Handle incoming URLs, including custom scheme and universal links.
     @objc(handleAppLinkWithURL:)
     public class func handleAppLink(with incomingURL: URL) {
         AppLinkService.shared.handleAppLink(incomingURL: incomingURL)
     }
     
-    /// Get cached referral details (if available)
-    /// - Returns the referral info dictionary
+    /// Get referral details
     @objc(getReferralInfoWithCompletion:)
     public class func getReferralInfo(withCompletion completion: @escaping (NSDictionary) -> Void) {
         AppLinkService.shared.getReferralInfo { info in
@@ -36,7 +31,7 @@ public class AppLinkWrapper: NSObject {
         }
     }
     
-    /// (Deprecated) Get cached referral details (for backward compatibility)
+    /// (Deprecated) Get referral details
     @available(*, deprecated, renamed: "getReferralInfo(withCompletion:)")
     @objc(getReferralDetailsWithCompletion:)
     public class func getReferralDetails(withCompletion completion: @escaping (NSDictionary) -> Void) {
@@ -45,8 +40,7 @@ public class AppLinkWrapper: NSObject {
         }
     }
     
-    /// Create a new dynamic AppLink
-    /// - Parameters mirror Swift API but are Objective-C++ friendly (NSString/NSNumber/NSDictionary)
+    /// Create a new AppLink
     @objc(createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:isOpenInIosApp:iosFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:)
     public class func createAppLink(
         url: String,
@@ -80,8 +74,7 @@ public class AppLinkWrapper: NSObject {
         }
     }
 
-    /// Handle cold-start launch options (custom URL scheme)
-    /// - Parameter launchOptions: UIApplication launch options dictionary
+    /// Handles app launch initiated from a cold start via a custom URL scheme.
     @objc(handleLaunchOptions:)
     public class func handleLaunchOptions(_ launchOptions: NSDictionary) {
         if let options = launchOptions as? [UIApplication.LaunchOptionsKey: Any],
@@ -90,8 +83,7 @@ public class AppLinkWrapper: NSObject {
         }
     }
 
-    /// Continue NSUserActivity for Universal Links (works from killed state)
-    /// - Parameter userActivity: NSUserActivity from application:continueUserActivity:
+    /// Continues an NSUserActivity for Universal Links, including from a killed state.
     @objc(continueUserActivity:)
     public class func continueUserActivity(_ userActivity: NSUserActivity) {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
