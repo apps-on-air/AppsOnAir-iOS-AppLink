@@ -5,12 +5,19 @@ import UIKit
 public class AppLinkWrapper: NSObject {
     
     /// Initialize the SDK and start listening for app links
-    /// - Parameter completion: Returns latest URL (if any) and link info payload
-    @objc(initializeWithCompletion:)
-    public class func initialize(withCompletion completion: @escaping (URL?, NSDictionary) -> Void) {
-        AppLinkService.shared.initialize { url, info in
-            completion(url, info as NSDictionary)
-        }
+    /// - Parameters:
+    ///   - completion: Returns latest URL (if any) and link info payload
+    ///   - onReferralLinkDetected: Returns referral link info dictionary when a referral link is detected
+    @objc(initializeWithOnDeepLinkProcessed:onReferralLinkDetected:)
+    public class func initialize(
+        withOnDeepLinkProcessed onDeepLinkProcessed: @escaping (URL?, NSDictionary) -> Void,
+        onReferralLinkDetected: ((NSDictionary) -> Void)? = nil
+    ) {
+        AppLinkService.shared.initialize(onDeepLinkProcessed: { url, info in
+            onDeepLinkProcessed(url, info as NSDictionary)
+        }, onReferralLinkDetected: { referralInfo in
+            onReferralLinkDetected?(referralInfo as NSDictionary)
+        })
     }
     
     /// Handle an incoming app link URL (custom scheme or universal link)
@@ -22,9 +29,18 @@ public class AppLinkWrapper: NSObject {
     
     /// Get cached referral details (if available)
     /// - Parameter completion: Returns the referral info dictionary
+    @objc(getReferralInfoWithCompletion:)
+    public class func getReferralInfo(withCompletion completion: @escaping (NSDictionary) -> Void) {
+        AppLinkService.shared.getReferralInfo { info in
+            completion(info as NSDictionary)
+        }
+    }
+    
+    /// (Deprecated) Get cached referral details (for backward compatibility)
+    @available(*, deprecated, renamed: "getReferralInfo(withCompletion:)")
     @objc(getReferralDetailsWithCompletion:)
     public class func getReferralDetails(withCompletion completion: @escaping (NSDictionary) -> Void) {
-        AppLinkService.shared.getReferralDetails { info in
+        AppLinkService.shared.getReferralDetails{ info in
             completion(info as NSDictionary)
         }
     }

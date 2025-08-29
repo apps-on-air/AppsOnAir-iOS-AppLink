@@ -2,25 +2,37 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// Pure Objective-C facade for AppsOnAir AppLink.
-/// Safe to include from both .m and .mm files.
-/// Note: Renamed to avoid clashing with Swift-exposed `AppLinkService` in the generated -Swift.h
 @interface AppLinkServices : NSObject
 
-/// Shared singleton facade instance
+/// Shared singleton instance
 + (instancetype)shared;
 
-/// Initialize SDK
-+ (void)initializeWithCompletion:(void (^)(NSURL * _Nullable url, NSDictionary *info))completion;
-- (void)initializeWithCompletion:(void (^)(NSURL * _Nullable url, NSDictionary *info))completion;
+/// Initialize AppLinkServices with deep link and referral link callbacks
+- (void)initializeWithOnDeepLinkProcessed:(void (^)(NSURL * _Nullable url, NSDictionary *info))onDeepLinkProcessed
+                 onReferralLinkDetected:(void (^)(NSDictionary *info))onReferralLinkDetected;
 
-/// Handle incoming link
++ (void)initializeWithOnDeepLinkProcessed:(void (^)(NSURL * _Nullable url, NSDictionary *info))onDeepLinkProcessed
+                  onReferralLinkDetected:(void (^)(NSDictionary *info))onReferralLinkDetected;
+
+/// Handle an incoming App Link URL
 + (void)handleAppLinkWithURL:(NSURL *)incomingURL;
 - (void)handleAppLinkWithURL:(NSURL *)incomingURL; // instance convenience
 
 /// Get referral info
-+ (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion;
-- (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion;
++ (void)getReferralInfoWithCompletion:(void (^)(NSDictionary *info))completion;
+- (void)getReferralInfoWithCompletion:(void (^)(NSDictionary *info))completion;
+
+/// Deprecated: Use `getReferralInfoWithCompletion:` instead
++ (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion
+    __attribute__((deprecated("Use getReferralInfoWithCompletion instead")))
+    __attribute__((swift_name("getReferralInfo(completion:)")));
+
+
+/// Deprecated: Use `getReferralInfoWithCompletion:` instead
+- (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion
+    __attribute__((deprecated("Use getReferralInfoWithCompletion instead")))
+    __attribute__((swift_name("getReferralInfo(completion:)")));
+
 
 /// Create AppLink
 + (void)createAppLinkWithUrl:(NSString *)url

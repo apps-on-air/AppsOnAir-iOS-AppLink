@@ -15,39 +15,61 @@ import AppsOnAir_Core
     //Latest link for Dynamic Link
     @Published var latestLink: URL?
     
+    //Latest link for Referral Link
+    @Published var latestReferralURL: URL?
+    
     // Listener for whenever link is Update
     private var linkListener: AnyCancellable?
+    
+    private var latestReferralInfo: [String: Any]?
+    
+    // Listener for whenever referral link is Update
+    private var referralLinkListener: AnyCancellable?
+    
+    // Manage for API call
+    private let dispatchGroup = DispatchGroup()
     
     deinit {
         // Cancel the listener when the object is deallocated
         linkListener?.cancel()
+        referralLinkListener?.cancel()
     }
     
     //initialize the common services like AppsOnAir-Core and swizzling method and fetch the latest Link
     ///fetch the latest link for universal link and custom URL schema
-    @objc public func initialize(completion: @escaping (URL?,[String:Any]) -> ()) {
+    ///fetch the latest link for referral link and
+    @objc public func initialize( onDeepLinkProcessed: @escaping (URL?, [String: Any]) -> (),
+                                  onReferralLinkDetected: (([String: Any]) -> Void)? = nil) {
         
         //initialize the AppsOnAir-core
         appsOnAirCoreServices.initialize()
         
         // Initialize swizzling
         _  = AppSwizzler.shared
-
+        
         // handle the internet connectivity abd listen for network status changes
         appsOnAirCoreServices.networkStatusListenerHandler { isConnected in
             guard self.linkListener == nil else { return }
             // Listener for link and link info
             self.linkListener = self.$latestLink.sink { [weak self] _ in
                 self?.onAppLinkHandler(isNetworkConnected: isConnected) { url, linkInfo in
-                    completion(url,linkInfo)
+                    onDeepLinkProcessed(url,linkInfo)
                 }
             }
+            self.referralLinkListener = self.$latestReferralURL
+                .dropFirst()
+                .sink { _ in
+                    self.referralHandler(isCompletionCall: true) { referralInfoFromKeyChain in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                            onReferralLinkDetected?(referralInfoFromKeyChain)
+                        }
+                    }
+                }
         }
         
         // help to referral handling
-        referralHandler()
+        referralHandler(isAPICall: true)
     }
-    
     
     ///handling when appLink is listen
     private func onAppLinkHandler(isNetworkConnected:Bool,completion: @escaping (URL?,[String:Any]) -> ()){
@@ -103,22 +125,27 @@ import AppsOnAir_Core
         }
     }
     
-    private func referralHandler(){
-        // Retrieve stored data from the device keychain
+    private func referralHandler(isAPICall:Bool = false,isCompletionCall:Bool = false,completion: (([String: Any]) -> Void)? = nil){
         let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
-        
+        // Retrieve stored data from the device keychain
         // If referral data is missing or the app was reinstalled, retrieve it from the server
-        if((referralInfoFromKeyChain?.isEmpty ?? false) || AppHelper.shared.isAppFirstOpen){
-            
+        if(((referralInfoFromKeyChain?.isEmpty ?? false) || AppHelper.shared.isAppFirstOpen) && isAPICall){
+            dispatchGroup.enter()
             AppLinkApiService.apiReferralInfo { referralLinkInfo in
-
+                let _ = self.appHelper.removeDataFromKeychain(key: referralData)
+                
+                self.latestReferralInfo = referralLinkInfo
+                
+                self.appHelper.saveToKeychain(key: referralData, value: referralLinkInfo)
+                
                 // Check referral API response
                 if let referralStatus = referralLinkInfo["status"] as? String,
                    referralStatus == "SUCCESS",
                    let referralInfo = referralLinkInfo["data"] as? [String: Any],
                    let referralLink = referralInfo["referralLink"] as? String,
                    let shortId = referralInfo["shortId"] as? String,
-                   let domain = URL(string: referralLink)?.host {
+                   let referralURL = URL(string: referralLink),
+                   let domain = referralURL.host {
                     
                     // Call analytics of referral result
                     AppLinkApiService.apiLinkAnalytics(
@@ -132,17 +159,52 @@ import AppsOnAir_Core
                            analyticsStatus == "SUCCESS" {
                             DispatchQueue.main.async {
                                 AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
-                                self.appHelper.saveToKeychain(key: referralData, value: referralLinkInfo)
+                                self.latestReferralURL = referralURL
+                                // Only set referralLink and call completion once here
+                                Logger.logInternal("Referral SuccessFully")
+                                if let referralLink = self.latestReferralURL,
+                                   let linkInfo = self.latestReferralInfo {
+                                    Logger.logInternal("Referral: \(referralLink), info: \(linkInfo)")
+                                    self.dispatchGroup.leave()
+                                }
                             }
+                        }else{
+                            self.errorReferralHandler()
                         }
                     }
+                }else{
+                    self.errorReferralHandler()
                 }
+            }
+        }
+        dispatchGroup.notify(queue: .main) {
+            if(isCompletionCall){
+                completion?(self.latestReferralInfo ?? [:])
             }
         }
     }
     
+    /// handle for handling error
+    private func errorReferralHandler(){
+        self.latestReferralURL = URL(string: "")
+        self.dispatchGroup.leave()
+    }
+    
+    @objc public func getReferralInfo(completion: @escaping ([String:Any]) -> ()) {
+        dispatchGroup.notify(queue: .main) {
+            if(!((self.latestReferralInfo ?? [:]).isEmpty)){
+                completion(self.latestReferralInfo ?? [:])
+                return
+            }
+            let referralInfoFromKeyChain = self.appHelper.readFromKeychain(key: referralData)
+            completion(referralInfoFromKeyChain ?? [:])
+        }
+    }
+    
     ///help to handle the get link for referral info
+    @available(*, deprecated, renamed: "getReferralInfo")
     @objc public func getReferralDetails(completion: @escaping ([String:Any]) -> ()) {
+        // Retrieve stored data from the device keychain
         let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
         completion(referralInfoFromKeyChain ?? [:])
     }
@@ -185,7 +247,7 @@ import AppsOnAir_Core
         let isOpenInIosAppNumber: Bool? = isOpenInIosApp?.boolValue
         let isOpenInAndroidAppNumber: Bool? = isOpenInAndroidApp?.boolValue
         let isOpenInBrowserAndroidNumber: Bool? = isOpenInBrowserAndroid?.boolValue
-
+        
         // Call the Swift-native function
         self.createAppLink(
             url: url,
@@ -240,13 +302,13 @@ import AppsOnAir_Core
                     "androidFallbackUrl": androidFallbackUrl ?? "",
                     "imageUrl": (socialMeta?["imageUrl"] as? String) ?? ""
                 ]
-
+                
                 // Validate URLs
                 if let invalidField = urls.first(where: { !$0.value.trimmed.isEmpty && !$0.value.isValidHttpUrl }) {
                     completion([errorStr: "\(errorURLInvalid) in \(invalidField.key) field!"])
                     return
                 }
-
+                
                 // Construct cleaned social meta dictionary
                 let socialMetaData: [String: Any] = (socialMeta ?? [:]).isEmpty ? [:] :  [
                     "title": socialMeta?["title"] ?? NSNull(),
