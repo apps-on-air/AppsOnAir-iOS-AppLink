@@ -6,7 +6,7 @@ public class AppLinkWrapper: NSObject {
     
     /// Initialize the SDK and start listening for app links
     /// - Parameters:
-    ///   - completion: Returns latest URL (if any) and link info payload
+    ///   - onDeepLinkProcessed: Returns latest URL (if any) and link info payload
     ///   - onReferralLinkDetected: Returns referral link info dictionary when a referral link is detected
     @objc(initializeWithOnDeepLinkProcessed:onReferralLinkDetected:)
     public class func initialize(
