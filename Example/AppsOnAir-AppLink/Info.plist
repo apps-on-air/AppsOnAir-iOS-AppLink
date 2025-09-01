@@ -4,7 +4,7 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
-    <key>AppsOnAirAPIKey</key>
+    <key>AppsonairAppId</key>
     <string>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
