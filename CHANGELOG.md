@@ -1,3 +1,7 @@
+## 1.3.0
+
+* Upgrade dependency
+
 ## 1.2.0
 
 * `getReferralDetails()` method is now deprecated use `getReferralInfo()` instead.
