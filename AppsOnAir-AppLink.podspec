@@ -20,7 +20,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '13.0'
   
   # AppsOnAir Core pod
-  s.dependency 'AppsOnAir-Core', '0.0.6'
+  s.dependency 'AppsOnAir-Core', '1.1.0'
 
   s.source_files = 'AppsOnAir_AppLink/**/*'
   
