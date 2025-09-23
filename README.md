@@ -1,4 +1,4 @@
-## [![pub package](https://appsonair.com/images/logo.svg)](https://cocoapods.org/pods/AppsOnAir-AppRemark)
+## [![pub package](https://appsonair.com/images/logo.svg)](https://cocoapods.org/pods/AppsOnAir-AppLink)
 # AppsOnAir-AppLink
 
 [![CI Status](https://img.shields.io/travis/164989979/AppsOnAir-AppLink.svg?style=flat)](https://travis-ci.org/164989979/AppsOnAir-AppLink)
