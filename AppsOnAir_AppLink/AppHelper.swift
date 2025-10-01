@@ -35,6 +35,17 @@ internal class AppHelper: NSObject {
     
     // MARK: - App Lifecycle
     
+    /// handle to get String from clipboard
+     internal func readClipBoard() -> String? {
+         if let string = UIPasteboard.general.string {
+             Logger.logInternal("📋 Last clipboard string: \(string)")
+             return string
+         } else {
+             Logger.logInternal("📋 Clipboard is empty or has no string")
+             return nil
+         }
+     }
+
     /// Handles app launch states (first open, reopen, install)
     internal func handleAppLaunch() {
         isUserReferral = userDefaults.bool(forKey: isReferralKey)
