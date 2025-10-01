@@ -5,6 +5,11 @@ import AppsOnAir_Core
 internal class AppLinkApiService {
     static let appHelper = AppLinkService.shared.appHelper
     
+    private static let networkSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        return URLSession(configuration: config)
+    }()
+    
     
     private static func getURLFromString(urlString: String) -> URL{
         if #available(iOS 16.0, *) {
@@ -89,8 +94,7 @@ internal class AppLinkApiService {
         let httpBody = try? JSONSerialization.data(withJSONObject: apiShortLinkPassData, options: [])
         request.httpBody = httpBody
         
-        URLSession.shared.dataTask(with: request) { responseData, response, error in
-            
+        networkSession.dataTask(with: request) { responseData, response, error in
             Logger.logInternal("\(String(describing: url)) = \(generateShortLink)")
             
             let httpResponse = response as? HTTPURLResponse
@@ -120,7 +124,7 @@ internal class AppLinkApiService {
     }
     
     /// API for fetch referral link
-    @objc internal static func apiReferralInfo(completion: @escaping ([String:Any]) -> Void) {
+    @objc internal static func apiReferralInfo(appLinParams: [String:Any] = [:], isEnableAdvancedDeferredLink:Bool = false,completion: @escaping ([String:Any]) -> Void) {
         if(appsOnAirCoreServices.appId.isEmpty){
             Logger.logInfo(errorAppIdMissing, prefix: appsOnAirLink)
             completion([errorStr: errorAppIdMissing])
@@ -128,9 +132,9 @@ internal class AppLinkApiService {
         }
         
         // server URL from EnvironmentConfig
-        let generateReferralLink = self.getURLFromString(urlString: EnvironmentConfig.getReferral)
+        let getReferralLink = self.getURLFromString(urlString: EnvironmentConfig.getReferral)
         
-        var request = URLRequest(url: generateReferralLink)
+        var request = URLRequest(url: getReferralLink)
         
         appHelper.getUserAgent { linkUserAgent in
             request.httpMethod = "GET"
@@ -139,9 +143,15 @@ internal class AppLinkApiService {
             request.setValue("application/json", forHTTPHeaderField: contentType)
             request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: xApplicationId)
             
-            URLSession.shared.dataTask(with: request) { responseData, response, error in
+            if(isEnableAdvancedDeferredLink){
+                request.httpMethod = "POST"
+                let httpBody = try? JSONSerialization.data(withJSONObject: appLinParams, options: [])
+                request.httpBody = httpBody
+            }
+            
+            networkSession.dataTask(with: request) { responseData, response, error in
                 
-                Logger.logInternal("\(String(describing: url)) = \(generateReferralLink)")
+                Logger.logInternal("\(String(describing: url)) = \(getReferralLink)")
                 
                 let httpResponse = response as? HTTPURLResponse
                 
@@ -202,8 +212,7 @@ internal class AppLinkApiService {
         let httpBody = try? JSONSerialization.data(withJSONObject: apiShortLinkPassData, options: [])
         request.httpBody = httpBody
         
-        URLSession.shared.dataTask(with: request) { responseData, response, error in
-            
+        networkSession.dataTask(with: request) { responseData, response, error in
             Logger.logInternal("\(String(describing: url)) = \(generateShortLink)")
             
             let httpResponse = response as? HTTPURLResponse
@@ -256,7 +265,7 @@ internal class AppLinkApiService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: "x-application-key")
         
-        URLSession.shared.dataTask(with: request) { responseData, response, error in
+        networkSession.dataTask(with: request) { responseData, response, error in
             Logger.logInternal("\(String(describing: url)) = \(linkURL)")
             
             guard let httpResponse = response as? HTTPURLResponse else {

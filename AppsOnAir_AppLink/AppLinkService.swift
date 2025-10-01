@@ -125,55 +125,153 @@ import AppsOnAir_Core
         }
     }
     
+    private func getAppLinkDataFromClipboard(completion: @escaping (String?) -> Void) {
+        DispatchQueue.main.async {
+            // Check feature flag
+            guard (Bundle.main.infoDictionary?[EnableAdvancedDeferredLinkKey] as? Bool) == true else {
+                Logger.logInternal("⚠️ \(enableAdvancedDeferredLinkDisabled)")
+                completion(nil)
+                return
+            }
+            
+            // Validate bundle identifier
+            guard let bundleId = Bundle.main.bundleIdentifier, !bundleId.isEmpty else {
+                Logger.logInternal("❌ \(invalidBundleIdentifier)")
+                completion(nil)
+                return
+            }
+            
+            // Build key and read clipboard
+            let appsonairKey = "appsonair_\(self.appsOnAirCoreServices.appId)_\(bundleId)_referral="
+            guard let clipboard = self.appHelper.readClipBoard() else {
+                Logger.logInternal("❌ \(clipboardEmpty)")
+                completion(nil)
+                return
+            }
+            
+            // Extract value if key exists
+            guard let range = clipboard.range(of: appsonairKey), clipboard.contains(bundleId) else {
+                Logger.logInternal("❌ '\(appsonairKey)' \(notFoundBundle)")
+                completion(nil)
+                return
+            }
+            
+            // Get the value from clipboard
+            let clipBoardDataFromKey = String(clipboard[range.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            UIPasteboard.general.string = ""
+            Logger.logInternal("✅ \(foundAppsOnAirKey): \(clipBoardDataFromKey)")
+            completion(clipBoardDataFromKey)
+        }
+    }
+
     private func referralHandler(isAPICall:Bool = false,isCompletionCall:Bool = false,completion: (([String: Any]) -> Void)? = nil){
         let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
         // Retrieve stored data from the device keychain
         // If referral data is missing or the app was reinstalled, retrieve it from the server
         if(((referralInfoFromKeyChain?.isEmpty ?? false) || AppHelper.shared.isAppFirstOpen) && isAPICall){
             dispatchGroup.enter()
-            AppLinkApiService.apiReferralInfo { referralLinkInfo in
-                let _ = self.appHelper.removeDataFromKeychain(key: referralData)
-                
-                self.latestReferralInfo = referralLinkInfo
-                
-                self.appHelper.saveToKeychain(key: referralData, value: referralLinkInfo)
-                
-                // Check referral API response
-                if let referralStatus = referralLinkInfo["status"] as? String,
-                   referralStatus == "SUCCESS",
-                   let referralInfo = referralLinkInfo["data"] as? [String: Any],
-                   let referralLink = referralInfo["referralLink"] as? String,
-                   let shortId = referralInfo["shortId"] as? String,
-                   let referralURL = URL(string: referralLink),
-                   let domain = referralURL.host {
+            self.getAppLinkDataFromClipboard { appLinkInfo in
+                if let appLinkInfo = appLinkInfo, !appLinkInfo.isEmpty,
+                   let url = URL(string: appLinkInfo) {
+                    Logger.logInternal("Clipboard called")
                     
-                    // Call analytics of referral result
-                    AppLinkApiService.apiLinkAnalytics(
-                        isClicked: false,
-                        urlPrefix: domain,
-                        shortId: shortId,
-                        isInstalled: true,
-                        isFirstOpen: true
-                    ) { analyticsInfo in
-                        if let analyticsStatus = analyticsInfo["status"] as? String,
-                           analyticsStatus == "SUCCESS" {
-                            DispatchQueue.main.async {
-                                AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
-                                self.latestReferralURL = referralURL
-                                // Only set referralLink and call completion once here
-                                Logger.logInternal("Referral SuccessFully")
-                                if let referralLink = self.latestReferralURL,
-                                   let linkInfo = self.latestReferralInfo {
-                                    Logger.logInternal("Referral: \(referralLink), info: \(linkInfo)")
-                                    self.dispatchGroup.leave()
+                    let domain = url.host ?? ""
+                    let shortId = url.pathComponents.dropFirst().first ?? ""
+                    
+                    Logger.logInternal("Domain: \(domain)")
+                    Logger.logInternal("Short ID: \(shortId)")
+                    
+                    var appLinkReferralLinkParams: [String: Any] = [:]
+                    if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                       let hashKey = components.queryItems?.first(where: { $0.name == "hash_key" })?.value {
+                        Logger.logInternal("Hash Key: \(hashKey)")
+                        appLinkReferralLinkParams["data"] = ["hashKey": hashKey]
+                    }
+                    
+                    AppLinkApiService.apiReferralInfo(appLinParams: appLinkReferralLinkParams,
+                                                      isEnableAdvancedDeferredLink: true) { linkInfo in
+                        let _ = self.appHelper.removeDataFromKeychain(key: referralData)
+                        
+                        self.latestReferralInfo = linkInfo
+                        
+                        self.appHelper.saveToKeychain(key: referralData, value: linkInfo)
+                        
+                        self.latestReferralInfo = linkInfo
+                        self.latestReferralURL = url
+                        
+                        if let referralStatus = linkInfo["status"] as? String, referralStatus == "SUCCESS" {
+                            AppLinkApiService.apiLinkAnalytics(
+                                isClicked: false,
+                                urlPrefix: domain,
+                                shortId: shortId,
+                                isInstalled: true,
+                                isFirstOpen: true
+                            ) { analyticsInfo in
+                                if let analyticsStatus = analyticsInfo["status"] as? String,
+                                   analyticsStatus == "SUCCESS" {
+                                    AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
+                                    Logger.logInternal("Referral SuccessFully")
+                                    if let referralLink = self.latestReferralURL,
+                                       let linkInfo = self.latestReferralInfo {
+                                        Logger.logInternal("Referral: \(referralLink), info: \(linkInfo)")
+                                        self.dispatchGroup.leave()
+                                    }
+                                } else {
+                                    self.errorReferralHandler()
+                                }
+                            }
+                        } else {
+                            self.errorReferralHandler()
+                        }
+                    }
+                }
+                else{
+                    Logger.logInternal("API called")
+                    AppLinkApiService.apiReferralInfo { referralLinkInfo in
+                        let _ = self.appHelper.removeDataFromKeychain(key: referralData)
+                        
+                        self.latestReferralInfo = referralLinkInfo
+                        
+                        self.appHelper.saveToKeychain(key: referralData, value: referralLinkInfo)
+                        
+                        // Check referral API response
+                        if let referralStatus = referralLinkInfo["status"] as? String,
+                           referralStatus == "SUCCESS",
+                           let referralInfo = referralLinkInfo["data"] as? [String: Any],
+                           let referralLink = referralInfo["referralLink"] as? String,
+                           let shortId = referralInfo["shortId"] as? String,
+                           let referralURL = URL(string: referralLink),
+                           let domain = referralURL.host {
+                            
+                            // Call analytics of referral result
+                            AppLinkApiService.apiLinkAnalytics(
+                                isClicked: false,
+                                urlPrefix: domain,
+                                shortId: shortId,
+                                isInstalled: true,
+                                isFirstOpen: true
+                            ) { analyticsInfo in
+                                if let analyticsStatus = analyticsInfo["status"] as? String,
+                                   analyticsStatus == "SUCCESS" {
+                                    DispatchQueue.main.async {
+                                        AppHelper.shared.userDefaults.set(true, forKey: isReferralKey)
+                                        self.latestReferralURL = referralURL
+                                        // Only set referralLink and call completion once here
+                                        Logger.logInternal(referralSuccessFully)
+                                        if let referralLink = self.latestReferralURL,
+                                           let linkInfo = self.latestReferralInfo {
+                                            Logger.logInternal("Referral: \(referralLink), info: \(linkInfo)")
+                                            self.dispatchGroup.leave()
+                                        }
+                                    }
+                                }else{
+                                    self.errorReferralHandler()
                                 }
                             }
                         }else{
                             self.errorReferralHandler()
                         }
                     }
-                }else{
-                    self.errorReferralHandler()
                 }
             }
         }

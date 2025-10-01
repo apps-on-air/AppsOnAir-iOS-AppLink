@@ -40,12 +40,18 @@ Minimum deployment target: 13.0
 
 ## USAGE 
 
-#### Add APIKey in your app info.plist file.
+#### Enable the Advanced Deferred AppLink feature in your iOS app by adding the EnableAdvancedDeferredLink Boolean flag to your Info.plist file.
+```xml
+<key>EnableAdvancedDeferredLink</key>
+<true/>
+```
+
+#### Add AppsonairAppId in your app info.plist file.
 ```xml
 <key>AppsonairAppId</key>
 <string>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</string>
 ```
-how to get APIKey for more details check this [URL](https://documentation.appsonair.com/MobileQuickstart/GettingStarted/)
+how to get AppsonairAppId for more details check this [URL](https://documentation.appsonair.com/MobileQuickstart/GettingStarted/)
 
 #### Add `YOUR_PROJECT.entitlements` file and add below code file for Add Associated Domain
 
