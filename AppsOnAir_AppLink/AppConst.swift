@@ -13,6 +13,18 @@ let errorSomeThingWrong = "Something went wrong please try again!"
 
 let errorStr = "error"
 
+let referralSuccessFully = "Referral SuccessFully"
+
+let clipboardEmpty = "Clipboard is empty"
+
+let invalidBundleIdentifier  = "Invalid bundle identifier"
+
+let enableAdvancedDeferredLinkDisabled = "EnableAdvancedDeferredLink is disabled/does not exist in Info.plist"
+
+let notFoundBundle = "not found or missing bundle identifier"
+
+let foundAppsOnAirKey = "Found value containing appsonairKey"
+
 let errorUserAgent = "getUserAgentError"
 
 let errorFailedSaveKey = "Failed to save key"
@@ -46,3 +58,5 @@ let xApplicationId = "x-application-key"
 let isFirstOpenKey = "isFirstOpen"
 
 let isReferralKey = "isUserReferral"
+
+let EnableAdvancedDeferredLinkKey = "EnableAdvancedDeferredLink"
