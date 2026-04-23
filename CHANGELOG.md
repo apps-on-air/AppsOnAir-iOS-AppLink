@@ -1,3 +1,7 @@
+## 1.4.0
+
+* Added support for Swift Package Manager (SPM).
+
 ## 1.3.2
 
 * Referral tracking enhancement.

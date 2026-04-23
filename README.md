@@ -22,11 +22,61 @@
 
 ## Installation
 
-AppsOnAir-AppLink is available through [CocoaPods](https://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+AppsOnAir-AppLink supports installation via [CocoaPods](https://cocoapods.org) and [Swift Package Manager](https://swift.org/package-manager/).
+
+### CocoaPods
+
+To install via CocoaPods, simply add the following line to your Podfile:
 
 ```ruby
 pod 'AppsOnAir-AppLink'
+```
+
+Then run:
+
+```bash
+pod install
+```
+
+### Swift Package Manager
+
+You can add AppsOnAir-AppLink to your project using Swift Package Manager in one of the following ways:
+
+#### Using Xcode
+
+1. Open your project in Xcode.
+2. Go to **File → Add Package Dependencies...**
+3. Enter the package URL:
+
+    ```
+    https://github.com/apps-on-air/AppsOnAir-iOS-AppLink.git
+    ```
+
+4. Select the version rule (e.g., **Up to Next Major Version**) and click **Add Package**.
+5. Choose the `AppsOnAir-AppLink` library and add it to your target.
+
+#### Using Package.swift
+
+If you are integrating AppsOnAir-AppLink into another Swift package, add it to the `dependencies` array in your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(
+        url: "https://github.com/apps-on-air/AppsOnAir-iOS-AppLink.git",
+        from: "1.4.0"
+    )
+]
+```
+
+Then add `AppsOnAir-AppLink` to the dependencies of the targets that need it:
+
+```swift
+.target(
+    name: "YourTarget",
+    dependencies: [
+        .product(name: "AppsOnAir-AppLink", package: "AppsOnAir-iOS-AppLink")
+    ]
+)
 ```
 
 ## Example
