@@ -63,7 +63,7 @@ If you are integrating AppsOnAir-AppLink into another Swift package, add it to t
 dependencies: [
     .package(
         url: "https://github.com/apps-on-air/AppsOnAir-iOS-AppLink.git",
-        from: "1.4.0"
+        from: "1.4.1"
     )
 ]
 ```
