@@ -1,3 +1,7 @@
+## 1.4.1
+
+* Minor fixes and improvements
+
 ## 1.4.0
 
 * Added support for Swift Package Manager (SPM).

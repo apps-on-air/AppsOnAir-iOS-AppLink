@@ -116,6 +116,10 @@ import Combine
                         // Get last path component as link ID
                         let linkId = resolvedAppLink?.lastPathComponent ?? ""
 
+                        if !self.isValidShortId(linkId) {
+                            completion(self.latestLink, [:])
+                            return
+                        }
                         // Always fetch link info after optional count tracking
                         let fetchLinkInfo = {
                             if isUniversalLink {
@@ -187,6 +191,17 @@ import Combine
             }
         }
 
+        func isValidShortId(_ linkId: String) -> Bool {
+            guard !linkId.isEmpty,
+                  (linkId.split(separator: "/")
+                    .last != nil)
+            else {
+                Logger.logInternal(errorShortIdMissing)
+                return false
+            }
+            return true
+        }
+
         private func referralHandler(
             isAPICall: Bool = false, isCompletionCall: Bool = false,
             completion: (([String: Any]) -> Void)? = nil
@@ -209,7 +224,10 @@ import Combine
 
                         Logger.logInternal("Domain: \(domain)")
                         Logger.logInternal("Short ID: \(shortId)")
-
+                        if !self.isValidShortId(shortId) {
+                            self.dispatchGroup.leave()
+                            return
+                        }
                         var appLinkReferralLinkParams: [String: Any] = [:]
                         if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
                             let hashKey = components.queryItems?.first(where: {
@@ -249,7 +267,6 @@ import Combine
                                     {
                                         AppHelper.shared.userDefaults.set(
                                             true, forKey: isReferralKey)
-                                        Logger.logInternal("Referral SuccessFully")
                                         if let referralLink = self.latestReferralURL,
                                             let linkInfo = self.latestReferralInfo
                                         {

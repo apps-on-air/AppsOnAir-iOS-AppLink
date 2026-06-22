@@ -30,6 +30,8 @@ let errorFailedSaveKey = "Failed to save key"
 
 let errorAppIdMissing = "App id missing!"
 
+let errorShortIdMissing = "Short id missing!"
+
 let errorFailedToLoad = "Failed to load:"
 
 let errorNetwork = "Please check internet connection!"
