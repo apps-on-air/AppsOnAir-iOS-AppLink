@@ -388,6 +388,7 @@ import Combine
         ///   - isOpenInAndroidApp: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open directly in the Android app.
         ///   - isOpenInBrowserAndroid: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open in a browser on Android.
         ///   - androidFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on Android.
+        ///   - appsFlyer: *(Optional)* Dictionary containing AppsFlyer attribution params (e.g., channel, campaignId, campaign, subs, metaTitle, metaDescription).
         ///   - completion: A closure that returns a dictionary containing the result of the link creation.
         @objc public func createAppLink(
             url: String,
@@ -401,6 +402,7 @@ import Combine
             isOpenInAndroidApp: NSNumber?,
             isOpenInBrowserAndroid: NSNumber?,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
             completion: @escaping ([String: Any]) -> Void
         ) {
             // Convert NSNumber? to Bool? for Swift compatibility
@@ -422,6 +424,7 @@ import Combine
                 isOpenInAndroidApp: isOpenInAndroidAppNumber,
                 isOpenInBrowserAndroid: isOpenInBrowserAndroidNumber,
                 androidFallbackUrl: androidFallbackUrl,
+                appsFlyer: appsFlyer,
                 completion: completion
             )
         }
@@ -438,6 +441,7 @@ import Combine
         ///   - isOpenInAndroidApp: `Bool` indicating whether the link should open directly in the Android app.
         ///   - isOpenInBrowserAndroid: `Bool` indicating whether the link should open in a browser on Android.
         ///   - androidFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on Android.
+        ///   - appsFlyer: *(Optional)* Dictionary containing AppsFlyer attribution params (e.g., channel, campaignId, campaign, subs, metaTitle, metaDescription).
         ///   - completion: A closure that returns a dictionary containing the result of the link creation.
         public func createAppLink(
             url: String,
@@ -451,6 +455,7 @@ import Combine
             isOpenInAndroidApp: Bool? = nil,
             isOpenInBrowserAndroid: Bool? = nil,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
             completion: @escaping ([String: Any]) -> Void
         ) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
@@ -488,7 +493,8 @@ import Combine
                         isOpenInIosApp: isOpenInIosApp, iosFallbackUrl: iosFallbackUrl,
                         isOpenInAndroidApp: isOpenInAndroidApp,
                         isOpenInBrowserAndroid: isOpenInBrowserAndroid,
-                        androidFallbackUrl: androidFallbackUrl
+                        androidFallbackUrl: androidFallbackUrl,
+                        appsFlyer: appsFlyer
                     ) { shortLinkData in
                         completion(shortLinkData)
                     }

@@ -53,7 +53,7 @@ import Foundation
         @objc(
             createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:
             isOpenInIosApp:
-            iosFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:
+            iosFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:appsFlyer:completion:
         )
         public class func createAppLink(
             url: String,
@@ -67,6 +67,7 @@ import Foundation
             isOpenInAndroidApp: NSNumber? = nil,
             isOpenInBrowserAndroid: NSNumber? = nil,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
             completion: @escaping (NSDictionary) -> Void
         ) {
             let socialMetaSwift = socialMeta as? [String: Any]
@@ -81,7 +82,8 @@ import Foundation
                 iosFallbackUrl: iosFallbackUrl,
                 isOpenInAndroidApp: isOpenInAndroidApp,
                 isOpenInBrowserAndroid: isOpenInBrowserAndroid,
-                androidFallbackUrl: androidFallbackUrl
+                androidFallbackUrl: androidFallbackUrl,
+                appsFlyer: appsFlyer
             ) { result in
                 completion(result as NSDictionary)
             }

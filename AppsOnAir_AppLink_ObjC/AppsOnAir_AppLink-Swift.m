@@ -19,6 +19,7 @@
           isOpenInAndroidApp:(nullable NSNumber *)isOpenInAndroidApp
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
+                   appsFlyer:(nullable NSDictionary *)appsFlyer
                   completion:(void (^)(NSDictionary *))completion;
 + (void)handleLaunchOptions:(NSDictionary *)launchOptions;
 + (void)continueUserActivity:(NSUserActivity *)userActivity;
@@ -86,6 +87,7 @@
           isOpenInAndroidApp:(nullable NSNumber *)isOpenInAndroidApp
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
+                   appsFlyer:(nullable NSDictionary *)appsFlyer
                   completion:(void (^)(NSDictionary *))completion {
   [AppLinkWrapper createAppLinkWithUrl:url
                                   name:name
@@ -98,6 +100,7 @@
                     isOpenInAndroidApp:isOpenInAndroidApp
                 isOpenInBrowserAndroid:isOpenInBrowserAndroid
                     androidFallbackUrl:androidFallbackUrl
+                             appsFlyer:appsFlyer
                             completion:completion];
 }
 
@@ -112,6 +115,7 @@
           isOpenInAndroidApp:(nullable NSNumber *)isOpenInAndroidApp
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
+                   appsFlyer:(nullable NSDictionary *)appsFlyer
                   completion:(void (^)(NSDictionary *))completion {
   [AppLinkService createAppLinkWithUrl:url
                                   name:name
@@ -124,6 +128,7 @@
                     isOpenInAndroidApp:isOpenInAndroidApp
                 isOpenInBrowserAndroid:isOpenInBrowserAndroid
                     androidFallbackUrl:androidFallbackUrl
+                             appsFlyer:appsFlyer
                             completion:completion];
 }
 

@@ -39,6 +39,7 @@ import Foundation
             isOpenInAndroidApp: Bool? = nil,
             isOpenInBrowserAndroid: Bool? = nil,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
             completion: @escaping ([String: Any]) -> Void
         ) {
 
@@ -84,6 +85,11 @@ import Foundation
             shortLinkData["isOpenInAndroidApp"] = isOpenInAndroidApp
             if let customUrlForAndroid = androidFallbackUrl {
                 shortLinkData["customUrlForAndroid"] = customUrlForAndroid
+            }
+
+            //AppsFlyer attribution params
+            if let appsFlyer = appsFlyer, !appsFlyer.isEmpty {
+                shortLinkData["appsFlyer"] = appsFlyer
             }
 
             let apiShortLinkPassData: [String: Any] = [

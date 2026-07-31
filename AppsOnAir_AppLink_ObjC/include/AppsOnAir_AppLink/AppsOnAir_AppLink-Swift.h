@@ -37,6 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
           isOpenInAndroidApp:(nullable NSNumber *)isOpenInAndroidApp
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
+                   appsFlyer:(nullable NSDictionary *)appsFlyer
                   completion:(void (^)(NSDictionary *result))completion;
 
 /// Handles app launch initiated from a cold start via a custom URL scheme.

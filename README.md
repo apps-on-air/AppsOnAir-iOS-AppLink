@@ -299,6 +299,19 @@ Objective-C++
 #import "AppsOnAir-AppLink/AppLinkService.h"
 ```
 
+### `appsFlyer` Parameters
+
+*(Optional)* Pass this dictionary to `createAppLink` to attach AppsFlyer attribution data to the generated link.
+
+| Key | Type | Required | Description |
+|---|---|---|---|
+| `channel` | String | Optional | The media source / channel driving traffic to this link (e.g. `"appsonair"`). |
+| `campaignId` | String | Optional | Unique identifier for the marketing campaign. |
+| `campaign` | String | Optional | Human-readable name of the marketing campaign. |
+| `subs` | [String] | Optional | Sub-parameters for granular tracking (e.g. `["sub1", "sub2", "sub3", "sub4", "sub5"]`). |
+| `metaTitle` | String | Optional | Title used for attribution metadata. |
+| `metaDescription` | String | Optional | Description used for attribution metadata. |
+
 ### App-Link Implement Code
 
 Swift UI
@@ -324,6 +337,14 @@ struct ContentView: View {
                     isOpenInBrowserApple: false,
                     isOpenInIosApp: true,
                     iosFallbackUrl: "https://appstore.com",
+                    appsFlyer: [ // Optional: AppsFlyer attribution params
+                        "channel": "appsonair",
+                        "campaignId": "01",
+                        "campaign": "test",
+                        "subs": ["sub1", "sub2", "sub3", "sub4", "sub5"],
+                        "metaTitle": "metaTitle",
+                        "metaDescription": "metaDescription"
+                    ]
                 ) { linkInfo in
                      //Write the code for handling create link
                 }
@@ -374,7 +395,7 @@ class ViewController: UIViewController {
                // Help to create the link
                // <urlPrefix> shouldn't contain http or https
                // <shortId>  If not set, it will be auto-generated
-               AppLinkService.shared.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com"
+               AppLinkService.shared.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com",appsFlyer: ["channel": "appsonair","campaignId": "01","campaign": "test","subs": ["sub1", "sub2", "sub3", "sub4", "sub5"],"metaTitle": "metaTitle","metaDescription": "metaDescription"]
         ) { linkInfo  in
                     //Write the code for handling create link
                 }
@@ -424,7 +445,7 @@ Objective-C
      // Help to create link
      // <urlPrefix> shouldn't contain http or https
      // <shortId>  If not set, it will be auto-generated
-    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com"completion:^(NSDictionary<NSString *,id> * linkInfo) {
+    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com"appsFlyer:@{@"channel":@"appsonair",@"campaignId":@"01",@"campaign":@"test",@"subs":@[@"sub1",@"sub2",@"sub3",@"sub4",@"sub5"],@"metaTitle":@"metaTitle",@"metaDescription":@"metaDescription"} completion:^(NSDictionary<NSString *,id> * linkInfo) {
         //Write the code for handling create link
     }];
 }
@@ -446,7 +467,7 @@ Objective-C++
 
   self.appLinkServices = [AppLinkServices shared];
 
-  [self.appLinkServices createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID" socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com" completion:^(NSDictionary<NSString*,id> * linkInfo) {
+  [self.appLinkServices createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID" socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com" appsFlyer:@{@"channel":@"appsonair",@"campaignId":@"01",@"campaign":@"test",@"subs":@[@"sub1",@"sub2",@"sub3",@"sub4",@"sub5"],@"metaTitle":@"metaTitle",@"metaDescription":@"metaDescription"} completion:^(NSDictionary<NSString*,id> * linkInfo) {
     //Write the code for handling create link
     }];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
