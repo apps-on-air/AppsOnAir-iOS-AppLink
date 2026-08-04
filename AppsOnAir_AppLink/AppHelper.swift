@@ -23,6 +23,14 @@ import Foundation
         internal var isAppFirstOpen: Bool = false
         internal var isUserReferral: Bool = false
 
+        /// `false` this session by default; flips to `true` only starting the next launch after a successful referral fetch.
+        internal var isConsumed: Bool = false
+
+        /// Device's first install time, computed fresh on every access (not cached).
+        internal var firstInstallTime: String {
+            getAppInstallationDate()
+        }
+
         // MARK: - Use Get User Agent
         /// A WKWebView instance used to retrieve the user agent.
 
@@ -58,6 +66,48 @@ import Foundation
             if isAppFirstOpen {
                 userDefaults.set(true, forKey: isFirstOpenKey)
             }
+
+            // isConsumed: use the cached value if it exists, otherwise create it with the default (false)
+            if userDefaults.object(forKey: isConsumedKey) != nil {
+                isConsumed = userDefaults.bool(forKey: isConsumedKey)
+            } else {
+                isConsumed = false
+                userDefaults.set(false, forKey: isConsumedKey)
+            }
+        }
+
+        /// Formats a Date using the device's current timezone, matching AppsOnAir-Core's format.
+        internal func formatDateToDeviceTimeZone(_ date: Date) -> String {
+            let formatter = DateFormatter()
+
+            // Use device's current timezone
+            formatter.timeZone = TimeZone.current
+
+            // Use consistent month abbreviations
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+
+            // Force 12-hour format with AM/PM
+            formatter.dateFormat = "dd-MMM-yyyy hh:mm:ss a"
+
+            return formatter.string(from: date)
+        }
+
+        /// Fetches the app's first install date from the Documents directory's creation date,
+        /// matching AppsOnAir-Core's `getAppInstallationDate()` implementation.
+        internal func getAppInstallationDate() -> String {
+            if let docPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                .first?.path
+            {
+                do {
+                    let attributes = try FileManager.default.attributesOfItem(atPath: docPath)
+                    if let installationDate = attributes[.creationDate] as? Date {
+                        return formatDateToDeviceTimeZone(installationDate)
+                    }
+                } catch {
+                    return "Unavailable"
+                }
+            }
+            return "Unavailable"
         }
 
         // MARK: - Keychain Handling

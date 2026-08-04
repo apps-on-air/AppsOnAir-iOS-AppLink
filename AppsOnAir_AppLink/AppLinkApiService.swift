@@ -40,6 +40,7 @@ import Foundation
             isOpenInBrowserAndroid: Bool? = nil,
             androidFallbackUrl: String? = nil,
             appsFlyer: [String: Any]? = nil,
+            attributionTtl: Int? = nil,
             completion: @escaping ([String: Any]) -> Void
         ) {
 
@@ -90,6 +91,11 @@ import Foundation
             //AppsFlyer attribution params
             if let appsFlyer = appsFlyer, !appsFlyer.isEmpty {
                 shortLinkData["appsFlyer"] = appsFlyer
+            }
+
+            //Attribution TTL
+            if let attributionTtl = attributionTtl {
+                shortLinkData["attributionTtl"] = attributionTtl
             }
 
             let apiShortLinkPassData: [String: Any] = [
@@ -171,7 +177,9 @@ import Foundation
                     let statusCode = httpResponse?.statusCode
                     do {
                         guard let responseData = responseData, !responseData.isEmpty else {
-                            completion([errorStr: errorSomeThingWrong])
+                            completion([
+                                errorStr: errorSomeThingWrong, statusCodeKey: statusCode as Any,
+                            ])
                             return
                         }
 
@@ -180,16 +188,19 @@ import Foundation
                         if statusCode == 429 {
                             let errorMessage = String(data: responseData, encoding: .utf8) ?? ""
                             Logger.logInfo(errorMessage, prefix: appsOnAirLink)
-                            completion([errorStr: errorMessage])
-                        } else if let json = try JSONSerialization.jsonObject(
+                            completion([errorStr: errorMessage, statusCodeKey: statusCode as Any])
+                        } else if var json = try JSONSerialization.jsonObject(
                             with: responseData, options: []) as? [String: Any]
                         {
+                            json[statusCodeKey] = statusCode
                             Logger.logInternal("\(responseJson) \(json)")
                             completion(json)
                         }
                     } catch {
                         Logger.logInternal("\(errorFailedToLoad) \(error.localizedDescription)")
-                        completion([errorStr: errorSomeThingWrong])
+                        completion([
+                            errorStr: errorSomeThingWrong, statusCodeKey: statusCode as Any,
+                        ])
                     }
 
                 }.resume()

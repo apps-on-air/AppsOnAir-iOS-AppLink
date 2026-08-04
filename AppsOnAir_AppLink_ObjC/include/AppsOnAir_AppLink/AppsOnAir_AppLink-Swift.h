@@ -8,22 +8,45 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)shared;
 
 /// Set up the SDK and start tracking app links and referral events.
+/// `onAttributionListener` fires when a referral fetch actually runs (first open,
+/// or no referral cached yet), with `isFirstLaunch`, `firstInstallTime`,
+/// `isConsumed`, and `attributionStatus` included in its payload.
 - (void)initializeOnDeepLinkProcessed:
             (void (^)(NSURL *_Nullable url,
                       NSDictionary *info))onDeepLinkProcessed
-                onReferralLinkDetected:
-                    (nullable void (^)(NSDictionary *referralInfo))
-                        onReferralLinkDetected;
+                onAttributionListener:
+                    (nullable void (^)(NSDictionary *attributionInfo))
+                        onAttributionListener;
+
+/// (Deprecated) Use `initializeOnDeepLinkProcessed:onAttributionListener:`
+/// instead. Receives just the raw referral dictionary — the deprecated
+/// replacement also includes `isFirstLaunch`, `firstInstallTime`,
+/// `isConsumed`, and `attributionStatus`.
+- (void)initializeOnDeepLinkProcessed:
+            (void (^)(NSURL *_Nullable url,
+                      NSDictionary *info))onDeepLinkProcessed
+               onReferralLinkDetected:
+                   (nullable void (^)(NSDictionary *referralInfo))
+                       onReferralLinkDetected
+    __attribute__((
+        deprecated("onReferralLinkDetected is deprecated and will be removed "
+                   "in a future release. Use onAttributionListener instead.")));
 
 /// Handle incoming URLs, including custom scheme and universal links.
 - (void)handleAppLinkWithIncomingURL:(NSURL *)url;
 
-/// Get referral details.
-- (void)getReferralInfoWithCompletion:(void (^)(NSDictionary *info))completion;
+/// (Deprecated) Get referral info.
+- (void)getReferralInfoWithCompletion:(void (^)(NSDictionary *info))completion
+    __attribute__((
+        deprecated("Use getAttributionInfoWithCompletion: instead")));
 
 /// (Deprecated) Get referral details.
-- (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *info))completion
-    __attribute__((deprecated("Use getReferralInfoWithCompletion: instead")));
+- (void)getReferralDetailsWithCompletion:
+    (void (^)(NSDictionary *info))completion __attribute__((
+        deprecated("Use getAttributionInfoWithCompletion: instead")));
+
+- (void)getAttributionInfoWithCompletion:
+    (void (^)(NSDictionary *info))completion;
 
 /// Create a new AppLink.
 - (void)createAppLinkWithUrl:(NSString *)url
@@ -38,6 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
                    appsFlyer:(nullable NSDictionary *)appsFlyer
+              attributionTtl:(nullable NSNumber *)attributionTtl
                   completion:(void (^)(NSDictionary *result))completion;
 
 /// Handles app launch initiated from a cold start via a custom URL scheme.

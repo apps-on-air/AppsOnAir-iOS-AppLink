@@ -16,9 +16,10 @@ let referralSuccessFully = "Referral SuccessFully"
 
 let clipboardEmpty = "Clipboard is empty"
 
-let invalidBundleIdentifier  = "Invalid bundle identifier"
+let invalidBundleIdentifier = "Invalid bundle identifier"
 
-let enableAdvancedDeferredLinkDisabled = "EnableAdvancedDeferredLink is disabled/does not exist in Info.plist"
+let enableAdvancedDeferredLinkDisabled =
+    "EnableAdvancedDeferredLink is disabled/does not exist in Info.plist"
 
 let notFoundBundle = "not found or missing bundle identifier"
 
@@ -61,3 +62,23 @@ let isFirstOpenKey = "isFirstOpen"
 let isReferralKey = "isUserReferral"
 
 let EnableAdvancedDeferredLinkKey = "EnableAdvancedDeferredLink"
+
+let isConsumedKey = "isConsumed"
+
+let isFirstLaunchKey = "isFirstLaunch"
+
+let firstInstallTimeKey = "firstInstallTime"
+
+let attributionStatusKey = "attributionStatus"
+
+let attributionTtlResponseKey = "attributionTtl"
+
+let applinkClickTimeParam = "applink_click_time"
+
+let attributionStatusOrganic = "organic"
+
+let attributionStatusNonOrganic = "non-organic"
+
+let statusCodeKey = "statusCode"
+
+let dataKey = "data"

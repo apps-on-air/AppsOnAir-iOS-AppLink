@@ -3,11 +3,16 @@
 @interface AppLinkWrapper : NSObject
 + (void)initializeWithOnDeepLinkProcessed:
             (void (^)(NSURL *_Nullable, NSDictionary *))onDeepLinkProcessed
+                    onAttributionListener:
+                        (nullable void (^)(NSDictionary *))onAttributionListener;
++ (void)initializeWithOnDeepLinkProcessed:
+            (void (^)(NSURL *_Nullable, NSDictionary *))onDeepLinkProcessed
                    onReferralLinkDetected:
                        (nullable void (^)(NSDictionary *))onReferralLinkDetected;
 + (void)handleAppLinkWithURL:(NSURL *)url;
 + (void)getReferralInfoWithCompletion:(void (^)(NSDictionary *))completion;
 + (void)getReferralDetailsWithCompletion:(void (^)(NSDictionary *))completion;
++ (void)getAttributionInfoWithCompletion:(void (^)(NSDictionary *))completion;
 + (void)createAppLinkWithUrl:(NSString *)url
                         name:(NSString *)name
                    urlPrefix:(NSString *)urlPrefix
@@ -20,6 +25,7 @@
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
                    appsFlyer:(nullable NSDictionary *)appsFlyer
+              attributionTtl:(nullable NSNumber *)attributionTtl
                   completion:(void (^)(NSDictionary *))completion;
 + (void)handleLaunchOptions:(NSDictionary *)launchOptions;
 + (void)continueUserActivity:(NSUserActivity *)userActivity;
@@ -34,6 +40,22 @@
     instance = [[self alloc] init];
   });
   return instance;
+}
+
++ (void)initializeOnDeepLinkProcessed:
+            (void (^)(NSURL *_Nullable, NSDictionary *))onDeepLinkProcessed
+                onAttributionListener:(nullable void (^)(NSDictionary *))
+                                          onAttributionListener {
+  [AppLinkWrapper initializeWithOnDeepLinkProcessed:onDeepLinkProcessed
+                              onAttributionListener:onAttributionListener];
+}
+
+- (void)initializeOnDeepLinkProcessed:
+            (void (^)(NSURL *_Nullable, NSDictionary *))onDeepLinkProcessed
+                onAttributionListener:(nullable void (^)(NSDictionary *))
+                                          onAttributionListener {
+  [AppLinkWrapper initializeWithOnDeepLinkProcessed:onDeepLinkProcessed
+                              onAttributionListener:onAttributionListener];
 }
 
 + (void)initializeOnDeepLinkProcessed:
@@ -76,6 +98,14 @@
   [AppLinkWrapper getReferralDetailsWithCompletion:completion];
 }
 
++ (void)getAttributionInfoWithCompletion:(void (^)(NSDictionary *))completion {
+  [AppLinkWrapper getAttributionInfoWithCompletion:completion];
+}
+
+- (void)getAttributionInfoWithCompletion:(void (^)(NSDictionary *))completion {
+  [AppLinkWrapper getAttributionInfoWithCompletion:completion];
+}
+
 + (void)createAppLinkWithUrl:(NSString *)url
                         name:(NSString *)name
                    urlPrefix:(NSString *)urlPrefix
@@ -88,6 +118,7 @@
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
                    appsFlyer:(nullable NSDictionary *)appsFlyer
+              attributionTtl:(nullable NSNumber *)attributionTtl
                   completion:(void (^)(NSDictionary *))completion {
   [AppLinkWrapper createAppLinkWithUrl:url
                                   name:name
@@ -101,6 +132,7 @@
                 isOpenInBrowserAndroid:isOpenInBrowserAndroid
                     androidFallbackUrl:androidFallbackUrl
                              appsFlyer:appsFlyer
+                       attributionTtl:attributionTtl
                             completion:completion];
 }
 
@@ -116,6 +148,7 @@
       isOpenInBrowserAndroid:(nullable NSNumber *)isOpenInBrowserAndroid
           androidFallbackUrl:(nullable NSString *)androidFallbackUrl
                    appsFlyer:(nullable NSDictionary *)appsFlyer
+              attributionTtl:(nullable NSNumber *)attributionTtl
                   completion:(void (^)(NSDictionary *))completion {
   [AppLinkService createAppLinkWithUrl:url
                                   name:name
@@ -129,6 +162,7 @@
                 isOpenInBrowserAndroid:isOpenInBrowserAndroid
                     androidFallbackUrl:androidFallbackUrl
                              appsFlyer:appsFlyer
+                       attributionTtl:attributionTtl
                             completion:completion];
 }
 
