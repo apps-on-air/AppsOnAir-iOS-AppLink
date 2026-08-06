@@ -1,3 +1,10 @@
+## 2.0.0
+
+**New method and listener:** 
+* Added `getAttributionInfo`/`onAttributionListener`, returning `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and `attributionStatus` (`"organic"`/`"non-organic"`) alongside referral data.
+* Deprecated `getReferralInfo` and `onReferralLinkDetected` in favor of `getAttributionInfo`/`onAttributionListener`.
+* `createAppLink()` now supports `appsFlyer` and `attributionTtl` params.
+
 ## 1.4.1
 
 * Minor fixes and improvements
