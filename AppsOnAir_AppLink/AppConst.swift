@@ -81,4 +81,15 @@ let attributionStatusNonOrganic = "non-organic"
 
 let statusCodeKey = "statusCode"
 
+let successStatusCode = 200
+
 let dataKey = "data"
+
+//MARK: - Internal Notifications
+
+extension Notification.Name {
+    /// Posted when the app returns to foreground after having been genuinely backgrounded
+    /// (not the initial cold-start activation), and `isFirstLaunch` flips from `true` to `false`.
+    static let appsOnAirFirstLaunchDidExpire = Notification.Name(
+        "AppsOnAirAppLink.firstLaunchDidExpire")
+}

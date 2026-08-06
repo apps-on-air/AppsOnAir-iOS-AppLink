@@ -26,9 +26,9 @@ import Foundation
         /// `false` this session by default; flips to `true` only starting the next launch after a successful referral fetch.
         internal var isConsumed: Bool = false
 
-        /// Device's first install time, computed fresh on every access (not cached).
-        internal var firstInstallTime: String {
-            getAppInstallationDate()
+        /// Device's first install time
+        internal var firstInstallTime: String? {
+            return getAppInstallationDateEpoch()
         }
 
         // MARK: - Use Get User Agent
@@ -36,14 +36,54 @@ import Foundation
 
         private var webView: WKWebView = WKWebView(frame: .zero)
 
+        /// `true` when `isAppFirstOpen` just flipped, so the next `didBecomeActive` notifies listeners.
+        private var firstLaunchExpired: Bool = false
+
         // MARK: - Initializer
 
         private override init() {
             super.init()
             handleAppLaunch()
+            observeAppLifecycleNotifications()
+        }
+
+        deinit {
+            NotificationCenter.default.removeObserver(self)
         }
 
         // MARK: - App Lifecycle
+
+        private func observeAppLifecycleNotifications() {
+            // handleAppDidEnterBackground() -> Called when the app enters the background.
+            // handleAppDidBecomeActive() -> Called on launch and when returning to the foreground.
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(handleAppDidEnterBackground),
+                name: UIApplication.didEnterBackgroundNotification, object: nil)
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(handleAppDidBecomeActive),
+                name: UIApplication.didBecomeActiveNotification, object: nil)
+        }
+
+        @objc private func handleAppDidEnterBackground() {
+            Logger.logInternal(
+                "AppHelper: didEnterBackground — isAppFirstOpen=\(isAppFirstOpen)")
+            guard isAppFirstOpen else { return }
+            isAppFirstOpen = false
+            firstLaunchExpired = true
+            Logger.logInternal(
+                "AppHelper: isAppFirstOpen flipped to false, will notify on next didBecomeActive")
+        }
+
+        @objc private func handleAppDidBecomeActive() {
+            Logger.logInternal(
+                "AppHelper: didBecomeActive — firstLaunchExpired=\(firstLaunchExpired)"
+            )
+            guard firstLaunchExpired else { return }
+            firstLaunchExpired = false
+            Logger.logInternal(
+                "AppHelper: posting appsOnAirFirstLaunchDidExpire")
+            NotificationCenter.default.post(name: .appsOnAirFirstLaunchDidExpire, object: nil)
+        }
 
         /// handle to get String from clipboard
         internal func readClipBoard() -> String? {
@@ -76,38 +116,26 @@ import Foundation
             }
         }
 
-        /// Formats a Date using the device's current timezone, matching AppsOnAir-Core's format.
-        internal func formatDateToDeviceTimeZone(_ date: Date) -> String {
-            let formatter = DateFormatter()
+        /// Fetches the app's first install date from the Documents directory's creation date,
+        internal func getAppInstallationDateValue() -> Date? {
+            guard
+                let docPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                    .first?.path
+            else {
+                return nil
+            }
 
-            // Use device's current timezone
-            formatter.timeZone = TimeZone.current
-
-            // Use consistent month abbreviations
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-
-            // Force 12-hour format with AM/PM
-            formatter.dateFormat = "dd-MMM-yyyy hh:mm:ss a"
-
-            return formatter.string(from: date)
+            do {
+                let attributes = try FileManager.default.attributesOfItem(atPath: docPath)
+                return attributes[.creationDate] as? Date
+            } catch {
+                return nil
+            }
         }
 
-        /// Fetches the app's first install date from the Documents directory's creation date,
-        /// matching AppsOnAir-Core's `getAppInstallationDate()` implementation.
-        internal func getAppInstallationDate() -> String {
-            if let docPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-                .first?.path
-            {
-                do {
-                    let attributes = try FileManager.default.attributesOfItem(atPath: docPath)
-                    if let installationDate = attributes[.creationDate] as? Date {
-                        return formatDateToDeviceTimeZone(installationDate)
-                    }
-                } catch {
-                    return "Unavailable"
-                }
-            }
-            return "Unavailable"
+        /// App install date in epoch seconds.
+        internal func getAppInstallationDateEpoch() -> String? {
+            getAppInstallationDateValue()?.timeIntervalSince1970.description
         }
 
         // MARK: - Keychain Handling

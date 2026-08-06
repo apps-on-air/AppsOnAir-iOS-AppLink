@@ -19,8 +19,8 @@ import Combine
             return appHelper.isAppFirstOpen
         }
 
-        /// Device's first install time
-        internal var firstInstallTime: String {
+        /// Device's first install time, as an epoch String
+        internal var firstInstallTime: String? {
             return appHelper.firstInstallTime
         }
 
@@ -40,10 +40,8 @@ import Combine
 
         private var latestReferralInfo: [String: Any]?
 
-        // "organic" / "nonorganic", computed only for the clipboard (advanced deferred link) approach.
-        // Defaults to organic (no referral found yet / error). Once a referral is found via the API
-        // without error, it becomes nonorganic — refined to organic/nonorganic by the click-time vs
-        // attributionTtl diff when that data is available.
+        // Attribution status: organic/non-organic; defaults to organic until resolved.
+
         private var latestAttributionStatus: String? = attributionStatusOrganic
 
         // Listener for whenever referral link is Update
@@ -52,10 +50,14 @@ import Combine
         // Manage for API call
         private let dispatchGroup = DispatchGroup()
 
+        private var attributionListener: (([String: Any]) -> Void)?
+        private var firstLaunchExpiredObserver: NSObjectProtocol?
+
         deinit {
             // Cancel the listener when the object is deallocated
             linkListener?.cancel()
             referralLinkListener?.cancel()
+            NotificationCenter.default.removeObserver(self)
         }
 
         /// Common initialization flow
@@ -69,6 +71,22 @@ import Combine
 
             // Initialize swizzling
             _ = AppSwizzler.shared
+
+            attributionListener = onAttributionListener
+            if let firstLaunchExpiredObserver {
+                NotificationCenter.default.removeObserver(firstLaunchExpiredObserver)
+            }
+            firstLaunchExpiredObserver = NotificationCenter.default.addObserver(
+                forName: .appsOnAirFirstLaunchDidExpire, object: nil, queue: .main
+            ) { [weak self] _ in
+                guard let self else { return }
+                Logger.logInternal(
+                    "AppLinkService: appsOnAirFirstLaunchDidExpire received, re-firing onAttributionListener"
+                )
+                self.getAttributionInfo { attributionInfo in
+                    self.attributionListener?(attributionInfo)
+                }
+            }
 
             // Listen for network status
             appsOnAirCoreServices.networkStatusListenerHandler { isConnected in
@@ -317,19 +335,24 @@ import Combine
                             appLinParams: appLinkReferralLinkParams,
                             isEnableAdvancedDeferredLink: true
                         ) { rawLinkInfo in
-                            let _ = self.appHelper.removeDataFromKeychain(key: referralData)
+                            _ = self.appHelper.removeDataFromKeychain(key: referralData)
 
-                            // isConsumed only takes effect starting the next app launch
-                            if (rawLinkInfo[statusCodeKey] as? Int) == 200 {
+                            var linkInfo = rawLinkInfo
+
+                            if (rawLinkInfo[statusCodeKey] as? Int) == successStatusCode {
+                                // isConsumed only takes effect starting the next app launch
                                 AppHelper.shared.isConsumed = true
                                 AppHelper.shared.userDefaults.set(true, forKey: isConsumedKey)
+
+                                linkInfo.removeValue(forKey: statusCodeKey)
                             }
 
-                            // strip the internal statusCode before storing/exposing to the host app
-                            var linkInfo = rawLinkInfo
-                            linkInfo.removeValue(forKey: statusCodeKey)
-
                             let referralStatus = linkInfo["status"] as? String
+
+                            self.latestReferralInfo = linkInfo
+                            self.appHelper.saveToKeychain(key: referralData, value: linkInfo)
+                            self.latestReferralURL = url
+
                             if referralStatus == "SUCCESS" {
                                 // clipboard-only: compare click time vs first install time vs attributionTtl
                                 self.computeAttributionStatus(
@@ -343,10 +366,6 @@ import Combine
                                     linkInfo[dataKey] = data
                                 }
                             }
-
-                            self.latestReferralInfo = linkInfo
-                            self.appHelper.saveToKeychain(key: referralData, value: linkInfo)
-                            self.latestReferralURL = url
 
                             if referralStatus == "SUCCESS" {
                                 AppLinkApiService.apiLinkAnalytics(
@@ -379,17 +398,18 @@ import Combine
                     } else {
                         Logger.logInternal("API called")
                         AppLinkApiService.apiReferralInfo { rawReferralLinkInfo in
-                            let _ = self.appHelper.removeDataFromKeychain(key: referralData)
+                            _ = self.appHelper.removeDataFromKeychain(key: referralData)
 
-                            // isConsumed only takes effect starting the next app launch
-                            if (rawReferralLinkInfo[statusCodeKey] as? Int) == 200 {
+                            var referralLinkInfo = rawReferralLinkInfo
+
+                            if (rawReferralLinkInfo[statusCodeKey] as? Int) == successStatusCode {
+
                                 AppHelper.shared.isConsumed = true
                                 AppHelper.shared.userDefaults.set(true, forKey: isConsumedKey)
-                            }
 
-                            // strip the internal statusCode before storing/exposing to the host app
-                            var referralLinkInfo = rawReferralLinkInfo
-                            referralLinkInfo.removeValue(forKey: statusCodeKey)
+                                // strip the internal statusCode before storing/exposing to the host app
+                                referralLinkInfo.removeValue(forKey: statusCodeKey)
+                            }
 
                             self.latestReferralInfo = referralLinkInfo
 
@@ -405,7 +425,7 @@ import Combine
                                 let referralURL = URL(string: referralLink),
                                 let domain = referralURL.host
                             {
-
+                                self.latestAttributionStatus = attributionStatusNonOrganic
                                 // Call analytics of referral result
                                 AppLinkApiService.apiLinkAnalytics(
                                     isClicked: false,
@@ -458,22 +478,22 @@ import Combine
         private func computeAttributionStatus(
             clickTimestamp: TimeInterval?, linkInfo: [String: Any]?
         ) {
-            // Referral was found via the API without error to get here — default to nonorganic,
-            // then refine to organic/nonorganic below if we have enough data to diff click time vs
-            // attributionTtl. (If the referral isn't found at all, this function never runs, and
-            // latestAttributionStatus keeps its class-level default: organic.)
+            // Referral found; default to non-organic and refine with click-time data.
             latestAttributionStatus = attributionStatusNonOrganic
 
-            guard let clickTimestamp = clickTimestamp else {
+            // Clipboard `applink_click_time` is in milliseconds.
+            guard let clickTimestampInMilliseconds = clickTimestamp else {
                 Logger.logInternal(
-                    "attributionStatus: no applink_click_time in clipboard — defaulting to nonorganic (referral found)"
+                    "attributionStatus: no applink_click_time in clipboard — defaulting to non-organic (referral found)"
                 )
                 return
             }
 
-            let data = linkInfo?["data"] as? [String: Any]
+            // Read TTL from response data when available; default to empty.
+            let data: [String: Any] = linkInfo?[dataKey] as? [String: Any] ?? [:]
+
             let rawAttributionTtl =
-                linkInfo?[attributionTtlResponseKey] ?? data?[attributionTtlResponseKey]
+                linkInfo?[attributionTtlResponseKey] ?? data[attributionTtlResponseKey]
 
             let attributionTtl: Double?
             switch rawAttributionTtl {
@@ -486,29 +506,26 @@ import Combine
 
             guard let attributionTtl = attributionTtl else {
                 Logger.logInternal(
-                    "attributionStatus: no attributionTtl in referral response (raw: \(String(describing: rawAttributionTtl))) — defaulting to nonorganic (referral found)"
+                    "attributionStatus: no attributionTtl in referral response (raw: \(String(describing: rawAttributionTtl))) — defaulting to non-organic (referral found)"
                 )
                 return
             }
 
-            let installDateFormatter = DateFormatter()
-            installDateFormatter.timeZone = TimeZone.current
-            installDateFormatter.locale = Locale(identifier: "en_US_POSIX")
-            installDateFormatter.dateFormat = "dd-MMM-yyyy hh:mm:ss a"
-
-            guard
-                let installDate = installDateFormatter.date(
-                    from: appHelper.getAppInstallationDate())
-            else {
+            guard let firstInstallEpoch = Double(appHelper.firstInstallTime ?? "") else {
                 Logger.logInternal(
-                    "attributionStatus: could not parse firstInstallTime — defaulting to nonorganic (referral found)"
+                    "attributionStatus: could not read firstInstallTime — defaulting to non-organic (referral found)"
                 )
                 return
             }
 
-            // convert firstInstallTime into epoch time to match clickTimestamp's units
-            let firstInstallEpoch = installDate.timeIntervalSince1970
-            let diffInSeconds = abs(clickTimestamp - firstInstallEpoch)
+            // scale the click time to epoch seconds so both sides use the same unit
+            let clickTimestampInSeconds: Double
+
+            let clickTimestampMeasurement = Measurement(
+                value: clickTimestampInMilliseconds, unit: UnitDuration.milliseconds)
+            clickTimestampInSeconds = clickTimestampMeasurement.converted(to: .seconds).value
+
+            let diffInSeconds = firstInstallEpoch - clickTimestampInSeconds
 
             latestAttributionStatus =
                 diffInSeconds > attributionTtl
@@ -541,9 +558,12 @@ import Combine
                 ? (self.latestReferralInfo ?? [:])
                 : (self.appHelper.readFromKeychain(key: referralData) ?? [:])
 
-            var data = attributionInfo[dataKey] as? [String: Any] ?? [:]
+            // Append attribution fields to response data.
+            var data: [String: Any] = attributionInfo[dataKey] as? [String: Any] ?? [:]
             data[isFirstLaunchKey] = self.isFirstLaunch
-            data[firstInstallTimeKey] = self.firstInstallTime
+            if let firstInstallTime = self.firstInstallTime {
+                data[firstInstallTimeKey] = firstInstallTime
+            }
             data[isConsumedKey] = self.isConsumed
             if let attributionStatus = self.latestAttributionStatus {
                 data[attributionStatusKey] = attributionStatus
