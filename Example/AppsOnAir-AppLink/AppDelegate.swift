@@ -1,5 +1,5 @@
-import UIKit
 import AppsOnAir_AppLink
+import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -11,8 +11,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         appLinkService.initialize { url, linkInfo in
             // write the code for handling flow based on url
-        } onReferralLinkDetected: { referralInfo in
-            // write the code for handling referral flow based on url
+        } onAttributionListener: { attributionInfo in
+            // write the code for handling attribution flow based on url
         }
         return true
     }
@@ -44,6 +44,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-
 }
-

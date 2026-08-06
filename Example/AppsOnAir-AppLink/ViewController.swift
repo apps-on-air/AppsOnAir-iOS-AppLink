@@ -29,9 +29,17 @@ class ViewController: UIViewController {
 
     @objc func createLinkTapped() {
 
+        //Help to get attribution information
+        appLinkService.getAttributionInfo { attributionInfo in
+            //Write code for handle attribution info
+        }
+
         //Help to get referral information
-        appLinkService.getReferralInfo { referralLinkInfo in
-            //Write code for handle referral link information
+        appLinkService.getReferralInfo { referralInfo in
+            //Write code for handle referral info
+        }
+        appLinkService.getReferralDetails { referralInfo in
+            //Write code for handle referral info
         }
 
         //help to set social meta
@@ -56,7 +64,7 @@ class ViewController: UIViewController {
             url: "https://appsonair.com", name: "AppsOnAir",
             urlPrefix: "YOUR_DOMAIN_NAME", shortId: "LINK_ID",
             socialMeta: socialMeta, isOpenInBrowserApple: false, isOpenInIosApp: true,
-            iosFallbackUrl: "https://appstore.com", appsFlyer: appsFlyer
+            iosFallbackUrl: "https://appstore.com", appsFlyer: appsFlyer, attributionTtl: 3600
         ) { linkInfo in
             //write code for handle create link
         }
