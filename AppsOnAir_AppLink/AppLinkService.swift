@@ -20,7 +20,7 @@ import Combine
         }
 
         /// Device's first install time, as an epoch String
-        internal var firstInstallTime: String? {
+        internal var firstInstallTime: Int64? {
             return appHelper.firstInstallTime
         }
 
@@ -40,9 +40,28 @@ import Combine
 
         private var latestReferralInfo: [String: Any]?
 
-        // Attribution status: organic/non-organic; defaults to organic until resolved.
+        /// Attribution status: organic/non-organic. Backed by `AppHelper`, which restores it from
+        /// UserDefaults on launch and persists every assignment — so a status resolved on first
+        /// launch survives relaunches. Defaults to organic until something is resolved and stored.
+        private var latestAttributionStatus: String {
+            get { appHelper.attributionStatus }
+            set { appHelper.updateAttributionStatus(newValue) }
+        }
 
-        private var latestAttributionStatus: String? = attributionStatusOrganic
+        /// Clipboard `applink_click_time` in epoch milliseconds, retained so `getAttributionInfo`
+        /// can report it alongside the Android SDK's equivalent field. Nil until a deferred link
+        /// carrying the param is resolved.
+        /// Backed by `AppHelper`, which restores it from UserDefaults on launch and persists every
+        /// assignment. The clipboard is only read on first open, so without persistence this would
+        /// be nil from launch 2 onward and drop out of the attribution payload.
+        /// Assigning nil is ignored — a later launch with no clipboard must not erase it.
+        private var latestClickTimestampInMilliseconds: TimeInterval? {
+            get { appHelper.clickTime }
+            set {
+                guard let newValue else { return }
+                appHelper.updateClickTime(newValue)
+            }
+        }
 
         // Listener for whenever referral link is Update
         private var referralLinkListener: AnyCancellable?
@@ -107,7 +126,7 @@ import Combine
 
                         self.referralHandler(isCompletionCall: true) { referralInfo in
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                                onReferralLinkDetected?(referralInfo)
+                                onReferralLinkDetected?(self.withoutAppsFlyer(referralInfo))
 
                                 self.getAttributionInfo { attributionInfo in
                                     onAttributionListener?(attributionInfo)
@@ -331,6 +350,10 @@ import Combine
                             .first(where: { $0.name == applinkClickTimeParam })?.value
                             .flatMap { Double($0) }
 
+                        // Retain it as soon as it is read, so it reaches the attribution payload
+                        // even when the referral call fails or the status is never computed.
+                        self.latestClickTimestampInMilliseconds = clickTimestamp
+
                         AppLinkApiService.apiReferralInfo(
                             appLinParams: appLinkReferralLinkParams,
                             isEnableAdvancedDeferredLink: true
@@ -354,17 +377,12 @@ import Combine
                             self.latestReferralURL = url
 
                             if referralStatus == "SUCCESS" {
-                                // clipboard-only: compare click time vs first install time vs attributionTtl
+                                // clipboard-only: compare click time vs first install time vs attributionTtl.
+                                // The resolved status is persisted by `computeAttributionStatus` itself and
+                                // read back in `getAttributionInfo`, so it is not copied into `linkInfo` here.
                                 self.computeAttributionStatus(
                                     clickTimestamp: clickTimestamp,
                                     linkInfo: linkInfo)
-
-                                // persist attributionStatus alongside the referral data
-                                if let attributionStatus = self.latestAttributionStatus {
-                                    var data = linkInfo[dataKey] as? [String: Any] ?? [:]
-                                    data[attributionStatusKey] = attributionStatus
-                                    linkInfo[dataKey] = data
-                                }
                             }
 
                             if referralStatus == "SUCCESS" {
@@ -481,7 +499,8 @@ import Combine
             // Referral found; default to non-organic and refine with click-time data.
             latestAttributionStatus = attributionStatusNonOrganic
 
-            // Clipboard `applink_click_time` is in milliseconds.
+            // Clipboard `applink_click_time` is in milliseconds. Already retained where it was read
+            // from the clipboard, so it is only consumed here.
             guard let clickTimestampInMilliseconds = clickTimestamp else {
                 Logger.logInternal(
                     "attributionStatus: no applink_click_time in clipboard — defaulting to non-organic (referral found)"
@@ -511,12 +530,17 @@ import Combine
                 return
             }
 
-            guard let firstInstallEpoch = Double(appHelper.firstInstallTime ?? "") else {
+            guard let firstInstallMilliseconds = appHelper.firstInstallTime else {
                 Logger.logInternal(
                     "attributionStatus: could not read firstInstallTime — defaulting to non-organic (referral found)"
                 )
                 return
             }
+
+            // firstInstallTime is epoch milliseconds; the comparison below works in seconds.
+            let firstInstallEpoch = Measurement(
+                value: Double(firstInstallMilliseconds), unit: UnitDuration.milliseconds
+            ).converted(to: .seconds).value
 
             // scale the click time to epoch seconds so both sides use the same unit
             let clickTimestampInSeconds: Double
@@ -532,8 +556,23 @@ import Combine
                 ? attributionStatusOrganic : attributionStatusNonOrganic
 
             Logger.logInternal(
-                "attributionStatus = \(latestAttributionStatus ?? "nil") (diff: \(diffInSeconds)s, ttl: \(attributionTtl)s)"
+                "attributionStatus = \(latestAttributionStatus) (diff: \(diffInSeconds)s, ttl: \(attributionTtl)s)"
             )
+        }
+
+        /// Returns a copy of `info` without the `appsFlyer` object. The API returns it on the
+        /// dynamic-link and referral/details endpoints, but it belongs to the newer attribution
+        /// surface: only `getAttributionInfo` / `onAttributionListener` expose it, so the
+        /// deprecated referral APIs and `onReferralLinkDetected` keep their original payload.
+        /// Removed at both levels because the key may sit at the root or inside `data`.
+        private func withoutAppsFlyer(_ info: [String: Any]) -> [String: Any] {
+            var info = info
+            info.removeValue(forKey: appsFlyerKey)
+            if var data = info[dataKey] as? [String: Any] {
+                data.removeValue(forKey: appsFlyerKey)
+                info[dataKey] = data
+            }
+            return info
         }
 
         /// (Deprecated) Get referral info
@@ -541,17 +580,17 @@ import Combine
         @objc public func getReferralInfo(completion: @escaping ([String: Any]) -> Void) {
             dispatchGroup.notify(queue: .main) {
                 if !((self.latestReferralInfo ?? [:]).isEmpty) {
-                    completion(self.latestReferralInfo ?? [:])
+                    completion(self.withoutAppsFlyer(self.latestReferralInfo ?? [:]))
                     return
                 }
                 let referralInfoFromKeyChain = self.appHelper.readFromKeychain(key: referralData)
-                completion(referralInfoFromKeyChain ?? [:])
+                completion(self.withoutAppsFlyer(referralInfoFromKeyChain ?? [:]))
             }
         }
 
         /// Get referral and attribution info. Same as the deprecated `getReferralInfo`, with attribution info
-        /// nested inside `data`: `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and (clipboard
-        /// approach only) `attributionStatus`.
+        /// nested inside `data`: `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
+        /// `attributionStatus` — the last resolved status, restored from storage on later launches.
         @objc public func getAttributionInfo(completion: @escaping ([String: Any]) -> Void) {
             var attributionInfo =
                 !((self.latestReferralInfo ?? [:]).isEmpty)
@@ -565,8 +604,9 @@ import Combine
                 data[firstInstallTimeKey] = firstInstallTime
             }
             data[isConsumedKey] = self.isConsumed
-            if let attributionStatus = self.latestAttributionStatus {
-                data[attributionStatusKey] = attributionStatus
+            data[attributionStatusKey] = self.latestAttributionStatus
+            if let clickTimestamp = self.latestClickTimestampInMilliseconds {
+                data[applinkClickTimeParam] = Int64(clickTimestamp.rounded())
             }
             attributionInfo[dataKey] = data
 
@@ -578,7 +618,7 @@ import Combine
         @objc public func getReferralDetails(completion: @escaping ([String: Any]) -> Void) {
             // Retrieve stored data from the device keychain
             let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
-            completion(referralInfoFromKeyChain ?? [:])
+            completion(withoutAppsFlyer(referralInfoFromKeyChain ?? [:]))
         }
 
         ///help to handle the latest link for universal link and custom URL schema

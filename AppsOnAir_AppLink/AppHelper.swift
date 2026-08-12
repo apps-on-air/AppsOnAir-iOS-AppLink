@@ -26,9 +26,65 @@ import Foundation
         /// `false` this session by default; flips to `true` only starting the next launch after a successful referral fetch.
         internal var isConsumed: Bool = false
 
-        /// Device's first install time
-        internal var firstInstallTime: String? {
-            return getAppInstallationDateEpoch()
+        /// Resolved attribution status (organic/non-organic). Restored from UserDefaults on launch
+        /// and re-persisted through `updateAttributionStatus(_:)` on every resolution, so launch 2+
+        /// reports the value resolved on first launch without needing a referral fetch.
+        internal private(set) var attributionStatus: String = attributionStatusOrganic
+
+        /// Clipboard `applink_click_time`, in epoch milliseconds. Restored from UserDefaults on
+        /// launch and re-persisted through `updateClickTime(_:)`, so it keeps reaching the
+        /// attribution payload on later launches — the clipboard is only read once, on first open.
+        /// `nil` until a deferred link carrying the param has been read.
+        internal private(set) var clickTime: TimeInterval?
+
+        /// SDK version reported in the `x-sdk-version` header.
+        ///
+        /// Read from this SDK's own resource bundle rather than relying on `SdkManager`'s bundle
+        /// heuristics, which only recognise the CocoaPods bundle name — SwiftPM names its bundle
+        /// `<Package>_<Target>.bundle`, so `Bundle.module` is the only dependable handle there.
+        /// Note `Bundle(for:)` alone is not enough under CocoaPods: with static linking this class
+        /// lives in the app binary, so that returns the *host app's* version.
+        /// Falls back to `SdkManager` (which covers framework-based installs), then to "-".
+        internal var sdkVersion: String {
+            #if SWIFT_PACKAGE
+                let resourceBundle: Bundle? = .module
+            #else
+                let hostBundle = Bundle(for: AppHelper.self)
+                let resourceBundle =
+                    hostBundle.url(forResource: appLinkResourceBundleName, withExtension: "bundle")
+                    .flatMap { Bundle(url: $0) }
+                    ?? Bundle.main.url(
+                        forResource: appLinkResourceBundleName, withExtension: "bundle"
+                    ).flatMap { Bundle(url: $0) }
+            #endif
+
+            // CocoaPods stamps the bundle's own Info.plist from s.version, so it cannot drift.
+            if let version = resourceBundle?
+                .object(forInfoDictionaryKey: shortVersionKey) as? String,
+                !version.isEmpty
+            {
+                return version
+            }
+
+            // SwiftPM writes its own Info.plist with no version, so read the plist we ship inside
+            // the bundle — the only version source on that path.
+            if let plistURL = resourceBundle?.url(
+                forResource: appLinkInfoPlistName, withExtension: "plist"),
+                let data = try? Data(contentsOf: plistURL),
+                let plist = try? PropertyListSerialization.propertyList(
+                    from: data, options: [], format: nil) as? [String: Any],
+                let version = plist[shortVersionKey] as? String,
+                !version.isEmpty
+            {
+                return version
+            }
+
+            return SdkManager.shared.getVersion(for: appLinkSdkName)
+        }
+
+        /// Device's first install time, as epoch milliseconds.
+        internal var firstInstallTime: Int64? {
+            return getAppInstallationDateEpochMilliseconds()
         }
 
         // MARK: - Use Get User Agent
@@ -114,6 +170,30 @@ import Foundation
                 isConsumed = false
                 userDefaults.set(false, forKey: isConsumedKey)
             }
+
+            // attributionStatus: restore the last resolved value; organic only when nothing stored yet
+            attributionStatus =
+                userDefaults.string(forKey: attributionStatusStorageKey) ?? attributionStatusOrganic
+
+            Logger.logInternal("attributionStatus restored: \(attributionStatus)")
+
+            // clickTime: restore the stored value; 0 means nothing has been stored yet
+            let storedClickTime = userDefaults.double(forKey: clickTimeStorageKey)
+            clickTime = storedClickTime > 0 ? storedClickTime : nil
+
+            Logger.logInternal("clickTime restored: \(String(describing: clickTime))")
+        }
+
+        /// Caches and persists a newly resolved attribution status so later launches report it.
+        internal func updateAttributionStatus(_ status: String) {
+            attributionStatus = status
+            userDefaults.set(status, forKey: attributionStatusStorageKey)
+        }
+
+        /// Caches and persists the clipboard click time so later launches keep reporting it.
+        internal func updateClickTime(_ value: TimeInterval) {
+            clickTime = value
+            userDefaults.set(value, forKey: clickTimeStorageKey)
         }
 
         /// Fetches the app's first install date from the Documents directory's creation date,
@@ -133,9 +213,15 @@ import Foundation
             }
         }
 
-        /// App install date in epoch seconds.
-        internal func getAppInstallationDateEpoch() -> String? {
-            getAppInstallationDateValue()?.timeIntervalSince1970.description
+        /// App install date in epoch milliseconds, matching the Android SDK's unit.
+        internal func getAppInstallationDateEpochMilliseconds() -> Int64? {
+            guard let installDate = getAppInstallationDateValue() else { return nil }
+
+            let milliseconds = Measurement(
+                value: installDate.timeIntervalSince1970, unit: UnitDuration.seconds
+            ).converted(to: .milliseconds).value
+
+            return Int64(milliseconds.rounded())
         }
 
         // MARK: - Keychain Handling

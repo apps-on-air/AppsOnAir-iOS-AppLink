@@ -59,6 +59,9 @@ import Foundation
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: xApplicationId)
+            request.setValue(
+                appHelper.sdkVersion,
+                forHTTPHeaderField: xSdkVersion)
 
             // Building JSON object
             var shortLinkData: [String: Any] = [:]
@@ -160,6 +163,9 @@ import Foundation
                 request.setValue(linkUserAgent, forHTTPHeaderField: userAgent)
                 request.setValue("application/json", forHTTPHeaderField: contentType)
                 request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: xApplicationId)
+                request.setValue(
+                    appHelper.sdkVersion,
+                    forHTTPHeaderField: xSdkVersion)
 
                 if isEnableAdvancedDeferredLink {
                     request.httpMethod = "POST"
@@ -228,6 +234,9 @@ import Foundation
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: xApplicationId)
+            request.setValue(
+                appHelper.sdkVersion,
+                forHTTPHeaderField: xSdkVersion)
 
             let apiShortLinkPassData: [String: Any] = [
                 "shortId": shortId as Any,
@@ -299,6 +308,9 @@ import Foundation
             request.httpMethod = "GET"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: "x-application-key")
+            request.setValue(
+                appHelper.sdkVersion,
+                forHTTPHeaderField: xSdkVersion)
 
             networkSession.dataTask(with: request) { responseData, response, error in
                 Logger.logInternal("\(String(describing: url)) = \(linkURL)")
