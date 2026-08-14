@@ -95,6 +95,9 @@ import Combine
             if let firstLaunchExpiredObserver {
                 NotificationCenter.default.removeObserver(firstLaunchExpiredObserver)
             }
+            // Re-delivers the attribution payload once, when `isFirstLaunch` expires, so the
+            // listener sees that flip instead of the value captured when the app first launched.
+            // Reads persisted state, no refetch.
             firstLaunchExpiredObserver = NotificationCenter.default.addObserver(
                 forName: .appsOnAirFirstLaunchDidExpire, object: nil, queue: .main
             ) { [weak self] _ in
@@ -144,9 +147,12 @@ import Combine
         /// deep link handling, referral detection, and attribution.
         /// - Parameters:
         ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
-        ///   - onAttributionListener: Callback invoked when a referral fetch actually runs (first open,
-        ///     or no referral cached yet) — same trigger as `onReferralLinkDetected`. Payload includes
-        ///     referral info plus `isFirstLaunch`, `firstInstallTime`, `isConsumed`, `attributionStatus`.
+        ///   - onAttributionListener: Fires at most twice — when a referral fetch actually runs
+        ///     (first open, or no referral cached yet), then once more on the return to the
+        ///     foreground that follows `isFirstLaunch` turning `false`, re-delivering the persisted
+        ///     payload without refetching so the listener sees that flip. Later foreground returns
+        ///     are silent. Payload includes referral info plus `isFirstLaunch`, `firstInstallTime`,
+        ///     `isConsumed`, `attributionStatus`.
         @objc
         public func initialize(
             onDeepLinkProcessed: @escaping (URL?, [String: Any]) -> Void,
@@ -161,8 +167,9 @@ import Combine
         /// - Parameters:
         ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
         ///   - onReferralLinkDetected: *(Deprecated)* Use `onAttributionListener` instead. Only fires
-        ///     when a referral fetch actually runs (first open, or no referral cached yet). Receives
-        ///     just the raw referral dictionary — use `initialize(onDeepLinkProcessed:onAttributionListener:)`
+        ///     when a referral fetch actually runs (first open, or no referral cached yet) — detection
+        ///     only, so unlike `onAttributionListener` it is not re-delivered on foreground returns.
+        ///     Receives just the raw referral dictionary — use `initialize(onDeepLinkProcessed:onAttributionListener:)`
         ///     for the referral info plus `isFirstLaunch`, `firstInstallTime`, `isConsumed`, `attributionStatus`.
         @available(
             *,
@@ -363,7 +370,9 @@ import Combine
                             var linkInfo = rawLinkInfo
 
                             if (rawLinkInfo[statusCodeKey] as? Int) == successStatusCode {
-                                // isConsumed only takes effect starting the next app launch
+                                // Takes effect immediately: the in-memory value backs
+                                // `isConsumed` in the payload, and the persisted copy carries it
+                                // to later launches.
                                 AppHelper.shared.isConsumed = true
                                 AppHelper.shared.userDefaults.set(true, forKey: isConsumedKey)
 
@@ -493,6 +502,76 @@ import Combine
             self.dispatchGroup.leave()
         }
 
+        /// Reads `attributionTtl`, in seconds, from a referral response — checking the top level
+        /// first and then `data`. Nil when it is absent or not numeric.
+        private func attributionTtl(from linkInfo: [String: Any]?) -> Double? {
+            let data: [String: Any] = linkInfo?[dataKey] as? [String: Any] ?? [:]
+            let rawAttributionTtl =
+                linkInfo?[attributionTtlResponseKey] ?? data[attributionTtlResponseKey]
+
+            switch rawAttributionTtl {
+            case let value as Int: return Double(value)
+            case let value as Double: return value
+            case let value as NSNumber: return value.doubleValue
+            case let value as String: return Double(value)
+            default: return nil
+            }
+        }
+
+        /// True when `attributionTtl` has elapsed since the click, measured against the clock right
+        /// now rather than against the install time. This is a live check, so it is independent of
+        /// `attributionStatus`: an install attributed at first launch still expires once enough
+        /// time passes.
+        ///
+        /// Unknown inputs count as not expired — no clipboard click time, or no `attributionTtl` in
+        /// `storedInfo` — since expiry cannot be demonstrated and the stored referral is the better
+        /// answer. Without the advanced deferred link approach there is no click time at all, so
+        /// this is always false. A device clock that predates the click or the install counts as
+        /// expired: see the comment below.
+        private func isAttributionTtlExpired(_ storedInfo: [String: Any]) -> Bool {
+            guard let clickTimestampInMilliseconds = self.latestClickTimestampInMilliseconds,
+                let attributionTtl = self.attributionTtl(from: storedInfo)
+            else { return false }
+
+            // scale the click time to epoch seconds so both sides use the same unit
+            let clickTimestampInSeconds = Measurement(
+                value: clickTimestampInMilliseconds, unit: UnitDuration.milliseconds
+            ).converted(to: .seconds).value
+
+            // Corrected by the last server Date header, so a device clock that is merely wrong still
+            // measures the window correctly. See `AppHelper.recordServerDate` for what this does
+            // and does not stop.
+            let now = self.appHelper.correctedNow
+
+            // Time only moves forward. Corrected now falling behind something already observed
+            // means the clock was wound back between observations.
+            if self.appHelper.hasClockRewound {
+                Logger.logInternal("Clock moved backwards, treating attribution as expired")
+                return true
+            }
+
+            // The click time is stamped by the link service and the install date by the filesystem,
+            // so neither can be edited from Settings. A now that predates either one is impossible
+            // on an honest clock, and would otherwise shrink the elapsed time and hold the window
+            // open. Treat it as expired so the backend decides, rather than trusting a clock that
+            // has lied.
+            let firstInstallInSeconds = self.appHelper.firstInstallTime.map {
+                Measurement(value: Double($0), unit: UnitDuration.milliseconds)
+                    .converted(to: .seconds).value
+            }
+            if now < clickTimestampInSeconds || (firstInstallInSeconds.map { now < $0 } ?? false) {
+                Logger.logInternal(
+                    "Clock (\(now)) predates click (\(clickTimestampInSeconds)) or install "
+                        + "(\(String(describing: firstInstallInSeconds))), treating attribution as expired"
+                )
+                return true
+            }
+
+            self.appHelper.observeCorrectedTime(now)
+
+            return now - clickTimestampInSeconds > attributionTtl
+        }
+
         private func computeAttributionStatus(
             clickTimestamp: TimeInterval?, linkInfo: [String: Any]?
         ) {
@@ -508,24 +587,9 @@ import Combine
                 return
             }
 
-            // Read TTL from response data when available; default to empty.
-            let data: [String: Any] = linkInfo?[dataKey] as? [String: Any] ?? [:]
-
-            let rawAttributionTtl =
-                linkInfo?[attributionTtlResponseKey] ?? data[attributionTtlResponseKey]
-
-            let attributionTtl: Double?
-            switch rawAttributionTtl {
-            case let value as Int: attributionTtl = Double(value)
-            case let value as Double: attributionTtl = value
-            case let value as NSNumber: attributionTtl = value.doubleValue
-            case let value as String: attributionTtl = Double(value)
-            default: attributionTtl = nil
-            }
-
-            guard let attributionTtl = attributionTtl else {
+            guard let attributionTtl = self.attributionTtl(from: linkInfo) else {
                 Logger.logInternal(
-                    "attributionStatus: no attributionTtl in referral response (raw: \(String(describing: rawAttributionTtl))) — defaulting to non-organic (referral found)"
+                    "attributionStatus: no attributionTtl in referral response — defaulting to non-organic (referral found)"
                 )
                 return
             }
@@ -588,14 +652,9 @@ import Combine
             }
         }
 
-        /// Get referral and attribution info. Same as the deprecated `getReferralInfo`, with attribution info
-        /// nested inside `data`: `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
-        /// `attributionStatus` — the last resolved status, restored from storage on later launches.
-        @objc public func getAttributionInfo(completion: @escaping ([String: Any]) -> Void) {
-            var attributionInfo =
-                !((self.latestReferralInfo ?? [:]).isEmpty)
-                ? (self.latestReferralInfo ?? [:])
-                : (self.appHelper.readFromKeychain(key: referralData) ?? [:])
+        /// Returns a copy of `info` with the attribution fields added inside `data`.
+        private func withAttribution(_ info: [String: Any]) -> [String: Any] {
+            var attributionInfo = info
 
             // Append attribution fields to response data.
             var data: [String: Any] = attributionInfo[dataKey] as? [String: Any] ?? [:]
@@ -610,7 +669,51 @@ import Combine
             }
             attributionInfo[dataKey] = data
 
-            completion(attributionInfo)
+            return attributionInfo
+        }
+
+        /// Get referral and attribution info. Same as the deprecated `getReferralInfo`, with attribution info
+        /// nested inside `data`: `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
+        /// `attributionStatus` — the last resolved status, restored from storage on later launches.
+        ///
+        /// Once `attributionTtl` has elapsed since the click, the stored referral no longer
+        /// describes this install, so it is re-read from the IP lookup on every call and that
+        /// response is returned in its place. Inside the window the stored referral is served
+        /// as-is.
+        ///
+        /// `attributionStatus` is deliberately left alone: it stays as it resolved at install time,
+        /// so it and `isConsumed` keep reporting what was attributed even once the payload carries
+        /// the IP based referral. A failed lookup falls back to the stored referral rather than
+        /// surfacing the error object to the host app.
+        @objc public func getAttributionInfo(completion: @escaping ([String: Any]) -> Void) {
+            let storedInfo =
+                !((self.latestReferralInfo ?? [:]).isEmpty)
+                ? (self.latestReferralInfo ?? [:])
+                : (self.appHelper.readFromKeychain(key: referralData) ?? [:])
+
+            guard self.isAttributionTtlExpired(storedInfo) else {
+                completion(self.withAttribution(storedInfo))
+                return
+            }
+
+            AppLinkApiService.apiReferralInfo { rawReferralInfo in
+                // apiReferralInfo completes on a URLSession queue; the callers of this method
+                // (the foreground observer, the RN bridge) all expect main.
+                DispatchQueue.main.async {
+                    guard (rawReferralInfo[statusCodeKey] as? Int) == successStatusCode else {
+                        Logger.logInternal(
+                            "IP referral lookup failed for organic install, falling back to stored referral"
+                        )
+                        completion(self.withAttribution(storedInfo))
+                        return
+                    }
+
+                    var referralInfo = rawReferralInfo
+                    // strip the internal statusCode before exposing it to the host app
+                    referralInfo.removeValue(forKey: statusCodeKey)
+                    completion(self.withAttribution(referralInfo))
+                }
+            }
         }
 
         ///help to handle the get link for referral info

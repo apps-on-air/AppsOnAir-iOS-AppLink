@@ -8,9 +8,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)shared;
 
 /// Set up the SDK and start tracking app links and referral events.
-/// `onAttributionListener` fires when a referral fetch actually runs (first open,
-/// or no referral cached yet), with `isFirstLaunch`, `firstInstallTime`,
-/// `isConsumed`, and `attributionStatus` included in its payload.
+/// `onAttributionListener` fires at most twice: when a referral fetch actually
+/// runs (first open, or no referral cached yet), then once more on the return to
+/// the foreground that follows `isFirstLaunch` turning `NO`, re-delivering the
+/// persisted payload without refetching. Later foreground returns are silent.
+/// `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and `attributionStatus`
+/// are included in its payload.
 - (void)initializeOnDeepLinkProcessed:
             (void (^)(NSURL *_Nullable url,
                       NSDictionary *info))onDeepLinkProcessed
@@ -45,6 +48,10 @@ NS_ASSUME_NONNULL_BEGIN
     (void (^)(NSDictionary *info))completion __attribute__((
         deprecated("Use getAttributionInfoWithCompletion: instead")));
 
+/// Get referral and attribution info. Same as the deprecated `getReferralInfo`,
+/// with `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
+/// `attributionStatus` ("organic"/"non-organic") included in the response —
+/// the last resolved status, restored from storage on later launches.
 - (void)getAttributionInfoWithCompletion:
     (void (^)(NSDictionary *info))completion;
 

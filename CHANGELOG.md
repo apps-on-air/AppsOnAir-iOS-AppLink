@@ -2,6 +2,7 @@
 
 **New method and listener:** 
 * Added `getAttributionInfo`/`onAttributionListener`, returning `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and `attributionStatus` (`"organic"`/`"non-organic"`) alongside referral data.
+* `onAttributionListener` fires at most twice: at first detection, then once more on the return to the foreground that follows `isFirstLaunch` turning `false` (reading persisted state, no refetch). Later foreground returns are silent. Matches the Android SDK. `onReferralLinkDetected` keeps its detection-only behaviour.
 * Deprecated `getReferralInfo` and `onReferralLinkDetected` in favor of `getAttributionInfo`/`onAttributionListener`.
 * `createAppLink()` now supports `appsFlyer` and `attributionTtl` params.
 

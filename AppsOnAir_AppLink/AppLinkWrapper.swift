@@ -10,10 +10,13 @@ import Foundation
         /// Set up the SDK and start tracking app links and referral events.
         /// - Parameters:
         ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
-        ///   - onAttributionListener: Callback invoked when a referral fetch actually runs (first open,
-        ///     or no referral cached yet) — same trigger as `onReferralLinkDetected`. The payload
-        ///     includes the referral info plus `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
-        ///     (clipboard/advanced deferred link approach only) `attributionStatus` ("organic"/"non-organic").
+        ///   - onAttributionListener: Fires at most twice — when a referral fetch actually runs
+        ///     (first open, or no referral cached yet), then once more on the return to the
+        ///     foreground that follows `isFirstLaunch` turning `false`, re-delivering the persisted
+        ///     payload without refetching so the listener sees that flip. Later foreground returns
+        ///     are silent. The payload includes the referral info plus `isFirstLaunch`,
+        ///     `firstInstallTime`, `isConsumed`, and `attributionStatus` ("organic"/"non-organic")
+        ///     — the last resolved status, restored from storage on later launches.
         @objc(initializeWithOnDeepLinkProcessed:onAttributionListener:)
         public class func initialize(
             withOnDeepLinkProcessed onDeepLinkProcessed: @escaping (URL?, NSDictionary) -> Void,
@@ -34,7 +37,7 @@ import Foundation
         ///     when a referral fetch actually runs (first open, or no referral cached yet). Receives
         ///     just the raw referral dictionary — use `initialize(withOnDeepLinkProcessed:onAttributionListener:)`
         ///     for the referral info plus `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
-        ///     (clipboard/advanced deferred link approach only) `attributionStatus` ("organic"/"non-organic").
+        ///     `attributionStatus` ("organic"/"non-organic").
         @available(
             *,
             deprecated,
@@ -84,9 +87,9 @@ import Foundation
         }
 
         /// Get referral/attribution info. Same as the deprecated `getReferralInfo`, with
-        /// `isFirstLaunch`, `firstInstallTime`, and `isConsumed` included in the response, plus
-        /// `attributionStatus` ("organic"/"non-organic") when using the clipboard (advanced
-        /// deferred link) approach.
+        /// `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and `attributionStatus`
+        /// ("organic"/"non-organic") included in the response — the last resolved status,
+        /// restored from storage on later launches.
         @objc(getAttributionInfoWithCompletion:)
         public class func getAttributionInfo(
             withCompletion completion: @escaping (NSDictionary) -> Void

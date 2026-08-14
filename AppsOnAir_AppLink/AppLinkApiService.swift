@@ -114,6 +114,8 @@ import Foundation
                 Logger.logInternal("\(String(describing: url)) = \(generateShortLink)")
 
                 let httpResponse = response as? HTTPURLResponse
+                // Server clock, used to keep attributionTtl off the editable device clock.
+                appHelper.recordServerDate(httpResponse?.value(forHTTPHeaderField: dateHeader))
 
                 let statusCode = httpResponse?.statusCode
                 do {
@@ -179,6 +181,8 @@ import Foundation
                     Logger.logInternal("\(String(describing: url)) = \(getReferralLink)")
 
                     let httpResponse = response as? HTTPURLResponse
+                    // Server clock, used to keep attributionTtl off the editable device clock.
+                    appHelper.recordServerDate(httpResponse?.value(forHTTPHeaderField: dateHeader))
 
                     let statusCode = httpResponse?.statusCode
                     do {
@@ -255,6 +259,8 @@ import Foundation
                 Logger.logInternal("\(String(describing: url)) = \(generateShortLink)")
 
                 let httpResponse = response as? HTTPURLResponse
+                // Server clock, used to keep attributionTtl off the editable device clock.
+                appHelper.recordServerDate(httpResponse?.value(forHTTPHeaderField: dateHeader))
 
                 let statusCode = httpResponse?.statusCode
                 do {
@@ -320,6 +326,8 @@ import Foundation
                     completion([errorStr: errorSomeThingWrong])
                     return
                 }
+                // Server clock, used to keep attributionTtl off the editable device clock.
+                appHelper.recordServerDate(httpResponse.value(forHTTPHeaderField: dateHeader))
 
                 let statusCode = httpResponse.statusCode
                 do {

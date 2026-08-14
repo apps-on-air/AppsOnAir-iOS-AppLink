@@ -92,7 +92,8 @@ import Foundation
 
         private var webView: WKWebView = WKWebView(frame: .zero)
 
-        /// `true` when `isAppFirstOpen` just flipped, so the next `didBecomeActive` notifies listeners.
+        /// Set when backgrounding ends the first launch, and cleared by the `didBecomeActive` that
+        /// follows. One-shot, so the attribution payload is re-delivered exactly once.
         private var firstLaunchExpired: Bool = false
 
         // MARK: - Initializer
@@ -123,6 +124,9 @@ import Foundation
         @objc private func handleAppDidEnterBackground() {
             Logger.logInternal(
                 "AppHelper: didEnterBackground — isAppFirstOpen=\(isAppFirstOpen)")
+
+            // Leaving the foreground ends the first launch, so `isFirstLaunch` turns false
+            // without waiting for the process to restart.
             guard isAppFirstOpen else { return }
             isAppFirstOpen = false
             firstLaunchExpired = true
@@ -134,6 +138,8 @@ import Foundation
             Logger.logInternal(
                 "AppHelper: didBecomeActive — firstLaunchExpired=\(firstLaunchExpired)"
             )
+            // One-shot: only the activation that follows `isFirstLaunch` expiring posts. Later
+            // returns to the foreground read the same persisted state, so they carry nothing new.
             guard firstLaunchExpired else { return }
             firstLaunchExpired = false
             Logger.logInternal(
@@ -194,6 +200,62 @@ import Foundation
         internal func updateClickTime(_ value: TimeInterval) {
             clickTime = value
             userDefaults.set(value, forKey: clickTimeStorageKey)
+        }
+
+        // MARK: - Server Time Correction
+
+        /// Parses the RFC 1123 form HTTP requires for `Date`. Static so the formatter is built once;
+        /// `DateFormatter` is expensive and this runs on every API response.
+        private static let httpDateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(identifier: "GMT")
+            formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+            return formatter
+        }()
+
+        /// `serverTime - deviceTime` at the last capture, in seconds. Zero until a response has
+        /// been seen, which makes `correctedNow` fall back to the plain device clock.
+        private var serverTimeOffset: TimeInterval {
+            get { userDefaults.double(forKey: serverTimeOffsetStorageKey) }
+            set { userDefaults.set(newValue, forKey: serverTimeOffsetStorageKey) }
+        }
+
+        /// The newest corrected time ever observed. Real time only moves forward, so a corrected
+        /// now behind this mark means the clock was wound back between two observations.
+        private var serverTimeHighWater: TimeInterval {
+            get { userDefaults.double(forKey: serverTimeHighWaterStorageKey) }
+            set { userDefaults.set(newValue, forKey: serverTimeHighWaterStorageKey) }
+        }
+
+        /// The device clock corrected by the last known server offset.
+        internal var correctedNow: TimeInterval {
+            Date().timeIntervalSince1970 + serverTimeOffset
+        }
+
+        /// True when corrected time has moved behind the newest time already observed.
+        internal var hasClockRewound: Bool {
+            let highWater = serverTimeHighWater
+            return highWater > 0 && correctedNow < highWater
+        }
+
+        /// Advances the high-water mark. Never moves it backwards.
+        internal func observeCorrectedTime(_ corrected: TimeInterval) {
+            if corrected > serverTimeHighWater {
+                serverTimeHighWater = corrected
+            }
+        }
+
+        /// Records the server clock from a response `Date` header. Called for every API response,
+        /// so an absent or malformed header is ignored rather than logged loudly.
+        internal func recordServerDate(_ header: String?) {
+            guard let header,
+                let serverDate = AppHelper.httpDateFormatter.date(from: header)
+            else { return }
+
+            let serverSeconds = serverDate.timeIntervalSince1970
+            serverTimeOffset = serverSeconds - Date().timeIntervalSince1970
+            observeCorrectedTime(serverSeconds)
         }
 
         /// Fetches the app's first install date from the Documents directory's creation date,

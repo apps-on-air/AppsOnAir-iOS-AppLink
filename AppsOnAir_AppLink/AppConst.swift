@@ -104,6 +104,15 @@ let applinkClickTimeParam = "applink_click_time"
 /// matches the Android SDK's stored key.
 let clickTimeStorageKey = "click_time"
 
+/// HTTP response header carrying the server clock, used to correct the device clock.
+let dateHeader = "Date"
+
+/// UserDefaults keys for the server-time correction. Both match the Android SDK's stored keys.
+/// The offset is `serverTime - deviceTime` at the last capture, in seconds; the high-water mark is
+/// the newest corrected time ever observed, used to detect a clock wound backwards.
+let serverTimeOffsetStorageKey = "server_time_offset"
+let serverTimeHighWaterStorageKey = "server_time_high_water"
+
 /// Response field carrying the AppsFlyer attribution object. Exposed only through the newer
 /// attribution surface, so it is stripped from the deprecated referral payloads.
 let appsFlyerKey = "appsFlyer"
