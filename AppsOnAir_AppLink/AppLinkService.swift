@@ -704,7 +704,7 @@ import Combine
                         Logger.logInternal(
                             "IP referral lookup failed for organic install, falling back to stored referral"
                         )
-                        completion(self.withAttribution(storedInfo))
+                        completion(self.withAttribution(rawReferralInfo))
                         return
                     }
 
