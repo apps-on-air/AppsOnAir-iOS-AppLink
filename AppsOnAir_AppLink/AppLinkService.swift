@@ -43,6 +43,13 @@ import Combine
 
         private var latestReferralInfo: [String: Any]?
 
+        /// The most recent successful post-expiry IP lookup. Held in memory only — like the
+        /// response `resolveReferralInfo` returns, it describes the lookup that ran, not the
+        /// install, so it must not replace the stored referral later launches read.
+        private var refreshedReferralInfo: [String: Any]?
+
+        private var refreshInFlight = false
+
         /// Attribution status: organic/non-organic. Backed by `AppHelper`, which restores it from
         /// UserDefaults on launch and persists every assignment — so a status resolved on first
         /// launch survives relaunches. Defaults to organic until something is resolved and stored.
@@ -725,6 +732,7 @@ import Combine
                     var referralInfo = rawReferralInfo
                     // strip the internal statusCode before exposing it to the host app
                     referralInfo.removeValue(forKey: statusCodeKey)
+                    self.refreshedReferralInfo = referralInfo
                     completion(transform(referralInfo))
                 }
             }
@@ -752,14 +760,51 @@ import Combine
             resolveReferralInfo(storedInfo: storedInfo, transform: withAttribution, completion: completion)
         }
 
-        ///help to handle the get link for referral info
+        /// Serves the freshest referral already held: the last post-expiry lookup when one has
+        /// run, the stored referral otherwise.
+        ///
+        /// This getter completes immediately, so unlike `getReferralInfo` and `getAttributionInfo`
+        /// it does not wait for a lookup. Once `attributionTtl` has elapsed it starts one in the
+        /// background instead, which leaves the first expired call serving the stored referral and
+        /// later calls serving the refreshed one. Android's `getReferralDetails()` is synchronous
+        /// and behaves the same way, so both platforms agree.
         @available(*, deprecated, renamed: "getAttributionInfo")
         @objc public func getReferralDetails(completion: @escaping ([String: Any]) -> Void) {
             // Retrieve stored data from the device keychain
             let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData) ?? [:]
-            resolveReferralInfo(
-                storedInfo: referralInfoFromKeyChain, transform: withoutAppsFlyer, completion: completion
-            )
+            let latest = refreshedReferralInfo ?? referralInfoFromKeyChain
+
+            if isAttributionTtlExpired(latest) {
+                refreshReferralInBackground()
+            }
+
+            completion(withoutAppsFlyer(latest))
+        }
+
+        /// Starts a lookup for `getReferralDetails`, which completes without waiting for one. At
+        /// most one runs at a time, so repeated calls past expiry do not pile up requests. A failed
+        /// lookup leaves `refreshedReferralInfo` untouched, so callers keep serving what they had.
+        private func refreshReferralInBackground() {
+            guard !refreshInFlight else { return }
+            refreshInFlight = true
+
+            AppLinkApiService.apiReferralInfo { rawReferralInfo in
+                DispatchQueue.main.async {
+                    self.refreshInFlight = false
+
+                    guard (rawReferralInfo[statusCodeKey] as? Int) == successStatusCode else {
+                        Logger.logInternal(
+                            "Background IP referral lookup failed, keeping the referral already held"
+                        )
+                        return
+                    }
+
+                    var referralInfo = rawReferralInfo
+                    // strip the internal statusCode before exposing it to the host app
+                    referralInfo.removeValue(forKey: statusCodeKey)
+                    self.refreshedReferralInfo = referralInfo
+                }
+            }
         }
 
         ///help to handle the latest link for universal link and custom URL schema
