@@ -35,6 +35,9 @@ import Combine
         //Latest link for Referral Link
         @Published var latestReferralURL: URL?
 
+        //Latest payload for Attribution
+        @Published var latestAttributionInfo: [String: Any]?
+
         // Listener for whenever link is Update
         private var linkListener: AnyCancellable?
 
@@ -66,6 +69,9 @@ import Combine
         // Listener for whenever referral link is Update
         private var referralLinkListener: AnyCancellable?
 
+        // Listener for whenever attribution info is Update
+        private var attributionInfoListener: AnyCancellable?
+
         // Manage for API call
         private let dispatchGroup = DispatchGroup()
 
@@ -76,6 +82,7 @@ import Combine
             // Cancel the listener when the object is deallocated
             linkListener?.cancel()
             referralLinkListener?.cancel()
+            attributionInfoListener?.cancel()
             NotificationCenter.default.removeObserver(self)
         }
 
@@ -92,6 +99,19 @@ import Combine
             _ = AppSwizzler.shared
 
             attributionListener = onAttributionListener
+
+            // Attribution listener: fires whenever `latestAttributionInfo` is updated, regardless
+            // of which call site (foreground re-fire or referral-detected flow) produced it.
+            // Subscribing before any assignment happens means dropFirst() only skips the initial
+            // nil emitted on subscribe, not a real payload.
+            attributionInfoListener?.cancel()
+            attributionInfoListener = self.$latestAttributionInfo
+                .dropFirst()
+                .compactMap { $0 }
+                .sink { [weak self] attributionInfo in
+                    self?.attributionListener?(attributionInfo)
+                }
+
             if let firstLaunchExpiredObserver {
                 NotificationCenter.default.removeObserver(firstLaunchExpiredObserver)
             }
@@ -106,7 +126,7 @@ import Combine
                     "AppLinkService: appsOnAirFirstLaunchDidExpire received, re-firing onAttributionListener"
                 )
                 self.getAttributionInfo { attributionInfo in
-                    self.attributionListener?(attributionInfo)
+                    self.latestAttributionInfo = attributionInfo
                 }
             }
 
@@ -132,7 +152,7 @@ import Combine
                                 onReferralLinkDetected?(self.withoutAppsFlyer(referralInfo))
 
                                 self.getAttributionInfo { attributionInfo in
-                                    onAttributionListener?(attributionInfo)
+                                    self.latestAttributionInfo = attributionInfo
                                 }
                             }
                         }
@@ -531,7 +551,7 @@ import Combine
         private func isAttributionTtlExpired(_ storedInfo: [String: Any]) -> Bool {
             guard let clickTimestampInMilliseconds = self.latestClickTimestampInMilliseconds,
                 let attributionTtl = self.attributionTtl(from: storedInfo)
-            else { return false }
+            else { return true }
 
             // scale the click time to epoch seconds so both sides use the same unit
             let clickTimestampInSeconds = Measurement(
@@ -643,12 +663,14 @@ import Combine
         @available(*, deprecated, renamed: "getAttributionInfo")
         @objc public func getReferralInfo(completion: @escaping ([String: Any]) -> Void) {
             dispatchGroup.notify(queue: .main) {
-                if !((self.latestReferralInfo ?? [:]).isEmpty) {
-                    completion(self.withoutAppsFlyer(self.latestReferralInfo ?? [:]))
-                    return
-                }
-                let referralInfoFromKeyChain = self.appHelper.readFromKeychain(key: referralData)
-                completion(self.withoutAppsFlyer(referralInfoFromKeyChain ?? [:]))
+                let storedInfo =
+                    !((self.latestReferralInfo ?? [:]).isEmpty)
+                    ? (self.latestReferralInfo ?? [:])
+                    : (self.appHelper.readFromKeychain(key: referralData) ?? [:])
+
+                self.resolveReferralInfo(
+                    storedInfo: storedInfo, transform: self.withoutAppsFlyer, completion: completion
+                )
             }
         }
 
@@ -672,6 +694,42 @@ import Combine
             return attributionInfo
         }
 
+        /// Resolves referral info for a call site: serves `storedInfo` as-is while
+        /// `attributionTtl` hasn't elapsed, otherwise re-reads it from the IP lookup and serves
+        /// that response in its place. A failed lookup falls back to the raw lookup response
+        /// rather than surfacing an error to the host app. `transform` shapes the final payload —
+        /// `withAttribution` for `getAttributionInfo`, `withoutAppsFlyer` for the deprecated
+        /// referral getters.
+        private func resolveReferralInfo(
+            storedInfo: [String: Any],
+            transform: @escaping ([String: Any]) -> [String: Any],
+            completion: @escaping ([String: Any]) -> Void
+        ) {
+            guard self.isAttributionTtlExpired(storedInfo) else {
+                completion(transform(storedInfo))
+                return
+            }
+
+            AppLinkApiService.apiReferralInfo { rawReferralInfo in
+                // apiReferralInfo completes on a URLSession queue; the callers of this method
+                // (the foreground observer, the RN bridge) all expect main.
+                DispatchQueue.main.async {
+                    guard (rawReferralInfo[statusCodeKey] as? Int) == successStatusCode else {
+                        Logger.logInternal(
+                            "IP referral lookup failed for organic install, falling back to stored referral"
+                        )
+                        completion(transform(rawReferralInfo))
+                        return
+                    }
+
+                    var referralInfo = rawReferralInfo
+                    // strip the internal statusCode before exposing it to the host app
+                    referralInfo.removeValue(forKey: statusCodeKey)
+                    completion(transform(referralInfo))
+                }
+            }
+        }
+
         /// Get referral and attribution info. Same as the deprecated `getReferralInfo`, with attribution info
         /// nested inside `data`: `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
         /// `attributionStatus` — the last resolved status, restored from storage on later launches.
@@ -691,37 +749,17 @@ import Combine
                 ? (self.latestReferralInfo ?? [:])
                 : (self.appHelper.readFromKeychain(key: referralData) ?? [:])
 
-            guard self.isAttributionTtlExpired(storedInfo) else {
-                completion(self.withAttribution(storedInfo))
-                return
-            }
-
-            AppLinkApiService.apiReferralInfo { rawReferralInfo in
-                // apiReferralInfo completes on a URLSession queue; the callers of this method
-                // (the foreground observer, the RN bridge) all expect main.
-                DispatchQueue.main.async {
-                    guard (rawReferralInfo[statusCodeKey] as? Int) == successStatusCode else {
-                        Logger.logInternal(
-                            "IP referral lookup failed for organic install, falling back to stored referral"
-                        )
-                        completion(self.withAttribution(rawReferralInfo))
-                        return
-                    }
-
-                    var referralInfo = rawReferralInfo
-                    // strip the internal statusCode before exposing it to the host app
-                    referralInfo.removeValue(forKey: statusCodeKey)
-                    completion(self.withAttribution(referralInfo))
-                }
-            }
+            resolveReferralInfo(storedInfo: storedInfo, transform: withAttribution, completion: completion)
         }
 
         ///help to handle the get link for referral info
         @available(*, deprecated, renamed: "getAttributionInfo")
         @objc public func getReferralDetails(completion: @escaping ([String: Any]) -> Void) {
             // Retrieve stored data from the device keychain
-            let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
-            completion(withoutAppsFlyer(referralInfoFromKeyChain ?? [:]))
+            let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData) ?? [:]
+            resolveReferralInfo(
+                storedInfo: referralInfoFromKeyChain, transform: withoutAppsFlyer, completion: completion
+            )
         }
 
         ///help to handle the latest link for universal link and custom URL schema
