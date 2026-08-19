@@ -10,6 +10,9 @@ import Foundation
         /// Set up the SDK and start tracking app links and referral events.
         /// - Parameters:
         ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
+        ///   - onReferralLinkDetected: *(Deprecated)* Use `onAttributionListener` instead. Detection
+        ///     only — fires when a referral fetch actually runs, and receives the bare referral
+        ///     dictionary with `appsFlyer` removed.
         ///   - onAttributionListener: Fires at most twice — when a referral fetch actually runs
         ///     (first open, or no referral cached yet), then once more on the return to the
         ///     foreground that follows `isFirstLaunch` turning `false`, re-delivering the persisted
@@ -17,37 +20,11 @@ import Foundation
         ///     are silent. The payload includes the referral info plus `isFirstLaunch`,
         ///     `firstInstallTime`, `isConsumed`, and `attributionStatus` ("organic"/"non-organic")
         ///     — the last resolved status, restored from storage on later launches.
-        @objc(initializeWithOnDeepLinkProcessed:onAttributionListener:)
+        @objc(initializeWithOnDeepLinkProcessed:onReferralLinkDetected:onAttributionListener:)
         public class func initialize(
             withOnDeepLinkProcessed onDeepLinkProcessed: @escaping (URL?, NSDictionary) -> Void,
+            onReferralLinkDetected: ((NSDictionary) -> Void)? = nil,
             onAttributionListener: ((NSDictionary) -> Void)? = nil
-        ) {
-            AppLinkService.shared.initialize(
-                onDeepLinkProcessed: { url, info in
-                    onDeepLinkProcessed(url, info as NSDictionary)
-                },
-                onAttributionListener: { attributionInfo in
-                    onAttributionListener?(attributionInfo as NSDictionary)
-                })
-        }
-
-        /// - Parameters:
-        ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
-        ///   - onReferralLinkDetected: *(Deprecated)* Use `onAttributionListener` instead. Only fires
-        ///     when a referral fetch actually runs (first open, or no referral cached yet). Receives
-        ///     just the raw referral dictionary — use `initialize(withOnDeepLinkProcessed:onAttributionListener:)`
-        ///     for the referral info plus `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
-        ///     `attributionStatus` ("organic"/"non-organic").
-        @available(
-            *,
-            deprecated,
-            message:
-                "`onReferralLinkDetected` is deprecated and will be removed in a future release. Use `onAttributionListener` instead."
-        )
-        @objc(initializeWithOnDeepLinkProcessed:onReferralLinkDetected:)
-        public class func initialize(
-            withOnDeepLinkProcessed onDeepLinkProcessed: @escaping (URL?, NSDictionary) -> Void,
-            onReferralLinkDetected: ((NSDictionary) -> Void)? = nil
         ) {
             AppLinkService.shared.initialize(
                 onDeepLinkProcessed: { url, info in
@@ -55,6 +32,9 @@ import Foundation
                 },
                 onReferralLinkDetected: { referralInfo in
                     onReferralLinkDetected?(referralInfo as NSDictionary)
+                },
+                onAttributionListener: { attributionInfo in
+                    onAttributionListener?(attributionInfo as NSDictionary)
                 })
         }
 

@@ -163,48 +163,28 @@ import Combine
             referralHandler(isAPICall: true)
         }
 
-        /// Initializes the common services like AppsOnAir Core, swizzling,
-        /// deep link handling, referral detection, and attribution.
-        /// - Parameters:
-        ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
-        ///   - onAttributionListener: Fires at most twice — when a referral fetch actually runs
-        ///     (first open, or no referral cached yet), then once more on the return to the
-        ///     foreground that follows `isFirstLaunch` turning `false`, re-delivering the persisted
-        ///     payload without refetching so the listener sees that flip. Later foreground returns
-        ///     are silent. Payload includes referral info plus `isFirstLaunch`, `firstInstallTime`,
-        ///     `isConsumed`, `attributionStatus`.
-        @objc
-        public func initialize(
-            onDeepLinkProcessed: @escaping (URL?, [String: Any]) -> Void,
-            onAttributionListener: (([String: Any]) -> Void)? = nil
-        ) {
-            performInitialization(
-                onDeepLinkProcessed: onDeepLinkProcessed,
-                onAttributionListener: onAttributionListener
-            )
-        }
 
         /// - Parameters:
         ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
         ///   - onReferralLinkDetected: *(Deprecated)* Use `onAttributionListener` instead. Only fires
         ///     when a referral fetch actually runs (first open, or no referral cached yet) — detection
         ///     only, so unlike `onAttributionListener` it is not re-delivered on foreground returns.
-        ///     Receives just the raw referral dictionary — use `initialize(onDeepLinkProcessed:onAttributionListener:)`
-        ///     for the referral info plus `isFirstLaunch`, `firstInstallTime`, `isConsumed`, `attributionStatus`.
-        @available(
-            *,
-            deprecated,
-            message:
-                "`onReferralLinkDetected` is deprecated and will be removed in a future release. Use `onAttributionListener` instead."
-        )
-        @objc(initializeOnDeepLinkProcessed:onReferralLinkDetected:)
+        ///     Receives just the raw referral dictionary, with `appsFlyer` removed.
+        ///   - onAttributionListener: Fires at most twice — when a referral fetch actually runs, then
+        ///     once more on the return to the foreground that follows `isFirstLaunch` turning `false`,
+        ///     re-delivering the persisted payload without refetching. Later foreground returns are
+        ///     silent. Payload adds `isFirstLaunch`, `firstInstallTime`, `isConsumed` and
+        ///     `attributionStatus` to the referral info.
+        @objc(initializeOnDeepLinkProcessed:onReferralLinkDetected:onAttributionListener:)
         public func initialize(
             onDeepLinkProcessed: @escaping (URL?, [String: Any]) -> Void,
-            onReferralLinkDetected: (([String: Any]) -> Void)? = nil
+            onReferralLinkDetected: (([String: Any]) -> Void)? = nil,
+            onAttributionListener: (([String: Any]) -> Void)? = nil
         ) {
             performInitialization(
                 onDeepLinkProcessed: onDeepLinkProcessed,
-                onReferralLinkDetected: onReferralLinkDetected
+                onReferralLinkDetected: onReferralLinkDetected,
+                onAttributionListener: onAttributionListener
             )
         }
 
