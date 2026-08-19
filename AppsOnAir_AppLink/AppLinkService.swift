@@ -541,22 +541,31 @@ import Combine
         /// True when `attributionTtl` has elapsed since the click, measured against the clock right
         /// now rather than against the install time. This is a live check, so it is independent of
         /// `attributionStatus`: an install attributed at first launch still expires once enough
-        /// time passes.
+        /// time passes, which is how the Android SDK measures the window.
         ///
-        /// Unknown inputs count as not expired — no clipboard click time, or no `attributionTtl` in
-        /// `storedInfo` — since expiry cannot be demonstrated and the stored referral is the better
-        /// answer. Without the advanced deferred link approach there is no click time at all, so
-        /// this is always false. A device clock that predates the click or the install counts as
-        /// expired: see the comment below.
+        /// Unknown inputs count as expired: an `attributionTtl` that is not in `storedInfo`, or
+        /// neither a click time nor an install time to measure the window from. Expiry cannot be
+        /// demonstrated in either case, so the referral is refreshed rather than trusted. A device
+        /// clock that predates the click or the install also counts as expired: see the comment
+        /// below.
         private func isAttributionTtlExpired(_ storedInfo: [String: Any]) -> Bool {
-            guard let clickTimestampInMilliseconds = self.latestClickTimestampInMilliseconds,
-                let attributionTtl = self.attributionTtl(from: storedInfo)
-            else { return true }
+            guard let attributionTtl = self.attributionTtl(from: storedInfo) else { return true }
 
-            // scale the click time to epoch seconds so both sides use the same unit
-            let clickTimestampInSeconds = Measurement(
-                value: clickTimestampInMilliseconds, unit: UnitDuration.milliseconds
-            ).converted(to: .seconds).value
+            // scale every epoch input to seconds so the comparisons below use one unit
+            let clickTimestampInSeconds = self.latestClickTimestampInMilliseconds.map {
+                Measurement(value: $0, unit: UnitDuration.milliseconds)
+                    .converted(to: .seconds).value
+            }
+            let firstInstallInSeconds = self.appHelper.firstInstallTime.map {
+                Measurement(value: Double($0), unit: UnitDuration.milliseconds)
+                    .converted(to: .seconds).value
+            }
+
+            // The window runs from the click. An organic install has none, and neither does a
+            // referral that carried no click time, so the install stands in for it: the stored
+            // referral stops being current once the ttl has passed either way.
+            guard let windowStartInSeconds = clickTimestampInSeconds ?? firstInstallInSeconds
+            else { return true }
 
             // Corrected by the last server Date header, so a device clock that is merely wrong still
             // measures the window correctly. See `AppHelper.recordServerDate` for what this does
@@ -575,48 +584,53 @@ import Combine
             // on an honest clock, and would otherwise shrink the elapsed time and hold the window
             // open. Treat it as expired so the backend decides, rather than trusting a clock that
             // has lied.
-            let firstInstallInSeconds = self.appHelper.firstInstallTime.map {
-                Measurement(value: Double($0), unit: UnitDuration.milliseconds)
-                    .converted(to: .seconds).value
-            }
-            if now < clickTimestampInSeconds || (firstInstallInSeconds.map { now < $0 } ?? false) {
+            if now < windowStartInSeconds || (firstInstallInSeconds.map { now < $0 } ?? false) {
                 Logger.logInternal(
-                    "Clock (\(now)) predates click (\(clickTimestampInSeconds)) or install "
-                        + "(\(String(describing: firstInstallInSeconds))), treating attribution as expired"
+                    "Clock (\(now)) predates click (\(String(describing: clickTimestampInSeconds))) "
+                        + "or install (\(String(describing: firstInstallInSeconds))), "
+                        + "treating attribution as expired"
                 )
                 return true
             }
 
             self.appHelper.observeCorrectedTime(now)
 
-            return now - clickTimestampInSeconds > attributionTtl
+            let elapsedInSeconds = now - windowStartInSeconds
+
+            Logger.logInternal(
+                "attributionTtl: now - windowStart = \(elapsedInSeconds)s, ttl: \(attributionTtl)s"
+            )
+
+            return elapsedInSeconds > attributionTtl
         }
 
         private func computeAttributionStatus(
             clickTimestamp: TimeInterval?, linkInfo: [String: Any]?
         ) {
-            // Referral found; default to non-organic and refine with click-time data.
-            latestAttributionStatus = attributionStatusNonOrganic
+            // An install is non-organic when it happened within `attributionTtl` of the click. Any
+            // missing input falls back to organic, matching the Android SDK: without all three
+            // there is nothing to show the click is what brought this install.
+            latestAttributionStatus = attributionStatusOrganic
 
             // Clipboard `applink_click_time` is in milliseconds. Already retained where it was read
             // from the clipboard, so it is only consumed here.
             guard let clickTimestampInMilliseconds = clickTimestamp else {
                 Logger.logInternal(
-                    "attributionStatus: no applink_click_time in clipboard — defaulting to non-organic (referral found)"
+                    "attributionStatus: no applink_click_time in clipboard — defaulting to organic"
                 )
                 return
             }
 
             guard let attributionTtl = self.attributionTtl(from: linkInfo) else {
                 Logger.logInternal(
-                    "attributionStatus: no attributionTtl in referral response — defaulting to non-organic (referral found)"
+                    "attributionStatus: no attributionTtl in referral response — defaulting to organic"
                 )
                 return
             }
 
             guard let firstInstallMilliseconds = appHelper.firstInstallTime else {
                 Logger.logInternal(
-                    "attributionStatus: could not read firstInstallTime — defaulting to non-organic (referral found)"
+                    "attributionStatus: could not read firstInstallTime — defaulting to organic"
                 )
                 return
             }
@@ -694,12 +708,15 @@ import Combine
             return attributionInfo
         }
 
-        /// Resolves referral info for a call site: serves `storedInfo` as-is while
-        /// `attributionTtl` hasn't elapsed, otherwise re-reads it from the IP lookup and serves
-        /// that response in its place. A failed lookup falls back to the raw lookup response
-        /// rather than surfacing an error to the host app. `transform` shapes the final payload —
-        /// `withAttribution` for `getAttributionInfo`, `withoutAppsFlyer` for the deprecated
-        /// referral getters.
+        /// Resolves referral info for a call site: serves `storedInfo` as-is while the click still
+        /// falls inside `attributionTtl`, otherwise re-reads it from the IP lookup and serves that
+        /// response in its place. The window is measured against the clock at call time, so a call
+        /// made once enough time has passed takes the lookup branch even though an earlier call on
+        /// the same install did not. Once the window has lapsed the lookup response is what is
+        /// returned, error payloads included: the stored referral no longer describes this install,
+        /// so it is not served in place of what the backend answered.
+        /// `transform` shapes the final payload — `withAttribution` for `getAttributionInfo`,
+        /// `withoutAppsFlyer` for the deprecated referral getters.
         private func resolveReferralInfo(
             storedInfo: [String: Any],
             transform: @escaping ([String: Any]) -> [String: Any],
@@ -715,8 +732,11 @@ import Combine
                 // (the foreground observer, the RN bridge) all expect main.
                 DispatchQueue.main.async {
                     guard (rawReferralInfo[statusCodeKey] as? Int) == successStatusCode else {
+                        // The lookup is the answer once the window has lapsed, so its error
+                        // payload goes to the host app as it came back — `statusCode` included —
+                        // instead of being replaced by a stored referral that has expired.
                         Logger.logInternal(
-                            "IP referral lookup failed for organic install, falling back to stored referral"
+                            "IP referral lookup failed, returning the lookup response"
                         )
                         completion(transform(rawReferralInfo))
                         return
@@ -735,14 +755,15 @@ import Combine
         /// `attributionStatus` — the last resolved status, restored from storage on later launches.
         ///
         /// Once `attributionTtl` has elapsed since the click, the stored referral no longer
-        /// describes this install, so it is re-read from the IP lookup on every call and that
-        /// response is returned in its place. Inside the window the stored referral is served
-        /// as-is.
+        /// describes this install, so it is re-read from the IP lookup and that response is
+        /// returned in its place. Inside the window the stored referral is served as-is. The
+        /// elapsed time is measured against the clock at call time, matching the Android SDK, so
+        /// the window does lapse while the app is in use.
         ///
         /// `attributionStatus` is deliberately left alone: it stays as it resolved at install time,
         /// so it and `isConsumed` keep reporting what was attributed even once the payload carries
-        /// the IP based referral. A failed lookup falls back to the stored referral rather than
-        /// surfacing the error object to the host app.
+        /// the IP based referral. A failed lookup surfaces the lookup response itself, so an
+        /// expired referral is never served as if it were current.
         @objc public func getAttributionInfo(completion: @escaping ([String: Any]) -> Void) {
             let storedInfo =
                 !((self.latestReferralInfo ?? [:]).isEmpty)
