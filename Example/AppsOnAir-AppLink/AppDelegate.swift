@@ -6,14 +6,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let appLinkService = AppLinkService.shared
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        appLinkService.initialize { url, linkInfo in
-            // write the code for handling flow based on url
-        } onAttributionListener: { attributionInfo in
-            // write the code for handling attribution flow based on url
-        }
+        // One call registers every callback. onReferralLinkDetected is deprecated and kept here
+        // only to compare its payload with onAttributionListener: it is detection-only and drops
+        // `appsFlyer` and the attribution fields.
+        // Initialize the AppLink to track the deeplink and attribution tracking.
+        appLinkService.initialize(
+            onDeepLinkProcessed: { url, linkInfo in
+              // write the code for handling onDeepLinkProcessed flow based on url
+            },
+            onReferralLinkDetected: { referralInfo in
+                                 // write the code for handling onReferralLinkDetected flow based on referralInfo
+               },
+            onAttributionListener: { attributionInfo in
+                            // write the code for handling onAttributionListener flow based on attributionInfo
+
+            })
+        
         return true
     }
     
