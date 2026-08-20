@@ -1,7 +1,6 @@
 ## [![pub package](https://appsonair.com/images/logo.svg)](https://cocoapods.org/pods/AppsOnAir-AppLink)
 # AppsOnAir-AppLink
 
-[![CI Status](https://img.shields.io/travis/164989979/AppsOnAir-AppLink.svg?style=flat)](https://travis-ci.org/164989979/AppsOnAir-AppLink)
 [![Version](https://img.shields.io/cocoapods/v/AppsOnAir-AppLink.svg?style=flat)](https://cocoapods.org/pods/AppsOnAir-AppLink)
 [![License](https://img.shields.io/cocoapods/l/AppsOnAir-AppLink.svg?style=flat)](https://cocoapods.org/pods/AppsOnAir-AppLink)
 [![Platform](https://img.shields.io/cocoapods/p/AppsOnAir-AppLink.svg?style=flat)](https://cocoapods.org/pods/AppsOnAir-AppLink)
@@ -16,6 +15,7 @@
 - ✅ Fallback behavior (e.g., open App Store)
 - ✅ Custom domain support
 - ✅ Referral tracking
+- ✅ AppsFlyer attribution params (`appsFlyer`) and attribution TTL (`attributionTtl`) on link creation
 - ✅ Seamless migration from Firebase Dynamic Links to AppLink
 
 **Note:** For comprehensive instructions on migrating Firebase Dynamic Links to AppLink, refer to the [documentation](https://documentation.appsonair.com/MobileQuickstart/AppLink/firebase-dynamiclinks-migration).
@@ -63,7 +63,7 @@ If you are integrating AppsOnAir-AppLink into another Swift package, add it to t
 dependencies: [
     .package(
         url: "https://github.com/apps-on-air/AppsOnAir-iOS-AppLink.git",
-        from: "1.4.1"
+        from: "2.0.0"
     )
 ]
 ```
@@ -197,8 +197,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         AppLinkService.shared.initialize { url, linkInfo in
             //Write the code for handling flow based on url
-        }onReferralLinkDetected: { referralInfo in
-            //Write the code for handling referral flow based on url
+        } onAttributionListener: { attributionInfo in
+            //Write the code for handling attribution flow
         }
       return true
   }
@@ -216,8 +216,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Help to initialize link services
         AppLinkService.shared.initialize { url, linkInfo in
             //Write the code for handling flow based on url
-        } onReferralLinkDetected: { referralInfo in
-            //Write the code for handling referral flow based on url
+        } onAttributionListener: { attributionInfo in
+            //Write the code for handling attribution flow
         }
         return true
     }
@@ -242,10 +242,11 @@ Objective-C
     self.appLinkServices = [AppLinkService shared];
     
     // Help to initialize link services
-    [self.appLinkServices initializeOnDeepLinkProcessed:^(NSURL * url, NSDictionary<NSString *,id> * linkInfo) {
-        //Write the code for handling flow based on url
-    } onReferralLinkDetected:^(NSDictionary<NSString *,id> * referralInfo) {
-        //Write the code for handling referral flow based on url
+    [self.appLinkServices initializeOnDeepLinkProcessed:^(NSURL * url, NSDictionary<NSString *,id> * linkInfo){
+          //Write the code for handling flow based on url
+    } onReferralLinkDetected:nil
+        onAttributionListener:^(NSDictionary<NSString *,id> * attributionInfo) {
+       //Write the code for handling attribution flow
     }];
     // Override point for customization after application launch.
     return YES;
@@ -260,25 +261,38 @@ Objective-C++
 #import "AppsOnAir-AppLink/AppLinkService.h"
 
 @interface AppDelegate ()
-@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@property (nonatomic, strong)  AppLinkService *appLinkServices;
 @end
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  self.appLinkServices = [AppLinkServices shared];
+  self.appLinkServices = [AppLinkService shared];
 
-  [self.appLinkServices initializeWithOnDeepLinkProcessed:^(NSURL * _Nullable url, NSDictionary * _Nonnull linkInfo) {
+  [self.appLinkServices initializeOnDeepLinkProcessed:^(NSURL * _Nullable url, NSDictionary * _Nonnull linkInfo) {
       //Write the code for handling flow based on url
-  } onReferralLinkDetected:^(NSDictionary * _Nonnull referralInfo) {
-      //Write the code for handling referral flow based on url
+  } onReferralLinkDetected:nil
+      onAttributionListener:^(NSDictionary * _Nonnull attributionInfo) {
+      //Write the code for handling attribution flow
   }];
   
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 ```
+
+`initialize` takes a single signature, with both listeners optional:
+
+```swift
+initialize(
+    onDeepLinkProcessed: (URL?, [String: Any]) -> Void,
+    onReferralLinkDetected: (([String: Any]) -> Void)? = nil,
+    onAttributionListener: (([String: Any]) -> Void)? = nil
+)
+```
+
+
 
 ## 2. Creating the AppLink 
 You can also create link, such as from a button action:
@@ -298,6 +312,24 @@ Objective-C++
 ```swift
 #import "AppsOnAir-AppLink/AppLinkService.h"
 ```
+
+### `appsFlyer` Parameters
+
+*(Optional)* Pass this dictionary to `createAppLink` to attach AppsFlyer attribution data to the generated link.
+
+| Key | Type | Required | Description |
+|---|---|---|---|
+| `channel` | String | Optional | The media source / channel driving traffic to this link (e.g. `"appsonair"`). |
+| `campaignId` | String | Optional | Unique identifier for the marketing campaign. |
+| `campaign` | String | Optional | Human-readable name of the marketing campaign. |
+| `subs` | [String] | Optional | Sub-parameters for granular tracking (e.g. `["sub1", "sub2", "sub3", "sub4", "sub5"]`). |
+| `metaTitle` | String | Optional | Title used for attribution metadata. |
+| `metaDescription` | String | Optional | Description used for attribution metadata. |
+
+### `attributionTtl` Parameter
+
+*(Optional)* `Int` — time-to-live, in seconds, for attribution of the generated link (e.g. `60` for 60 seconds).
+
 
 ### App-Link Implement Code
 
@@ -324,6 +356,15 @@ struct ContentView: View {
                     isOpenInBrowserApple: false,
                     isOpenInIosApp: true,
                     iosFallbackUrl: "https://appstore.com",
+                    appsFlyer: [ // Optional: AppsFlyer attribution params
+                        "channel": "appsonair",
+                        "campaignId": "01",
+                        "campaign": "test",
+                        "subs": ["sub1", "sub2", "sub3", "sub4", "sub5"],
+                        "metaTitle": "metaTitle",
+                        "metaDescription": "metaDescription"
+                    ],
+                    attributionTtl: 60 // Optional: TTL (in seconds) for attribution
                 ) { linkInfo in
                      //Write the code for handling create link
                 }
@@ -374,7 +415,7 @@ class ViewController: UIViewController {
                // Help to create the link
                // <urlPrefix> shouldn't contain http or https
                // <shortId>  If not set, it will be auto-generated
-               AppLinkService.shared.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com"
+               AppLinkService.shared.createAppLink(url: "https://appsonair.com",name: "AppsOnAir",urlPrefix: "YOUR_DOMAIN_NAME",shortId: "LINK_ID",socialMeta: ["title": "link title","description":  "link description","imageUrl": "https://image.png"],isOpenInBrowserApple: false,isOpenInIosApp: true,iosFallbackUrl: "https://appstore.com",appsFlyer: ["channel": "appsonair","campaignId": "01","campaign": "test","subs": ["sub1", "sub2", "sub3", "sub4", "sub5"],"metaTitle": "metaTitle","metaDescription": "metaDescription"],attributionTtl: 60
         ) { linkInfo  in
                     //Write the code for handling create link
                 }
@@ -424,7 +465,7 @@ Objective-C
      // Help to create link
      // <urlPrefix> shouldn't contain http or https
      // <shortId>  If not set, it will be auto-generated
-    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com"completion:^(NSDictionary<NSString *,id> * linkInfo) {
+    [self.appLinkService createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID"socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com"appsFlyer:@{@"channel":@"appsonair",@"campaignId":@"01",@"campaign":@"test",@"subs":@[@"sub1",@"sub2",@"sub3",@"sub4",@"sub5"],@"metaTitle":@"metaTitle",@"metaDescription":@"metaDescription"} attributionTtl:@60 completion:^(NSDictionary<NSString *,id> * linkInfo) {
         //Write the code for handling create link
     }];
 }
@@ -436,7 +477,7 @@ Objective-C++
 #import "AppsOnAir-AppLink/AppLinkService.h"
 
 @interface AppDelegate ()
-@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@property (nonatomic, strong)  AppLinkService *appLinkServices;
 @end
 
 @implementation AppDelegate
@@ -444,9 +485,9 @@ Objective-C++
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 
-  self.appLinkServices = [AppLinkServices shared];
+  self.appLinkServices = [AppLinkService shared];
 
-  [self.appLinkServices createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID" socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com" completion:^(NSDictionary<NSString*,id> * linkInfo) {
+  [self.appLinkServices createAppLinkWithUrl:@"https://appsonair.com" name:@"AppsOnAir" urlPrefix:@"YOUR_DOMAIN_NAME" shortId: @"LINK_ID" socialMeta:@{@"title":@"link title",@"description":@"link description",@"imageUrl":@"https://image.png"}isOpenInBrowserApple:@0 isOpenInIosApp:@1 iosFallbackUrl:@"https://appstore.com" isOpenInAndroidApp:@1 isOpenInBrowserAndroid:@0 androidFallbackUrl:@"https://play.google.com" appsFlyer:@{@"channel":@"appsonair",@"campaignId":@"01",@"campaign":@"test",@"subs":@[@"sub1",@"sub2",@"sub3",@"sub4",@"sub5"],@"metaTitle":@"metaTitle",@"metaDescription":@"metaDescription"} attributionTtl:@60 completion:^(NSDictionary<NSString*,id> * linkInfo) {
     //Write the code for handling create link
     }];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
@@ -454,8 +495,8 @@ Objective-C++
 ```
 
 
-## 3. To Retrieving Referral Link  
-You can also retrieving linkInfo, such as from a button action:
+## 3. Retrieving the attribution info
+You can also retrieve the attribution info on demand, such as from a button action:
 ### Firstly, import AppsOnAir_AppLink in your ViewController file or swift code file
 
 Swift / SwiftUI
@@ -486,11 +527,12 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 20) {
             Button(action: {
-                AppLinkService.shared.getReferralInfo { linkInfo in
-                   //Write the code for handling referral flow based on url
+                AppLinkService.shared.getAttributionInfo { attributionInfo in
+                   //Write the code for handling attribution flow
                 }
             }) {
-                Text("Fetch Referral Link")
+
+                Text("Fetch Attribution Info")
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(Color.green)
@@ -533,9 +575,9 @@ class ViewController: UIViewController {
     
           // Define the action when button is pressed
            @objc func buttonPressed() {
-                // Help to retrieving referral linkInfo
-                AppLinkService.shared.getReferralInfo { linkInfo in
-                   //Write the code for handling referral linkInfo
+                // Help to retrieving the attribution info
+                AppLinkService.shared.getAttributionInfo { attributionInfo in
+                   //Write the code for handling attribution info
                 }
            }
 
@@ -568,7 +610,7 @@ Objective-C
        UIButton *ctaButton = [UIButton buttonWithType:UIButtonTypeSystem];
        
        // Set button title
-       [ctaButton setTitle:@"Fetch Referral Link" forState:UIControlStateNormal];
+       [ctaButton setTitle:@"Fetch Attribution Info" forState:UIControlStateNormal];
        
        // Set button frame (position and size)
        ctaButton.frame = CGRectMake(100, 200, 200, 50);
@@ -580,9 +622,9 @@ Objective-C
        [self.view addSubview:ctaButton];
 }
 - (void)openNextScreen {
-    // Help to retrieving referral linkInfo
-    [self.appLinkServices getReferralInfoWithCompletion:^(NSDictionary<NSString *,id> * linkInfo) {
-         //Write the code for handling referral linkInfo
+    // Help to retrieving the attribution info
+    [self.appLinkService getAttributionInfoWithCompletion:^(NSDictionary<NSString *,id> * attributionInfo) {
+         //Write the code for handling attribution info
     }];
 }
 ```
@@ -593,22 +635,56 @@ Objective-C++
 #import "AppsOnAir-AppLink/AppLinkService.h"
 
 @interface AppDelegate ()
-@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@property (nonatomic, strong)  AppLinkService *appLinkServices;
 @end
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 
-  self.appLinkServices = [AppLinkServices shared];
+  self.appLinkServices = [AppLinkService shared];
 
-  [self.appLinkServices getReferralInfoWithCompletion:^(NSDictionary * _Nonnull linkInfo) {
-      //Write the code for handling referral linkInfo
+  [self.appLinkServices getAttributionInfoWithCompletion:^(NSDictionary * _Nonnull attributionInfo) {
+      //Write the code for handling attribution info
   }];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 ```
+
+Along with the referral details, `getAttributionInfo()` and `onAttributionListener()` add the
+following keys inside the `data` object of the response:
+
+| Response Key | Type | Description |
+| --- | --- | --- |
+| `isFirstLaunch` | Bool | `true` only during the very first app launch after installation.|
+| `firstInstallTime` | Int64 | Timestamp (epoch milliseconds) of the app's first installation.|
+| `isConsumed` | Bool | `true` once a referral fetch has returned successfully for this install. Persisted. |
+| `attributionStatus` | String | `non-organic` when the install happened within `attributionTtl` of the click, otherwise `organic`. |
+| `applink_click_time` | Int64 | Timestamp (epoch milliseconds) of the click. |
+
+
+
+### Deprecated APIs
+
+The following APIs are deprecated and will be removed in a future release. Existing
+integrations keep working, but should migrate:
+
+| Deprecated | Use instead |
+| --- | --- |
+| `onReferralLinkDetected()` | `onAttributionListener()` |
+| `getReferralInfo()` | `getAttributionInfo()` |
+| `getReferralDetails()` | `getAttributionInfo()` |
+
+The deprecated getters carry the **referral payload only**. None of `appsFlyer`, `isFirstLaunch`,
+`firstInstallTime`, `isConsumed`, `attributionStatus` or `applink_click_time` appear in them —
+those belong to `getAttributionInfo()` and `onAttributionListener()`. `attributionTtl` expiry
+still applies to all three getters.
+
+`onReferralLinkDetected` is still a parameter of `initialize`, so it no longer raises a deprecation
+warning at the call site the way the removed overload did. It remains detection-only: it fires when
+a referral fetch actually runs — first open, or no referral cached yet — and is not re-delivered on
+the foreground return that follows `isFirstLaunch` turning `false`.
 
 ## Troubleshooting
 
@@ -673,6 +749,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 @property (nonatomic, strong) AppLinkService *appLinkServices;
 @end
 
+@implementation AppDelegate
+
 - (BOOL)application:(UIApplication * )application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     self.appLinkServices = [AppLinkService shared];
     return YES;
@@ -698,9 +776,10 @@ continueUserActivity:(NSUserActivity *)userActivity
     return NO;
 }
 
+@end
 ```
 
-**SceneDelegatee.m**
+**SceneDelegate.m**
 
 ```swift
 #import "SceneDelegate.h"
@@ -770,7 +849,7 @@ willConnectToSession:(UISceneSession *)session
 #import "AppsOnAir-AppLink/AppLinkService.h"
 
 @interface AppDelegate ()
-@property (nonatomic, strong)  AppLinkServices *appLinkServices;
+@property (nonatomic, strong)  AppLinkService *appLinkServices;
 @end
 
 @implementation AppDelegate
@@ -778,7 +857,7 @@ willConnectToSession:(UISceneSession *)session
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   
-  self.appLinkServices = [AppLinkServices shared];
+  self.appLinkServices = [AppLinkService shared];
   
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
@@ -787,7 +866,7 @@ willConnectToSession:(UISceneSession *)session
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
 
-  [self.appLinkServices handleAppLinkWithURL:url];
+  [self.appLinkServices handleAppLinkWithIncomingURL:url];
   
     return YES;
 }
@@ -798,7 +877,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 
     if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
         NSURL *url = userActivity.webpageURL;
-        [self.appLinkServices handleAppLinkWithURL:url];
+        [self.appLinkServices handleAppLinkWithIncomingURL:url];
     }
     return NO;
 }

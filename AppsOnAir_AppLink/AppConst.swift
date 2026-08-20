@@ -16,9 +16,10 @@ let referralSuccessFully = "Referral SuccessFully"
 
 let clipboardEmpty = "Clipboard is empty"
 
-let invalidBundleIdentifier  = "Invalid bundle identifier"
+let invalidBundleIdentifier = "Invalid bundle identifier"
 
-let enableAdvancedDeferredLinkDisabled = "EnableAdvancedDeferredLink is disabled/does not exist in Info.plist"
+let enableAdvancedDeferredLinkDisabled =
+    "EnableAdvancedDeferredLink is disabled/does not exist in Info.plist"
 
 let notFoundBundle = "not found or missing bundle identifier"
 
@@ -56,8 +57,81 @@ let url = "URL"
 
 let xApplicationId = "x-application-key"
 
+/// Sent on every API request so the backend can attribute behaviour to an SDK release.
+let xSdkVersion = "x-sdk-version"
+
+/// Pod name handed to `SdkManager.getVersion(for:)`, used only as a fallback.
+let appLinkSdkName = "AppsOnAir-AppLink"
+
+/// Name of the resource bundle CocoaPods builds from `s.resource_bundles`. Its
+/// `CFBundleShortVersionString` is the version reported in `x-sdk-version`, so
+/// `Resources/AppsOnAir-AppLinkInfo.plist` must stay in step with `s.version` in the podspec.
+/// SwiftPM names its bundle `<Package>_<Target>.bundle` instead, which is why it is reached
+/// through `Bundle.module` rather than by name.
+let appLinkResourceBundleName = "AppsOnAir_AppLink"
+
+/// The plist shipped inside that bundle. SwiftPM writes its own `Info.plist` without a version, so
+/// this file is the only version source under SPM and must track `s.version` in the podspec.
+/// Under CocoaPods the bundle's own `Info.plist` is stamped from `s.version` and wins.
+let appLinkInfoPlistName = "AppsOnAir-AppLinkInfo"
+
+let shortVersionKey = "CFBundleShortVersionString"
+
 let isFirstOpenKey = "isFirstOpen"
 
 let isReferralKey = "isUserReferral"
 
 let EnableAdvancedDeferredLinkKey = "EnableAdvancedDeferredLink"
+
+let isConsumedKey = "isConsumed"
+
+let isFirstLaunchKey = "isFirstLaunch"
+
+let firstInstallTimeKey = "firstInstallTime"
+
+let attributionStatusKey = "attributionStatus"
+
+/// UserDefaults key for the persisted attribution status. Distinct from `attributionStatusKey`,
+/// which names the field inside the response payload; matches the Android SDK's stored key.
+let attributionStatusStorageKey = "attribution_status"
+
+let attributionTtlResponseKey = "attributionTtl"
+
+let applinkClickTimeParam = "applink_click_time"
+
+/// UserDefaults key for the persisted clipboard click time. Distinct from `applinkClickTimeParam`,
+/// which names both the clipboard query item and the field inside the response payload;
+/// matches the Android SDK's stored key.
+let clickTimeStorageKey = "click_time"
+
+/// HTTP response header carrying the server clock, used to correct the device clock.
+let dateHeader = "Date"
+
+/// UserDefaults keys for the server-time correction. Both match the Android SDK's stored keys.
+/// The offset is `serverTime - deviceTime` at the last capture, in seconds; the high-water mark is
+/// the newest corrected time ever observed, used to detect a clock wound backwards.
+let serverTimeOffsetStorageKey = "server_time_offset"
+let serverTimeHighWaterStorageKey = "server_time_high_water"
+
+/// Response field carrying the AppsFlyer attribution object. Exposed only through the newer
+/// attribution surface, so it is stripped from the deprecated referral payloads.
+let appsFlyerKey = "appsFlyer"
+
+let attributionStatusOrganic = "organic"
+
+let attributionStatusNonOrganic = "non-organic"
+
+let statusCodeKey = "statusCode"
+
+let successStatusCode = 200
+
+let dataKey = "data"
+
+//MARK: - Internal Notifications
+
+extension Notification.Name {
+    /// Posted when the app returns to foreground after having been genuinely backgrounded
+    /// (not the initial cold-start activation), and `isFirstLaunch` flips from `true` to `false`.
+    static let appsOnAirFirstLaunchDidExpire = Notification.Name(
+        "AppsOnAirAppLink.firstLaunchDidExpire")
+}

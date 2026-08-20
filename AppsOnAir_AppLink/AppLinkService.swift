@@ -14,65 +14,178 @@ import Combine
         //App Helper service initialization
         let appHelper = AppHelper.shared
 
+        /// `true` only on the very first app launch
+        internal var isFirstLaunch: Bool {
+            return appHelper.isAppFirstOpen
+        }
+
+        /// Device's first install time, as an epoch String
+        internal var firstInstallTime: Int64? {
+            return appHelper.firstInstallTime
+        }
+
+        /// `false` this session until a successful referral fetch
+        internal var isConsumed: Bool {
+            return appHelper.isConsumed
+        }
+
         //Latest link for Dynamic Link
         @Published var latestLink: URL?
 
         //Latest link for Referral Link
         @Published var latestReferralURL: URL?
 
+        //Latest payload for Attribution
+        @Published var latestAttributionInfo: [String: Any]?
+
         // Listener for whenever link is Update
         private var linkListener: AnyCancellable?
 
         private var latestReferralInfo: [String: Any]?
 
+        /// Attribution status: organic/non-organic. Backed by `AppHelper`, which restores it from
+        /// UserDefaults on launch and persists every assignment — so a status resolved on first
+        /// launch survives relaunches. Defaults to organic until something is resolved and stored.
+        private var latestAttributionStatus: String {
+            get { appHelper.attributionStatus }
+            set { appHelper.updateAttributionStatus(newValue) }
+        }
+
+        /// Clipboard `applink_click_time` in epoch milliseconds, retained so `getAttributionInfo`
+        /// can report it alongside the Android SDK's equivalent field. Nil until a deferred link
+        /// carrying the param is resolved.
+        /// Backed by `AppHelper`, which restores it from UserDefaults on launch and persists every
+        /// assignment. The clipboard is only read on first open, so without persistence this would
+        /// be nil from launch 2 onward and drop out of the attribution payload.
+        /// Assigning nil is ignored — a later launch with no clipboard must not erase it.
+        private var latestClickTimestampInMilliseconds: TimeInterval? {
+            get { appHelper.clickTime }
+            set {
+                guard let newValue else { return }
+                appHelper.updateClickTime(newValue)
+            }
+        }
+
         // Listener for whenever referral link is Update
         private var referralLinkListener: AnyCancellable?
 
+        // Listener for whenever attribution info is Update
+        private var attributionInfoListener: AnyCancellable?
+
         // Manage for API call
         private let dispatchGroup = DispatchGroup()
+
+        private var attributionListener: (([String: Any]) -> Void)?
+        private var firstLaunchExpiredObserver: NSObjectProtocol?
 
         deinit {
             // Cancel the listener when the object is deallocated
             linkListener?.cancel()
             referralLinkListener?.cancel()
+            attributionInfoListener?.cancel()
+            NotificationCenter.default.removeObserver(self)
         }
 
-        //initialize the common services like AppsOnAir-Core and swizzling method and fetch the latest Link
-        ///fetch the latest link for universal link and custom URL schema
-        ///fetch the latest link for referral link and
-        @objc public func initialize(
+        /// Common initialization flow
+        private func performInitialization(
             onDeepLinkProcessed: @escaping (URL?, [String: Any]) -> Void,
-            onReferralLinkDetected: (([String: Any]) -> Void)? = nil
+            onReferralLinkDetected: (([String: Any]) -> Void)? = nil,
+            onAttributionListener: (([String: Any]) -> Void)? = nil
         ) {
-
-            //initialize the AppsOnAir-core
+            // Initialize AppsOnAir Core
             appsOnAirCoreServices.initialize()
 
             // Initialize swizzling
             _ = AppSwizzler.shared
 
-            // handle the internet connectivity abd listen for network status changes
+            attributionListener = onAttributionListener
+
+            // Attribution listener: fires whenever `latestAttributionInfo` is updated, regardless
+            // of which call site (foreground re-fire or referral-detected flow) produced it.
+            // Subscribing before any assignment happens means dropFirst() only skips the initial
+            // nil emitted on subscribe, not a real payload.
+            attributionInfoListener?.cancel()
+            attributionInfoListener = self.$latestAttributionInfo
+                .dropFirst()
+                .compactMap { $0 }
+                .sink { [weak self] attributionInfo in
+                    self?.attributionListener?(attributionInfo)
+                }
+
+            if let firstLaunchExpiredObserver {
+                NotificationCenter.default.removeObserver(firstLaunchExpiredObserver)
+            }
+            // Re-delivers the attribution payload once, when `isFirstLaunch` expires, so the
+            // listener sees that flip instead of the value captured when the app first launched.
+            // Reads persisted state, no refetch.
+            firstLaunchExpiredObserver = NotificationCenter.default.addObserver(
+                forName: .appsOnAirFirstLaunchDidExpire, object: nil, queue: .main
+            ) { [weak self] _ in
+                guard let self else { return }
+                Logger.logInternal(
+                    "AppLinkService: appsOnAirFirstLaunchDidExpire received, re-firing onAttributionListener"
+                )
+                self.getAttributionInfo { attributionInfo in
+                    self.latestAttributionInfo = attributionInfo
+                }
+            }
+
+            // Listen for network status
             appsOnAirCoreServices.networkStatusListenerHandler { isConnected in
                 guard self.linkListener == nil else { return }
-                // Listener for link and link info
+
+                // Deep link listener
                 self.linkListener = self.$latestLink.sink { [weak self] _ in
                     self?.onAppLinkHandler(isNetworkConnected: isConnected) { url, linkInfo in
                         onDeepLinkProcessed(url, linkInfo)
                     }
                 }
+
+                // Referral listener
                 self.referralLinkListener = self.$latestReferralURL
                     .dropFirst()
-                    .sink { _ in
-                        self.referralHandler(isCompletionCall: true) { referralInfoFromKeyChain in
+                    .sink { [weak self] _ in
+                        guard let self else { return }
+
+                        self.referralHandler(isCompletionCall: true) { referralInfo in
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                                onReferralLinkDetected?(referralInfoFromKeyChain)
+                                onReferralLinkDetected?(self.withoutAppsFlyer(referralInfo))
+
+                                self.getAttributionInfo { attributionInfo in
+                                    self.latestAttributionInfo = attributionInfo
+                                }
                             }
                         }
                     }
             }
 
-            // help to referral handling
+            // Trigger referral flow
             referralHandler(isAPICall: true)
+        }
+
+
+        /// - Parameters:
+        ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
+        ///   - onReferralLinkDetected: *(Deprecated)* Use `onAttributionListener` instead. Only fires
+        ///     when a referral fetch actually runs (first open, or no referral cached yet) — detection
+        ///     only, so unlike `onAttributionListener` it is not re-delivered on foreground returns.
+        ///     Receives just the raw referral dictionary, with `appsFlyer` removed.
+        ///   - onAttributionListener: Fires at most twice — when a referral fetch actually runs, then
+        ///     once more on the return to the foreground that follows `isFirstLaunch` turning `false`,
+        ///     re-delivering the persisted payload without refetching. Later foreground returns are
+        ///     silent. Payload adds `isFirstLaunch`, `firstInstallTime`, `isConsumed` and
+        ///     `attributionStatus` to the referral info.
+        @objc(initializeOnDeepLinkProcessed:onReferralLinkDetected:onAttributionListener:)
+        public func initialize(
+            onDeepLinkProcessed: @escaping (URL?, [String: Any]) -> Void,
+            onReferralLinkDetected: (([String: Any]) -> Void)? = nil,
+            onAttributionListener: (([String: Any]) -> Void)? = nil
+        ) {
+            performInitialization(
+                onDeepLinkProcessed: onDeepLinkProcessed,
+                onReferralLinkDetected: onReferralLinkDetected,
+                onAttributionListener: onAttributionListener
+            )
         }
 
         ///handling when appLink is listen
@@ -193,8 +306,8 @@ import Combine
 
         func isValidShortId(_ linkId: String) -> Bool {
             guard !linkId.isEmpty,
-                  (linkId.split(separator: "/")
-                    .last != nil)
+                linkId.split(separator: "/")
+                    .last != nil
             else {
                 Logger.logInternal(errorShortIdMissing)
                 return false
@@ -228,33 +341,60 @@ import Combine
                             self.dispatchGroup.leave()
                             return
                         }
+                        let clipboardURLComponents = URLComponents(
+                            url: url, resolvingAgainstBaseURL: false)
+
                         var appLinkReferralLinkParams: [String: Any] = [:]
-                        if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-                            let hashKey = components.queryItems?.first(where: {
-                                $0.name == "hash_key"
-                            }
-                            )?.value
-                        {
+                        if let hashKey = clipboardURLComponents?.queryItems?.first(where: {
+                            $0.name == "hash_key"
+                        })?.value {
                             Logger.logInternal("Hash Key: \(hashKey)")
                             appLinkReferralLinkParams["data"] = ["hashKey": hashKey]
                         }
 
+                        // fetch the click time from the clipboard, same as the hash key above
+                        let clickTimestamp: TimeInterval? = clipboardURLComponents?.queryItems?
+                            .first(where: { $0.name == applinkClickTimeParam })?.value
+                            .flatMap { Double($0) }
+
+                        // Retain it as soon as it is read, so it reaches the attribution payload
+                        // even when the referral call fails or the status is never computed.
+                        self.latestClickTimestampInMilliseconds = clickTimestamp
+
                         AppLinkApiService.apiReferralInfo(
                             appLinParams: appLinkReferralLinkParams,
                             isEnableAdvancedDeferredLink: true
-                        ) { linkInfo in
-                            let _ = self.appHelper.removeDataFromKeychain(key: referralData)
+                        ) { rawLinkInfo in
+                            _ = self.appHelper.removeDataFromKeychain(key: referralData)
+
+                            var linkInfo = rawLinkInfo
+
+                            if (rawLinkInfo[statusCodeKey] as? Int) == successStatusCode {
+                                // Takes effect immediately: the in-memory value backs
+                                // `isConsumed` in the payload, and the persisted copy carries it
+                                // to later launches.
+                                AppHelper.shared.isConsumed = true
+                                AppHelper.shared.userDefaults.set(true, forKey: isConsumedKey)
+
+                                linkInfo.removeValue(forKey: statusCodeKey)
+                            }
+
+                            let referralStatus = linkInfo["status"] as? String
 
                             self.latestReferralInfo = linkInfo
-
                             self.appHelper.saveToKeychain(key: referralData, value: linkInfo)
-
-                            self.latestReferralInfo = linkInfo
                             self.latestReferralURL = url
 
-                            if let referralStatus = linkInfo["status"] as? String,
-                                referralStatus == "SUCCESS"
-                            {
+                            if referralStatus == "SUCCESS" {
+                                // clipboard-only: compare click time vs first install time vs attributionTtl.
+                                // The resolved status is persisted by `computeAttributionStatus` itself and
+                                // read back in `getAttributionInfo`, so it is not copied into `linkInfo` here.
+                                self.computeAttributionStatus(
+                                    clickTimestamp: clickTimestamp,
+                                    linkInfo: linkInfo)
+                            }
+
+                            if referralStatus == "SUCCESS" {
                                 AppLinkApiService.apiLinkAnalytics(
                                     isClicked: false,
                                     urlPrefix: domain,
@@ -284,8 +424,19 @@ import Combine
                         }
                     } else {
                         Logger.logInternal("API called")
-                        AppLinkApiService.apiReferralInfo { referralLinkInfo in
-                            let _ = self.appHelper.removeDataFromKeychain(key: referralData)
+                        AppLinkApiService.apiReferralInfo { rawReferralLinkInfo in
+                            _ = self.appHelper.removeDataFromKeychain(key: referralData)
+
+                            var referralLinkInfo = rawReferralLinkInfo
+
+                            if (rawReferralLinkInfo[statusCodeKey] as? Int) == successStatusCode {
+
+                                AppHelper.shared.isConsumed = true
+                                AppHelper.shared.userDefaults.set(true, forKey: isConsumedKey)
+
+                                // strip the internal statusCode before storing/exposing to the host app
+                                referralLinkInfo.removeValue(forKey: statusCodeKey)
+                            }
 
                             self.latestReferralInfo = referralLinkInfo
 
@@ -301,7 +452,7 @@ import Combine
                                 let referralURL = URL(string: referralLink),
                                 let domain = referralURL.host
                             {
-
+                                self.latestAttributionStatus = attributionStatusNonOrganic
                                 // Call analytics of referral result
                                 AppLinkApiService.apiLinkAnalytics(
                                     isClicked: false,
@@ -351,23 +502,265 @@ import Combine
             self.dispatchGroup.leave()
         }
 
-        @objc public func getReferralInfo(completion: @escaping ([String: Any]) -> Void) {
-            dispatchGroup.notify(queue: .main) {
-                if !((self.latestReferralInfo ?? [:]).isEmpty) {
-                    completion(self.latestReferralInfo ?? [:])
-                    return
-                }
-                let referralInfoFromKeyChain = self.appHelper.readFromKeychain(key: referralData)
-                completion(referralInfoFromKeyChain ?? [:])
+        /// Reads `attributionTtl`, in seconds, from a referral response — checking the top level
+        /// first and then `data`. Nil when it is absent or not numeric.
+        private func attributionTtl(from linkInfo: [String: Any]?) -> Double? {
+            let data: [String: Any] = linkInfo?[dataKey] as? [String: Any] ?? [:]
+            let rawAttributionTtl =
+                linkInfo?[attributionTtlResponseKey] ?? data[attributionTtlResponseKey]
+
+            switch rawAttributionTtl {
+            case let value as Int: return Double(value)
+            case let value as Double: return value
+            case let value as NSNumber: return value.doubleValue
+            case let value as String: return Double(value)
+            default: return nil
             }
         }
 
+        /// True when `attributionTtl` has elapsed since the click, measured against the clock right
+        /// now rather than against the install time. This is a live check, so it is independent of
+        /// `attributionStatus`: an install attributed at first launch still expires once enough
+        /// time passes, which is how the Android SDK measures the window.
+        ///
+        /// Unknown inputs count as expired: an `attributionTtl` that is not in `storedInfo`, or
+        /// neither a click time nor an install time to measure the window from. Expiry cannot be
+        /// demonstrated in either case, so the referral is refreshed rather than trusted. A device
+        /// clock that predates the click or the install also counts as expired: see the comment
+        /// below.
+        private func isAttributionTtlExpired(_ storedInfo: [String: Any]) -> Bool {
+            guard let attributionTtl = self.attributionTtl(from: storedInfo) else { return true }
+
+            // scale every epoch input to seconds so the comparisons below use one unit
+            let clickTimestampInSeconds = self.latestClickTimestampInMilliseconds.map {
+                Measurement(value: $0, unit: UnitDuration.milliseconds)
+                    .converted(to: .seconds).value
+            }
+            let firstInstallInSeconds = self.appHelper.firstInstallTime.map {
+                Measurement(value: Double($0), unit: UnitDuration.milliseconds)
+                    .converted(to: .seconds).value
+            }
+
+            // The window runs from the click. An organic install has none, and neither does a
+            // referral that carried no click time, so the install stands in for it: the stored
+            // referral stops being current once the ttl has passed either way.
+            guard let windowStartInSeconds = clickTimestampInSeconds ?? firstInstallInSeconds
+            else { return true }
+
+            // Corrected by the last server Date header, so a device clock that is merely wrong still
+            // measures the window correctly. See `AppHelper.recordServerDate` for what this does
+            // and does not stop.
+            let now = self.appHelper.correctedNow
+
+            // Time only moves forward. Corrected now falling behind something already observed
+            // means the clock was wound back between observations.
+            if self.appHelper.hasClockRewound {
+                Logger.logInternal("Clock moved backwards, treating attribution as expired")
+                return true
+            }
+
+            // The click time is stamped by the link service and the install date by the filesystem,
+            // so neither can be edited from Settings. A now that predates either one is impossible
+            // on an honest clock, and would otherwise shrink the elapsed time and hold the window
+            // open. Treat it as expired so the backend decides, rather than trusting a clock that
+            // has lied.
+            if now < windowStartInSeconds || (firstInstallInSeconds.map { now < $0 } ?? false) {
+                Logger.logInternal(
+                    "Clock (\(now)) predates click (\(String(describing: clickTimestampInSeconds))) "
+                        + "or install (\(String(describing: firstInstallInSeconds))), "
+                        + "treating attribution as expired"
+                )
+                return true
+            }
+
+            self.appHelper.observeCorrectedTime(now)
+
+            let elapsedInSeconds = now - windowStartInSeconds
+
+            Logger.logInternal(
+                "attributionTtl: now - windowStart = \(elapsedInSeconds)s, ttl: \(attributionTtl)s"
+            )
+
+            return elapsedInSeconds > attributionTtl
+        }
+
+        private func computeAttributionStatus(
+            clickTimestamp: TimeInterval?, linkInfo: [String: Any]?
+        ) {
+            // An install is non-organic when it happened within `attributionTtl` of the click. Any
+            // missing input falls back to organic, matching the Android SDK: without all three
+            // there is nothing to show the click is what brought this install.
+            latestAttributionStatus = attributionStatusOrganic
+
+            // Clipboard `applink_click_time` is in milliseconds. Already retained where it was read
+            // from the clipboard, so it is only consumed here.
+            guard let clickTimestampInMilliseconds = clickTimestamp else {
+                Logger.logInternal(
+                    "attributionStatus: no applink_click_time in clipboard — defaulting to organic"
+                )
+                return
+            }
+
+            guard let attributionTtl = self.attributionTtl(from: linkInfo) else {
+                Logger.logInternal(
+                    "attributionStatus: no attributionTtl in referral response — defaulting to organic"
+                )
+                return
+            }
+
+            guard let firstInstallMilliseconds = appHelper.firstInstallTime else {
+                Logger.logInternal(
+                    "attributionStatus: could not read firstInstallTime — defaulting to organic"
+                )
+                return
+            }
+
+            // firstInstallTime is epoch milliseconds; the comparison below works in seconds.
+            let firstInstallEpoch = Measurement(
+                value: Double(firstInstallMilliseconds), unit: UnitDuration.milliseconds
+            ).converted(to: .seconds).value
+
+            // scale the click time to epoch seconds so both sides use the same unit
+            let clickTimestampInSeconds: Double
+
+            let clickTimestampMeasurement = Measurement(
+                value: clickTimestampInMilliseconds, unit: UnitDuration.milliseconds)
+            clickTimestampInSeconds = clickTimestampMeasurement.converted(to: .seconds).value
+
+            let diffInSeconds = firstInstallEpoch - clickTimestampInSeconds
+
+            latestAttributionStatus =
+                diffInSeconds > attributionTtl
+                ? attributionStatusOrganic : attributionStatusNonOrganic
+
+            Logger.logInternal(
+                "attributionStatus = \(latestAttributionStatus) (diff: \(diffInSeconds)s, ttl: \(attributionTtl)s)"
+            )
+        }
+
+        /// Returns a copy of `info` without the `appsFlyer` object. The API returns it on the
+        /// dynamic-link and referral/details endpoints, but it belongs to the newer attribution
+        /// surface: only `getAttributionInfo` / `onAttributionListener` expose it, so the
+        /// deprecated referral APIs and `onReferralLinkDetected` keep their original payload.
+        /// Removed at both levels because the key may sit at the root or inside `data`.
+        private func withoutAppsFlyer(_ info: [String: Any]) -> [String: Any] {
+            var info = info
+            info.removeValue(forKey: appsFlyerKey)
+            if var data = info[dataKey] as? [String: Any] {
+                data.removeValue(forKey: appsFlyerKey)
+                info[dataKey] = data
+            }
+            return info
+        }
+
+        /// (Deprecated) Get referral info
+        @available(*, deprecated, renamed: "getAttributionInfo")
+        @objc public func getReferralInfo(completion: @escaping ([String: Any]) -> Void) {
+            dispatchGroup.notify(queue: .main) {
+                let storedInfo =
+                    !((self.latestReferralInfo ?? [:]).isEmpty)
+                    ? (self.latestReferralInfo ?? [:])
+                    : (self.appHelper.readFromKeychain(key: referralData) ?? [:])
+
+                self.resolveReferralInfo(
+                    storedInfo: storedInfo, transform: self.withoutAppsFlyer, completion: completion
+                )
+            }
+        }
+
+        /// Returns a copy of `info` with the attribution fields added inside `data`.
+        private func withAttribution(_ info: [String: Any]) -> [String: Any] {
+            var attributionInfo = info
+
+            // Append attribution fields to response data.
+            var data: [String: Any] = attributionInfo[dataKey] as? [String: Any] ?? [:]
+            data[isFirstLaunchKey] = self.isFirstLaunch
+            if let firstInstallTime = self.firstInstallTime {
+                data[firstInstallTimeKey] = firstInstallTime
+            }
+            data[isConsumedKey] = self.isConsumed
+            data[attributionStatusKey] = self.latestAttributionStatus
+            if let clickTimestamp = self.latestClickTimestampInMilliseconds {
+                data[applinkClickTimeParam] = Int64(clickTimestamp.rounded())
+            }
+            attributionInfo[dataKey] = data
+
+            return attributionInfo
+        }
+
+        /// Resolves referral info for a call site: serves `storedInfo` as-is while the click still
+        /// falls inside `attributionTtl`, otherwise re-reads it from the IP lookup and serves that
+        /// response in its place. The window is measured against the clock at call time, so a call
+        /// made once enough time has passed takes the lookup branch even though an earlier call on
+        /// the same install did not. Once the window has lapsed the lookup response is what is
+        /// returned, error payloads included: the stored referral no longer describes this install,
+        /// so it is not served in place of what the backend answered.
+        /// `transform` shapes the final payload — `withAttribution` for `getAttributionInfo`,
+        /// `withoutAppsFlyer` for the deprecated referral getters.
+        private func resolveReferralInfo(
+            storedInfo: [String: Any],
+            transform: @escaping ([String: Any]) -> [String: Any],
+            completion: @escaping ([String: Any]) -> Void
+        ) {
+            guard self.isAttributionTtlExpired(storedInfo) else {
+                completion(transform(storedInfo))
+                return
+            }
+
+            AppLinkApiService.apiReferralInfo { rawReferralInfo in
+                // apiReferralInfo completes on a URLSession queue; the callers of this method
+                // (the foreground observer, the RN bridge) all expect main.
+                DispatchQueue.main.async {
+                    guard (rawReferralInfo[statusCodeKey] as? Int) == successStatusCode else {
+                        // The lookup is the answer once the window has lapsed, so its error
+                        // payload goes to the host app as it came back — `statusCode` included —
+                        // instead of being replaced by a stored referral that has expired.
+                        Logger.logInternal(
+                            "IP referral lookup failed, returning the lookup response"
+                        )
+                        completion(transform(rawReferralInfo))
+                        return
+                    }
+
+                    var referralInfo = rawReferralInfo
+                    // strip the internal statusCode before exposing it to the host app
+                    referralInfo.removeValue(forKey: statusCodeKey)
+                    completion(transform(referralInfo))
+                }
+            }
+        }
+
+        /// Get referral and attribution info. Same as the deprecated `getReferralInfo`, with attribution info
+        /// nested inside `data`: `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and
+        /// `attributionStatus` — the last resolved status, restored from storage on later launches.
+        ///
+        /// Once `attributionTtl` has elapsed since the click, the stored referral no longer
+        /// describes this install, so it is re-read from the IP lookup and that response is
+        /// returned in its place. Inside the window the stored referral is served as-is. The
+        /// elapsed time is measured against the clock at call time, matching the Android SDK, so
+        /// the window does lapse while the app is in use.
+        ///
+        /// `attributionStatus` is deliberately left alone: it stays as it resolved at install time,
+        /// so it and `isConsumed` keep reporting what was attributed even once the payload carries
+        /// the IP based referral. A failed lookup surfaces the lookup response itself, so an
+        /// expired referral is never served as if it were current.
+        @objc public func getAttributionInfo(completion: @escaping ([String: Any]) -> Void) {
+            let storedInfo =
+                !((self.latestReferralInfo ?? [:]).isEmpty)
+                ? (self.latestReferralInfo ?? [:])
+                : (self.appHelper.readFromKeychain(key: referralData) ?? [:])
+
+            resolveReferralInfo(storedInfo: storedInfo, transform: withAttribution, completion: completion)
+        }
+
         ///help to handle the get link for referral info
-        @available(*, deprecated, renamed: "getReferralInfo")
+        @available(*, deprecated, renamed: "getAttributionInfo")
         @objc public func getReferralDetails(completion: @escaping ([String: Any]) -> Void) {
             // Retrieve stored data from the device keychain
-            let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData)
-            completion(referralInfoFromKeyChain ?? [:])
+            let referralInfoFromKeyChain = appHelper.readFromKeychain(key: referralData) ?? [:]
+            resolveReferralInfo(
+                storedInfo: referralInfoFromKeyChain, transform: withoutAppsFlyer, completion: completion
+            )
         }
 
         ///help to handle the latest link for universal link and custom URL schema
@@ -388,6 +781,8 @@ import Combine
         ///   - isOpenInAndroidApp: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open directly in the Android app.
         ///   - isOpenInBrowserAndroid: `NSNumber` (e.g., `1` or `0`) indicating whether the link should open in a browser on Android.
         ///   - androidFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on Android.
+        ///   - appsFlyer: *(Optional)* Dictionary containing AppsFlyer attribution params (e.g., channel, campaignId, campaign, subs, metaTitle, metaDescription).
+        ///   - attributionTtl: *(Optional)* `NSNumber` — time-to-live, in seconds, for attribution of this link.
         ///   - completion: A closure that returns a dictionary containing the result of the link creation.
         @objc public func createAppLink(
             url: String,
@@ -401,6 +796,8 @@ import Combine
             isOpenInAndroidApp: NSNumber?,
             isOpenInBrowserAndroid: NSNumber?,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
+            attributionTtl: NSNumber? = nil,
             completion: @escaping ([String: Any]) -> Void
         ) {
             // Convert NSNumber? to Bool? for Swift compatibility
@@ -408,6 +805,7 @@ import Combine
             let isOpenInIosAppNumber: Bool? = isOpenInIosApp?.boolValue
             let isOpenInAndroidAppNumber: Bool? = isOpenInAndroidApp?.boolValue
             let isOpenInBrowserAndroidNumber: Bool? = isOpenInBrowserAndroid?.boolValue
+            let attributionTtlNumber: Int? = attributionTtl?.intValue
 
             // Call the Swift-native function
             self.createAppLink(
@@ -422,6 +820,8 @@ import Combine
                 isOpenInAndroidApp: isOpenInAndroidAppNumber,
                 isOpenInBrowserAndroid: isOpenInBrowserAndroidNumber,
                 androidFallbackUrl: androidFallbackUrl,
+                appsFlyer: appsFlyer,
+                attributionTtl: attributionTtlNumber,
                 completion: completion
             )
         }
@@ -438,6 +838,8 @@ import Combine
         ///   - isOpenInAndroidApp: `Bool` indicating whether the link should open directly in the Android app.
         ///   - isOpenInBrowserAndroid: `Bool` indicating whether the link should open in a browser on Android.
         ///   - androidFallbackUrl: *(Optional)* Fallback URL used if the app is not installed on Android.
+        ///   - appsFlyer: *(Optional)* Dictionary containing AppsFlyer attribution params (e.g., channel, campaignId, campaign, subs, metaTitle, metaDescription).
+        ///   - attributionTtl: *(Optional)* Time-to-live, in seconds, for attribution of this link.
         ///   - completion: A closure that returns a dictionary containing the result of the link creation.
         public func createAppLink(
             url: String,
@@ -451,6 +853,8 @@ import Combine
             isOpenInAndroidApp: Bool? = nil,
             isOpenInBrowserAndroid: Bool? = nil,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
+            attributionTtl: Int? = nil,
             completion: @escaping ([String: Any]) -> Void
         ) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
@@ -488,7 +892,9 @@ import Combine
                         isOpenInIosApp: isOpenInIosApp, iosFallbackUrl: iosFallbackUrl,
                         isOpenInAndroidApp: isOpenInAndroidApp,
                         isOpenInBrowserAndroid: isOpenInBrowserAndroid,
-                        androidFallbackUrl: androidFallbackUrl
+                        androidFallbackUrl: androidFallbackUrl,
+                        appsFlyer: appsFlyer,
+                        attributionTtl: attributionTtl
                     ) { shortLinkData in
                         completion(shortLinkData)
                     }

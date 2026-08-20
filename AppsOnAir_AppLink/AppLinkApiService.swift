@@ -39,6 +39,8 @@ import Foundation
             isOpenInAndroidApp: Bool? = nil,
             isOpenInBrowserAndroid: Bool? = nil,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
+            attributionTtl: Int? = nil,
             completion: @escaping ([String: Any]) -> Void
         ) {
 
@@ -57,6 +59,9 @@ import Foundation
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: xApplicationId)
+            request.setValue(
+                appHelper.sdkVersion,
+                forHTTPHeaderField: xSdkVersion)
 
             // Building JSON object
             var shortLinkData: [String: Any] = [:]
@@ -86,6 +91,16 @@ import Foundation
                 shortLinkData["customUrlForAndroid"] = customUrlForAndroid
             }
 
+            //AppsFlyer attribution params
+            if let appsFlyer = appsFlyer, !appsFlyer.isEmpty {
+                shortLinkData["appsFlyer"] = appsFlyer
+            }
+
+            //Attribution TTL
+            if let attributionTtl = attributionTtl {
+                shortLinkData["attributionTtl"] = attributionTtl
+            }
+
             let apiShortLinkPassData: [String: Any] = [
                 "where": ["urlPrefix": urlPrefix],
                 "data": shortLinkData,
@@ -99,6 +114,8 @@ import Foundation
                 Logger.logInternal("\(String(describing: url)) = \(generateShortLink)")
 
                 let httpResponse = response as? HTTPURLResponse
+                // Server clock, used to keep attributionTtl off the editable device clock.
+                appHelper.recordServerDate(httpResponse?.value(forHTTPHeaderField: dateHeader))
 
                 let statusCode = httpResponse?.statusCode
                 do {
@@ -148,6 +165,9 @@ import Foundation
                 request.setValue(linkUserAgent, forHTTPHeaderField: userAgent)
                 request.setValue("application/json", forHTTPHeaderField: contentType)
                 request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: xApplicationId)
+                request.setValue(
+                    appHelper.sdkVersion,
+                    forHTTPHeaderField: xSdkVersion)
 
                 if isEnableAdvancedDeferredLink {
                     request.httpMethod = "POST"
@@ -161,11 +181,15 @@ import Foundation
                     Logger.logInternal("\(String(describing: url)) = \(getReferralLink)")
 
                     let httpResponse = response as? HTTPURLResponse
+                    // Server clock, used to keep attributionTtl off the editable device clock.
+                    appHelper.recordServerDate(httpResponse?.value(forHTTPHeaderField: dateHeader))
 
                     let statusCode = httpResponse?.statusCode
                     do {
                         guard let responseData = responseData, !responseData.isEmpty else {
-                            completion([errorStr: errorSomeThingWrong])
+                            completion([
+                                errorStr: errorSomeThingWrong, statusCodeKey: statusCode as Any,
+                            ])
                             return
                         }
 
@@ -174,16 +198,19 @@ import Foundation
                         if statusCode == 429 {
                             let errorMessage = String(data: responseData, encoding: .utf8) ?? ""
                             Logger.logInfo(errorMessage, prefix: appsOnAirLink)
-                            completion([errorStr: errorMessage])
-                        } else if let json = try JSONSerialization.jsonObject(
+                            completion([errorStr: errorMessage, statusCodeKey: statusCode as Any])
+                        } else if var json = try JSONSerialization.jsonObject(
                             with: responseData, options: []) as? [String: Any]
                         {
+                            json[statusCodeKey] = statusCode
                             Logger.logInternal("\(responseJson) \(json)")
                             completion(json)
                         }
                     } catch {
                         Logger.logInternal("\(errorFailedToLoad) \(error.localizedDescription)")
-                        completion([errorStr: errorSomeThingWrong])
+                        completion([
+                            errorStr: errorSomeThingWrong, statusCodeKey: statusCode as Any,
+                        ])
                     }
 
                 }.resume()
@@ -211,6 +238,9 @@ import Foundation
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: xApplicationId)
+            request.setValue(
+                appHelper.sdkVersion,
+                forHTTPHeaderField: xSdkVersion)
 
             let apiShortLinkPassData: [String: Any] = [
                 "shortId": shortId as Any,
@@ -229,6 +259,8 @@ import Foundation
                 Logger.logInternal("\(String(describing: url)) = \(generateShortLink)")
 
                 let httpResponse = response as? HTTPURLResponse
+                // Server clock, used to keep attributionTtl off the editable device clock.
+                appHelper.recordServerDate(httpResponse?.value(forHTTPHeaderField: dateHeader))
 
                 let statusCode = httpResponse?.statusCode
                 do {
@@ -282,6 +314,9 @@ import Foundation
             request.httpMethod = "GET"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(appsOnAirCoreServices.appId, forHTTPHeaderField: "x-application-key")
+            request.setValue(
+                appHelper.sdkVersion,
+                forHTTPHeaderField: xSdkVersion)
 
             networkSession.dataTask(with: request) { responseData, response, error in
                 Logger.logInternal("\(String(describing: url)) = \(linkURL)")
@@ -291,6 +326,8 @@ import Foundation
                     completion([errorStr: errorSomeThingWrong])
                     return
                 }
+                // Server clock, used to keep attributionTtl off the editable device clock.
+                appHelper.recordServerDate(httpResponse.value(forHTTPHeaderField: dateHeader))
 
                 let statusCode = httpResponse.statusCode
                 do {
