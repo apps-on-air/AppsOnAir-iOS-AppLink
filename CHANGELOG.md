@@ -1,10 +1,19 @@
 ## 2.0.0
 
-**New method and listener:** 
-* Added `getAttributionInfo`/`onAttributionListener`, returning `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and `attributionStatus` (`"organic"`/`"non-organic"`) alongside referral data.
-* `onAttributionListener` fires at most twice: at first detection, then once more on the return to the foreground that follows `isFirstLaunch` turning `false` (reading persisted state, no refetch). Later foreground returns are silent. Matches the Android SDK. `onReferralLinkDetected` keeps its detection-only behaviour.
-* Deprecated `getReferralInfo` and `onReferralLinkDetected` in favor of `getAttributionInfo`/`onAttributionListener`.
-* `createAppLink()` now supports `appsFlyer` and `attributionTtl` params.
+* `getReferralInfo()` is now deprecated, use `getAttributionInfo()` instead.
+
+* Introduced `getAttributionInfo()` method.
+    * Returns the same data as `getReferralInfo()` with additional `isFirstLaunch`, `firstInstallTime`, `isConsumed` and `attributionStatus` fields included in the response.
+
+* Introduced `onAttributionListener()` listener.
+    * When an attribution is detected, and again every time the app returns to the foreground so the payload stays current.
+
+* Added `appsFlyer` and `attributionTtl` params to `AppLinkParams` for AppsFlyer attribution support in `createAppLink` method.
+
+**Deprecated:**
+
+* `onReferralLinkDetected()` — use `onAttributionListener()`.
+* `getReferralInfo()` and `getReferralDetails()` — use `getAttributionInfo()`.
 
 ## 1.4.1
 

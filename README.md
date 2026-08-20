@@ -1,7 +1,6 @@
 ## [![pub package](https://appsonair.com/images/logo.svg)](https://cocoapods.org/pods/AppsOnAir-AppLink)
 # AppsOnAir-AppLink
 
-[![CI Status](https://img.shields.io/travis/164989979/AppsOnAir-AppLink.svg?style=flat)](https://travis-ci.org/164989979/AppsOnAir-AppLink)
 [![Version](https://img.shields.io/cocoapods/v/AppsOnAir-AppLink.svg?style=flat)](https://cocoapods.org/pods/AppsOnAir-AppLink)
 [![License](https://img.shields.io/cocoapods/l/AppsOnAir-AppLink.svg?style=flat)](https://cocoapods.org/pods/AppsOnAir-AppLink)
 [![Platform](https://img.shields.io/cocoapods/p/AppsOnAir-AppLink.svg?style=flat)](https://cocoapods.org/pods/AppsOnAir-AppLink)
@@ -64,7 +63,7 @@ If you are integrating AppsOnAir-AppLink into another Swift package, add it to t
 dependencies: [
     .package(
         url: "https://github.com/apps-on-air/AppsOnAir-iOS-AppLink.git",
-        from: "1.4.1"
+        from: "2.0.0"
     )
 ]
 ```
@@ -245,7 +244,8 @@ Objective-C
     // Help to initialize link services
     [self.appLinkServices initializeOnDeepLinkProcessed:^(NSURL * url, NSDictionary<NSString *,id> * linkInfo){
           //Write the code for handling flow based on url
-    } onAttributionListener:^(NSDictionary<NSString *,id> * attributionInfo) {
+    } onReferralLinkDetected:nil
+        onAttributionListener:^(NSDictionary<NSString *,id> * attributionInfo) {
        //Write the code for handling attribution flow
     }];
     // Override point for customization after application launch.
@@ -272,7 +272,8 @@ Objective-C++
 
   [self.appLinkServices initializeOnDeepLinkProcessed:^(NSURL * _Nullable url, NSDictionary * _Nonnull linkInfo) {
       //Write the code for handling flow based on url
-  } onAttributionListener:^(NSDictionary * _Nonnull attributionInfo) {
+  } onReferralLinkDetected:nil
+      onAttributionListener:^(NSDictionary * _Nonnull attributionInfo) {
       //Write the code for handling attribution flow
   }];
   
@@ -281,11 +282,17 @@ Objective-C++
 
 ```
 
-`onAttributionListener()` fires at most twice: once when the attribution is first detected, and
-once more on the return to the foreground that follows `isFirstLaunch` turning `false`, so the
-payload carries that flip. Later foreground returns are silent — they would only repeat the same
-persisted state. Gate any one time logic on `isFirstLaunch` rather than on the callback firing.
-The payload is the same one [`getAttributionInfo()`](#3-retrieving-the-attribution-info) returns.
+`initialize` takes a single signature, with both listeners optional:
+
+```swift
+initialize(
+    onDeepLinkProcessed: (URL?, [String: Any]) -> Void,
+    onReferralLinkDetected: (([String: Any]) -> Void)? = nil,
+    onAttributionListener: (([String: Any]) -> Void)? = nil
+)
+```
+
+
 
 ## 2. Creating the AppLink 
 You can also create link, such as from a button action:
@@ -322,6 +329,7 @@ Objective-C++
 ### `attributionTtl` Parameter
 
 *(Optional)* `Int` — time-to-live, in seconds, for attribution of the generated link (e.g. `60` for 60 seconds).
+
 
 ### App-Link Implement Code
 
@@ -649,11 +657,13 @@ following keys inside the `data` object of the response:
 
 | Response Key | Type | Description |
 | --- | --- | --- |
-| `isFirstLaunch` | Bool | `true` only during the very first app launch after installation. It turns `false` as soon as the app leaves the foreground (backgrounded or phone locked) and stays `false` on every later launch. |
-| `firstInstallTime` | Int64 | Timestamp (epoch milliseconds) of the app's first installation, derived from the app's Documents directory creation date. Computed locally, so it is always available. |
-| `isConsumed` | Bool | `true` once a referral fetch has returned successfully for this install. Persisted, so it stays `true` on every later launch. |
-| `attributionStatus` | String | `non-organic` when the install happened within `attributionTtl` seconds of the click, otherwise `organic`. A referral that was found but could not be timed — no click time, no `attributionTtl` in the response, or no install time — stays `non-organic`. Resolved once and restored from storage on later launches. |
-| `applink_click_time` | Int64 | Timestamp (epoch milliseconds) of the click. Only present when the Advanced Deferred AppLink feature is enabled and the link carries the parameter, since the clipboard is the only source for it on iOS. |
+| `isFirstLaunch` | Bool | `true` only during the very first app launch after installation.|
+| `firstInstallTime` | Int64 | Timestamp (epoch milliseconds) of the app's first installation.|
+| `isConsumed` | Bool | `true` once a referral fetch has returned successfully for this install. Persisted. |
+| `attributionStatus` | String | `non-organic` when the install happened within `attributionTtl` of the click, otherwise `organic`. |
+| `applink_click_time` | Int64 | Timestamp (epoch milliseconds) of the click. |
+
+
 
 ### Deprecated APIs
 
@@ -662,10 +672,19 @@ integrations keep working, but should migrate:
 
 | Deprecated | Use instead |
 | --- | --- |
-| `initialize(onDeepLinkProcessed:onReferralLinkDetected:)` | `initialize(onDeepLinkProcessed:onAttributionListener:)` |
 | `onReferralLinkDetected()` | `onAttributionListener()` |
 | `getReferralInfo()` | `getAttributionInfo()` |
 | `getReferralDetails()` | `getAttributionInfo()` |
+
+The deprecated getters carry the **referral payload only**. None of `appsFlyer`, `isFirstLaunch`,
+`firstInstallTime`, `isConsumed`, `attributionStatus` or `applink_click_time` appear in them —
+those belong to `getAttributionInfo()` and `onAttributionListener()`. `attributionTtl` expiry
+still applies to all three getters.
+
+`onReferralLinkDetected` is still a parameter of `initialize`, so it no longer raises a deprecation
+warning at the call site the way the removed overload did. It remains detection-only: it fires when
+a referral fetch actually runs — first open, or no referral cached yet — and is not re-delivered on
+the foreground return that follows `isFirstLaunch` turning `false`.
 
 ## Troubleshooting
 
@@ -730,6 +749,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 @property (nonatomic, strong) AppLinkService *appLinkServices;
 @end
 
+@implementation AppDelegate
+
 - (BOOL)application:(UIApplication * )application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     self.appLinkServices = [AppLinkService shared];
     return YES;
@@ -755,9 +776,10 @@ continueUserActivity:(NSUserActivity *)userActivity
     return NO;
 }
 
+@end
 ```
 
-**SceneDelegatee.m**
+**SceneDelegate.m**
 
 ```swift
 #import "SceneDelegate.h"
@@ -844,7 +866,7 @@ willConnectToSession:(UISceneSession *)session
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
 
-  [self.appLinkServices handleAppLinkWithURL:url];
+  [self.appLinkServices handleAppLinkWithIncomingURL:url];
   
     return YES;
 }
@@ -855,7 +877,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 
     if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
         NSURL *url = userActivity.webpageURL;
-        [self.appLinkServices handleAppLinkWithURL:url];
+        [self.appLinkServices handleAppLinkWithIncomingURL:url];
     }
     return NO;
 }
