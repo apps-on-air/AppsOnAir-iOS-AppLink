@@ -8,10 +8,23 @@ import Foundation
     public class AppLinkWrapper: NSObject {
 
         /// Set up the SDK and start tracking app links and referral events.
-        @objc(initializeWithOnDeepLinkProcessed:onReferralLinkDetected:)
+        /// - Parameters:
+        ///   - onDeepLinkProcessed: Callback invoked with the resolved deep link and its info.
+        ///   - onReferralLinkDetected: *(Deprecated)* Use `onAttributionListener` instead. Detection
+        ///     only — fires when a referral fetch actually runs, and receives the bare referral
+        ///     dictionary with `appsFlyer` removed.
+        ///   - onAttributionListener: Fires at most twice — when a referral fetch actually runs
+        ///     (first open, or no referral cached yet), then once more on the return to the
+        ///     foreground that follows `isFirstLaunch` turning `false`, re-delivering the persisted
+        ///     payload without refetching so the listener sees that flip. Later foreground returns
+        ///     are silent. The payload includes the referral info plus `isFirstLaunch`,
+        ///     `firstInstallTime`, `isConsumed`, and `attributionStatus` ("organic"/"non-organic")
+        ///     — the last resolved status, restored from storage on later launches.
+        @objc(initializeWithOnDeepLinkProcessed:onReferralLinkDetected:onAttributionListener:)
         public class func initialize(
             withOnDeepLinkProcessed onDeepLinkProcessed: @escaping (URL?, NSDictionary) -> Void,
-            onReferralLinkDetected: ((NSDictionary) -> Void)? = nil
+            onReferralLinkDetected: ((NSDictionary) -> Void)? = nil,
+            onAttributionListener: ((NSDictionary) -> Void)? = nil
         ) {
             AppLinkService.shared.initialize(
                 onDeepLinkProcessed: { url, info in
@@ -19,6 +32,9 @@ import Foundation
                 },
                 onReferralLinkDetected: { referralInfo in
                     onReferralLinkDetected?(referralInfo as NSDictionary)
+                },
+                onAttributionListener: { attributionInfo in
+                    onAttributionListener?(attributionInfo as NSDictionary)
                 })
         }
 
@@ -28,7 +44,8 @@ import Foundation
             AppLinkService.shared.handleAppLink(incomingURL: incomingURL)
         }
 
-        /// Get referral details
+        /// (Deprecated) Get referral info
+        @available(*, deprecated, renamed: "getAttributionInfo(withCompletion:)")
         @objc(getReferralInfoWithCompletion:)
         public class func getReferralInfo(
             withCompletion completion: @escaping (NSDictionary) -> Void
@@ -39,7 +56,7 @@ import Foundation
         }
 
         /// (Deprecated) Get referral details
-        @available(*, deprecated, renamed: "getReferralInfo(withCompletion:)")
+        @available(*, deprecated, renamed: "getAttributionInfo(withCompletion:)")
         @objc(getReferralDetailsWithCompletion:)
         public class func getReferralDetails(
             withCompletion completion: @escaping (NSDictionary) -> Void
@@ -49,11 +66,24 @@ import Foundation
             }
         }
 
+        /// Get referral/attribution info. Same as the deprecated `getReferralInfo`, with
+        /// `isFirstLaunch`, `firstInstallTime`, `isConsumed`, and `attributionStatus`
+        /// ("organic"/"non-organic") included in the response — the last resolved status,
+        /// restored from storage on later launches.
+        @objc(getAttributionInfoWithCompletion:)
+        public class func getAttributionInfo(
+            withCompletion completion: @escaping (NSDictionary) -> Void
+        ) {
+            AppLinkService.shared.getAttributionInfo { info in
+                completion(info as NSDictionary)
+            }
+        }
+
         /// Create a new AppLink
         @objc(
             createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:
             isOpenInIosApp:
-            iosFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:completion:
+            iosFallbackUrl:isOpenInAndroidApp:isOpenInBrowserAndroid:androidFallbackUrl:appsFlyer:attributionTtl:completion:
         )
         public class func createAppLink(
             url: String,
@@ -67,6 +97,8 @@ import Foundation
             isOpenInAndroidApp: NSNumber? = nil,
             isOpenInBrowserAndroid: NSNumber? = nil,
             androidFallbackUrl: String? = nil,
+            appsFlyer: [String: Any]? = nil,
+            attributionTtl: NSNumber? = nil,
             completion: @escaping (NSDictionary) -> Void
         ) {
             let socialMetaSwift = socialMeta as? [String: Any]
@@ -81,7 +113,9 @@ import Foundation
                 iosFallbackUrl: iosFallbackUrl,
                 isOpenInAndroidApp: isOpenInAndroidApp,
                 isOpenInBrowserAndroid: isOpenInBrowserAndroid,
-                androidFallbackUrl: androidFallbackUrl
+                androidFallbackUrl: androidFallbackUrl,
+                appsFlyer: appsFlyer,
+                attributionTtl: attributionTtl
             ) { result in
                 completion(result as NSDictionary)
             }
