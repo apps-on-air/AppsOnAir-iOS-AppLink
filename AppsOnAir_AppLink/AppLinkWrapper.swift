@@ -79,6 +79,19 @@ import Foundation
             }
         }
 
+        /// Fetches link details on demand by shortId and urlPrefix.
+        /// Only returns data for links belonging to your configured AppsonairAppId.
+        @objc(getAppLinkInfoWithShortId:urlPrefix:completion:)
+        public class func getAppLinkInfo(
+            withShortId shortId: String,
+            urlPrefix: String,
+            completion: @escaping (NSDictionary) -> Void
+        ) {
+            AppLinkService.shared.getAppLinkInfo(shortId: shortId, urlPrefix: urlPrefix) { info in
+                completion(info as NSDictionary)
+            }
+        }
+
         /// Create a new AppLink
         @objc(
             createAppLinkWithUrl:name:urlPrefix:shortId:socialMeta:isOpenInBrowserApple:

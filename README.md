@@ -495,7 +495,84 @@ Objective-C++
 ```
 
 
-## 3. Retrieving the attribution info
+## 3. Fetching link details on demand
+
+Use `getAppLinkInfo()` to fetch link details on demand. Only returns data for links belonging to your configured **AppsonairAppId**.
+Both **shortId** and **urlPrefix** are required.
+
+Swift / SwiftUI
+```swift
+import AppsOnAir_AppLink
+```
+Objective-C
+```swift
+#import "AppsOnAir_AppLink/AppsOnAir_AppLink-Swift.h"
+```
+
+Swift UI
+```swift
+AppLinkService.shared.getAppLinkInfo(
+    shortId: "LINK_SHORT_ID",
+    urlPrefix: "YOUR_DOMAIN_NAME" // shouldn't contain http or https
+) { info in
+    // Handle link info
+}
+```
+
+Swift
+```swift
+AppLinkService.shared.getAppLinkInfo(
+    shortId: "LINK_SHORT_ID",
+    urlPrefix: "YOUR_DOMAIN_NAME" // shouldn't contain http or https
+) { info in
+    // Handle link info
+}
+```
+
+Objective-C
+```objc
+[self.appLinkService getAppLinkInfoWithShortId:@"LINK_SHORT_ID"
+                                     urlPrefix:@"YOUR_DOMAIN_NAME" // shouldn't contain http or https
+                                    completion:^(NSDictionary<NSString *, id> *info) {
+    // Handle link info
+}];
+```
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `shortId` | String | ✅ | Last path segment of the link URL. |
+| `urlPrefix` | String | ✅ | Domain of the link, without scheme (e.g. `example.appsonair.link`). |
+
+**Response:**
+```json
+{
+  "data": {
+    "name": "Link Name",
+    "link": "https://example.com/target-page",
+    "shortId": "LINK_SHORT_ID",
+    "socialMetaTags": {
+      "title": "Link Title",
+      "description": "Link Description",
+      "imageUrl": "https://example.com/image.png"
+    },
+    "attributionTtl": 3600,
+    "appsFlyer": {
+      "channel": "appsonair",
+      "campaignId": "01",
+      "campaign": "test",
+      "subs": ["sub1", "sub2", "sub3", "sub4", "sub5"],
+      "metaTitle": "metaTitle",
+      "metaDescription": "metaDescription"
+    }
+  },
+  "message": "AppLink fetched successfully!",
+  "status": "SUCCESS"
+}
+```
+
+`appsFlyer` is included only when the link was created with AppsFlyer params.
+
+## 4. Retrieving the attribution info
 You can also retrieve the attribution info on demand, such as from a button action:
 ### Firstly, import AppsOnAir_AppLink in your ViewController file or swift code file
 
