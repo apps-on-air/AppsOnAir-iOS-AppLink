@@ -511,14 +511,20 @@ Objective-C
 
 Swift UI
 ```swift
-AppLinkService.shared.getAppLinkInfo(shortId: "LINK_SHORT_ID", urlPrefix: "YOUR_DOMAIN_NAME") { info in
+AppLinkService.shared.getAppLinkInfo(
+    shortId: "LINK_SHORT_ID",
+    urlPrefix: "YOUR_DOMAIN_NAME" // shouldn't contain http or https
+) { info in
     // Handle link info
 }
 ```
 
 Swift
 ```swift
-AppLinkService.shared.getAppLinkInfo(shortId: "LINK_SHORT_ID", urlPrefix: "YOUR_DOMAIN_NAME") { info in
+AppLinkService.shared.getAppLinkInfo(
+    shortId: "LINK_SHORT_ID",
+    urlPrefix: "YOUR_DOMAIN_NAME" // shouldn't contain http or https
+) { info in
     // Handle link info
 }
 ```
@@ -526,7 +532,7 @@ AppLinkService.shared.getAppLinkInfo(shortId: "LINK_SHORT_ID", urlPrefix: "YOUR_
 Objective-C
 ```objc
 [self.appLinkService getAppLinkInfoWithShortId:@"LINK_SHORT_ID"
-                                     urlPrefix:@"YOUR_DOMAIN_NAME"
+                                     urlPrefix:@"YOUR_DOMAIN_NAME" // shouldn't contain http or https
                                     completion:^(NSDictionary<NSString *, id> *info) {
     // Handle link info
 }];
