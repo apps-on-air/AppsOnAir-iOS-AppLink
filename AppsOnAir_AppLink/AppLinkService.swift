@@ -763,6 +763,27 @@ import Combine
             )
         }
 
+        /// Fetches the app link details for the given `shortId` and `urlPrefix` on demand.
+        ///
+        /// Uses the same endpoint called internally when a link is tapped, so you get identical
+        /// data without waiting for a deep link event.
+        ///
+        /// Only returns data for links that belong to the app identified by the `AppsonairAppId`
+        /// configured in `Info.plist`. When the link was created with AppsFlyer params, the
+        /// response includes an `appsFlyer` object inside `data`.
+        ///
+        /// - Parameters:
+        ///   - shortId: The short identifier of the link — last path segment of the link URL. Required.
+        ///   - urlPrefix: The domain of the link, without scheme (e.g. `example.appsonair.link`). Required.
+        ///   - completion: A closure that returns a dictionary containing the link details inside a `data` key.
+        @objc public func getAppLinkInfo(
+            shortId: String,
+            urlPrefix: String,
+            completion: @escaping ([String: Any]) -> Void
+        ) {
+            AppLinkApiService.apiFetchLinkInfo(domain: urlPrefix, linkId: shortId, completion: completion)
+        }
+
         ///help to handle the latest link for universal link and custom URL schema
         @objc public func handleAppLink(incomingURL: URL) {
             self.appLinkHandler(inComingURL: incomingURL)

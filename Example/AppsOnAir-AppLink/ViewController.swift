@@ -16,6 +16,8 @@ class ViewController: UIViewController {
     private let iosFallbackField = UITextField()
     private let attributionTtlField = UITextField()
     private let appsFlyerView = UITextView()
+    private let getLinkShortIdField = UITextField()
+    private let getLinkUrlPrefixField = UITextField()
     private let openInAndroidAppSwitch = UISwitch()
     private let openInAndroidBrowserSwitch = UISwitch()
     private let openInIosAppSwitch = UISwitch()
@@ -136,6 +138,14 @@ class ViewController: UIViewController {
         addSection(.attributionListener)
         addSection(.attributionApi)
         addButton("Get Attribution Info", action: #selector(getAttributionInfoTapped))
+
+        addDivider()
+
+        addSectionTitle("Get App Link Info")
+        addTextField(getLinkShortIdField, label: "Short ID", text: "")
+        addTextField(getLinkUrlPrefixField, label: "URL Prefix", text: "")
+        addSection(.appLinkInfo)
+        addButton("Get App Link Info", action: #selector(getAppLinkInfoTapped))
 
         addDivider()
 
@@ -360,6 +370,15 @@ class ViewController: UIViewController {
         }
     }
 
+    @objc private func getAppLinkInfoTapped() {
+        dismissKeyboard()
+        let shortId = (getLinkShortIdField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let urlPrefix = (getLinkUrlPrefixField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        appLinkService.getAppLinkInfo(shortId: shortId, urlPrefix: urlPrefix) { info in
+            AppLinkResultStore.shared[.appLinkInfo] = responseText(info)
+        }
+    }
+
     @objc private func createLinkTapped() {
         dismissKeyboard()
 
@@ -468,4 +487,50 @@ private final class ResponseSectionView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
+
+// MARK: - Result store
+
+private enum ResponseSection: Hashable {
+    case deepLink
+    case deprecatedListener
+    case deprecatedApi
+    case attributionListener
+    case attributionApi
+    case appLinkInfo
+    case createLink
+
+    var title: String {
+        switch self {
+        case .deepLink: return "Deep Link"
+        case .deprecatedListener: return "Referral Listener (Deprecated)"
+        case .deprecatedApi: return "Referral API (Deprecated)"
+        case .attributionListener: return "Attribution Listener"
+        case .attributionApi: return "Attribution API"
+        case .appLinkInfo: return "App Link Info"
+        case .createLink: return "Create Link"
+        }
+    }
+}
+
+private final class AppLinkResultStore {
+    static let shared = AppLinkResultStore()
+    static let didChangeNotification = Notification.Name("AppLinkResultStoreDidChange")
+
+    private var results: [ResponseSection: String] = [:]
+
+    subscript(section: ResponseSection) -> String {
+        get { results[section] ?? "" }
+        set {
+            results[section] = newValue
+            NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
+        }
+    }
+}
+
+private func responseText(_ dict: [String: Any]) -> String {
+    guard let data = try? JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted),
+        let text = String(data: data, encoding: .utf8)
+    else { return String(describing: dict) }
+    return text
 }
