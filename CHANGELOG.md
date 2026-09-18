@@ -1,3 +1,7 @@
+## 2.0.2
+
+* Updated `AppsOnAir-Core` dependency requirement to `>= 1.1.1`.
+
 ## 2.0.1
 
 * Introduced `getAppLinkInfo()` method.
