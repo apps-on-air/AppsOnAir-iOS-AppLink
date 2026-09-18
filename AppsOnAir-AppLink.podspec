@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
 
   s.name             = 'AppsOnAir-AppLink'
-  s.version          = '2.0.1'
+  s.version          = '2.0.2'
   s.summary          = 'AppLink service for app download tracking, deep linking, and engagement analytics for ios - an alternative to Firebase Dynamic Links'
   s.homepage         = 'https://documentation.appsonair.com/category/applink/'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
@@ -20,7 +20,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '13.0'
   
   # AppsOnAir Core pod
-  s.dependency 'AppsOnAir-Core', '1.1.1'
+  s.dependency 'AppsOnAir-Core', '>= 1.1.1'
 
   s.source_files = 'AppsOnAir_AppLink/**/*.{swift,h,m}'
 
