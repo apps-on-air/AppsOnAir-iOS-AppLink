@@ -137,8 +137,8 @@ import Combine
             }
 
             // Listen for network status
-            appsOnAirCoreServices.networkStatusListenerHandler { isConnected in
-                guard self.linkListener == nil else { return }
+            appsOnAirCoreServices.networkStatusListenerHandler { [weak self] isConnected in
+                guard let self, self.linkListener == nil else { return }
 
                 // Deep link listener
                 self.linkListener = self.$latestLink.sink { [weak self] _ in
