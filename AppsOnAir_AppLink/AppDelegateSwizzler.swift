@@ -12,7 +12,14 @@
         /// wrap the handler twice and process every link twice.
         private var hookedSceneDelegateClasses = Set<ObjectIdentifier>()
 
+        /// The scene delegate class found by the name-based lookup used up to 2.0.2. Its hooks keep
+        /// the 2.0.2 behavior unchanged. Every other scene delegate (only found since iOS 27 support
+        /// was added) also gets the app's own implementation called, so URLs meant for the app or
+        /// other SDKs (e.g. sign-in callbacks) keep reaching it.
+        private var legacySceneDelegateClass: AnyClass?
+
         private init() {
+            legacySceneDelegateClass = getSceneDelegateClassByName()
             let sceneDelegateClasses = getSceneDelegateClasses()
 
             // A scene delegate can also come from `application(_:configurationForConnecting:options:)`
@@ -57,7 +64,7 @@
                 }
             }
 
-            if let cls = getSceneDelegateClassByName() {
+            if let cls = legacySceneDelegateClass {
                 append(cls)
             }
             return classes
@@ -132,12 +139,17 @@
             }
             hookedSceneDelegateClasses.insert(ObjectIdentifier(sceneDelegateClass))
 
+            let callsOriginal = sceneDelegateClass != legacySceneDelegateClass
+            Logger.logInternal(
+                "Hooking \(NSStringFromClass(sceneDelegateClass)) (\(callsOriginal ? "app's own handlers are also called" : "2.0.2 behavior"))."
+            )
+
             /// fetch URL when app killed
             swizzleSceneWillConnectTo(sceneDelegateClass)
             /// fetch URL when app in background
-            swizzleSceneContinue(sceneDelegateClass)
+            swizzleSceneContinue(sceneDelegateClass, callsOriginal: callsOriginal)
             /// fetch custom URLS
-            swizzleSceneOpenURLContexts(sceneDelegateClass)
+            swizzleSceneOpenURLContexts(sceneDelegateClass, callsOriginal: callsOriginal)
         }
 
         /// Replaces `selector` on `cls` with the IMP built by `makeIMP`, which receives the
@@ -303,7 +315,8 @@
 
         /// Swizzle: scene(_:continue:)
         /// fetch URL when app in background
-        private func swizzleSceneContinue(_ sceneDelegateClass: AnyClass) {
+        /// - Parameter callsOriginal: also call the app's implementation after handling a web link.
+        private func swizzleSceneContinue(_ sceneDelegateClass: AnyClass, callsOriginal: Bool) {
             let selector = #selector(UISceneDelegate.scene(_:continue:))
             typealias Original = @convention(c) (AnyObject, Selector, UIScene, NSUserActivity) -> Void
 
@@ -318,6 +331,7 @@
                         let url = userActivity.webpageURL
                     {
                         AppLinkService.shared.appLinkHandler(inComingURL: url)
+                        if callsOriginal { original?(object, selector, scene, userActivity) }
                         return
                     }
                     original?(object, selector, scene, userActivity)
@@ -331,7 +345,8 @@
         }
 
         /// Swizzle: scene(_:openURLContexts:)
-        private func swizzleSceneOpenURLContexts(_ sceneDelegateClass: AnyClass) {
+        /// - Parameter callsOriginal: also call the app's implementation after handling the URL.
+        private func swizzleSceneOpenURLContexts(_ sceneDelegateClass: AnyClass, callsOriginal: Bool) {
             let selector = #selector(UISceneDelegate.scene(_:openURLContexts:))
             typealias Original =
                 @convention(c) (AnyObject, Selector, UIScene, Set<UIOpenURLContext>) -> Void
@@ -340,12 +355,16 @@
                 let original = originalIMP.map { unsafeBitCast($0, to: Original.self) }
                 let block: @convention(block) (AnyObject, UIScene, Set<UIOpenURLContext>) -> Void = {
                     object, scene, URLContexts in
-                    guard let urlContext = URLContexts.first else { return }
+                    guard let urlContext = URLContexts.first else {
+                        if callsOriginal { original?(object, selector, scene, URLContexts) }
+                        return
+                    }
                     let url = urlContext.url
 
                     if !(url.scheme?.trimmed.isEmpty ?? false) {
                         Logger.logInternal("🔥 Custom URL scheme opened: \(url)")
                         AppLinkService.shared.appLinkHandler(inComingURL: url)
+                        if callsOriginal { original?(object, selector, scene, URLContexts) }
                         return
                     }
                     original?(object, selector, scene, URLContexts)
