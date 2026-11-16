@@ -153,7 +153,7 @@ class ViewController: UIViewController {
         addTextField(nameField, label: "Name", text: "AppsOnAir")
         addTextField(urlField, label: "URL", text: "https://appsonair.com")
         // urlPrefix shouldn't contain http or https
-        addTextField(urlPrefixField, label: "URL Prefix", text: "")
+        addTextField(urlPrefixField, label: "URL Prefix", text: "kashyap.appsonair.link")
         addTextField(shortIdField, label: "Short ID", text: "")
         addTextField(androidFallbackField, label: "Android Fallback URL", text: "")
         addTextField(iosFallbackField, label: "iOS Fallback URL", text: "")
@@ -330,6 +330,11 @@ class ViewController: UIViewController {
     // MARK: - Rendering
 
     @objc private func renderResults() {
+        // SDK callbacks can arrive on a background queue
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { self.renderResults() }
+            return
+        }
         for (section, sectionView) in sectionViews {
             sectionView.value = AppLinkResultStore.shared[section]
         }
@@ -491,7 +496,7 @@ private final class ResponseSectionView: UIView {
 
 // MARK: - Result store
 
-private enum ResponseSection: Hashable {
+enum ResponseSection: Hashable {
     case deepLink
     case deprecatedListener
     case deprecatedApi
@@ -513,7 +518,7 @@ private enum ResponseSection: Hashable {
     }
 }
 
-private final class AppLinkResultStore {
+final class AppLinkResultStore {
     static let shared = AppLinkResultStore()
     static let didChangeNotification = Notification.Name("AppLinkResultStoreDidChange")
 
@@ -528,7 +533,7 @@ private final class AppLinkResultStore {
     }
 }
 
-private func responseText(_ dict: [String: Any]) -> String {
+func responseText(_ dict: [String: Any]) -> String {
     guard let data = try? JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted),
         let text = String(data: data, encoding: .utf8)
     else { return String(describing: dict) }
