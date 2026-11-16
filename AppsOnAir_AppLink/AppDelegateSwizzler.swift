@@ -8,15 +8,25 @@
         /// Singleton instance
         static let shared = AppSwizzler()
 
+        /// Scene delegate classes whose methods are already hooked. Hooking a class twice would
+        /// wrap the handler twice and process every link twice.
+        private var hookedSceneDelegateClasses = Set<ObjectIdentifier>()
+
         private init() {
+            let sceneDelegateClasses = getSceneDelegateClasses()
+
+            // A scene delegate can also come from `application(_:configurationForConnecting:options:)`
+            // instead of Info.plist. Hook it so we catch that class before its scene connects.
+            hookSceneConfigurationProviderIfNeeded()
+
             // Swizzle AppDelegate methods as a fallback if SceneDelegate class is not found
-            guard getSceneDelegateClass() != nil else {
+            guard !sceneDelegateClasses.isEmpty else {
                 // Swizzle AppDelegate methods
                 swizzleAppDelegateMethods()
                 return
             }
             // Swizzle SceneDelegate methods
-            swizzleSceneDelegateMethods()
+            sceneDelegateClasses.forEach { swizzleSceneDelegateMethods($0) }
         }
 
         // MARK: - AppDelegate Swizzling
@@ -28,7 +38,58 @@
         }
 
         // MARK: - SceneDelegate Swizzling
-        private func getSceneDelegateClass() -> NSObject.Type? {
+
+        /// Resolves the app's scene delegate classes.
+        ///
+        /// iOS 27 requires the UIScene lifecycle for apps built with its SDK, so the delegate class
+        /// is read from the `UIApplicationSceneManifest` first (this covers any class name). The
+        /// name-based lookup is kept as a fallback for older setups.
+        private func getSceneDelegateClasses() -> [AnyClass] {
+            var classes: [AnyClass] = []
+            func append(_ cls: AnyClass) {
+                if !classes.contains(where: { $0 == cls }) { classes.append(cls) }
+            }
+
+            for className in sceneDelegateClassNamesFromManifest() {
+                if let cls = resolveClass(named: className) {
+                    Logger.logInternal("✅ Found SceneDelegate class from scene manifest: \(className)")
+                    append(cls)
+                }
+            }
+
+            if let cls = getSceneDelegateClassByName() {
+                append(cls)
+            }
+            return classes
+        }
+
+        /// Reads every `UISceneDelegateClassName` declared in the Info.plist scene manifest.
+        private func sceneDelegateClassNamesFromManifest() -> [String] {
+            guard
+                let manifest = Bundle.main.object(forInfoDictionaryKey: "UIApplicationSceneManifest")
+                    as? [String: Any],
+                let configurations = manifest["UISceneConfigurations"] as? [String: Any]
+            else { return [] }
+
+            return configurations.values
+                .compactMap { $0 as? [[String: Any]] }
+                .flatMap { $0 }
+                .compactMap { $0["UISceneDelegateClassName"] as? String }
+                .filter { !$0.trimmed.isEmpty }
+        }
+
+        /// Resolves a class name, also trying it with the app's module prefix.
+        private func resolveClass(named className: String) -> AnyClass? {
+            if let cls = NSClassFromString(className) { return cls }
+            let moduleName =
+                (Bundle.main.object(forInfoDictionaryKey: "CFBundleExecutable") as? String ?? "")
+                .replacingOccurrences(of: "-", with: "_")
+                .replacingOccurrences(of: " ", with: "_")
+            guard !moduleName.isEmpty, !className.contains(".") else { return nil }
+            return NSClassFromString("\(moduleName).\(className)")
+        }
+
+        private func getSceneDelegateClassByName() -> NSObject.Type? {
             let moduleName =
                 Bundle.main.object(forInfoDictionaryKey: "CFBundleExecutable") as? String ?? ""
 
@@ -53,21 +114,95 @@
             return nil
         }
 
-        /// Main function to trigger swizzling of SceneDelegate methods
-        private func swizzleSceneDelegateMethods() {
-            // NOTE: Replace "SceneDelegate" with your actual class name if different
-            guard let sceneDelegateClass = getSceneDelegateClass() else {
-                Logger.logInternal("Swizzling failed: Could not find SceneDelegate class.")
+        /// Hooks the deep link methods of one scene delegate class.
+        ///
+        /// Each method gets its own replacement implementation that calls the class's original one,
+        /// so hooking several classes never affects another class or `NSObject`. A method the class
+        /// does not implement is added, so links still reach the SDK.
+        private func swizzleSceneDelegateMethods(_ sceneDelegateClass: AnyClass) {
+            guard !hookedSceneDelegateClasses.contains(ObjectIdentifier(sceneDelegateClass)) else {
                 return
             }
+            // A subclass of an already hooked class inherits the hooks; hooking it as well would
+            // run the handler twice.
+            var superclass: AnyClass? = class_getSuperclass(sceneDelegateClass)
+            while let current = superclass {
+                if hookedSceneDelegateClasses.contains(ObjectIdentifier(current)) { return }
+                superclass = class_getSuperclass(current)
+            }
+            hookedSceneDelegateClasses.insert(ObjectIdentifier(sceneDelegateClass))
 
-            // Swizzle individual methods
             /// fetch URL when app killed
             swizzleSceneWillConnectTo(sceneDelegateClass)
             /// fetch URL when app in background
             swizzleSceneContinue(sceneDelegateClass)
             /// fetch custom URLS
             swizzleSceneOpenURLContexts(sceneDelegateClass)
+        }
+
+        /// Replaces `selector` on `cls` with the IMP built by `makeIMP`, which receives the
+        /// original IMP (nil when neither the class nor its superclasses implement the method).
+        private func replaceMethod(
+            on cls: AnyClass, selector: Selector, makeIMP: (IMP?) -> IMP
+        ) -> Bool {
+            let originalMethod = class_getInstanceMethod(cls, selector)
+            let types =
+                originalMethod.flatMap { method_getTypeEncoding($0) }
+                ?? sceneDelegateTypeEncoding(for: selector)
+            guard let types else { return false }
+
+            let newIMP = makeIMP(originalMethod.map { method_getImplementation($0) })
+
+            // Succeeds when the method is inherited or missing, adding it only to this class.
+            if class_addMethod(cls, selector, newIMP, types) { return true }
+            // The class implements the method itself: replace only its implementation.
+            guard let originalMethod else { return false }
+            method_setImplementation(originalMethod, newIMP)
+            return true
+        }
+
+        private func sceneDelegateTypeEncoding(for selector: Selector) -> UnsafePointer<CChar>? {
+            guard let sceneProtocol = objc_getProtocol("UISceneDelegate") else { return nil }
+            return protocol_getMethodDescription(sceneProtocol, selector, false, true).types.map {
+                UnsafePointer($0)
+            }
+        }
+
+        /// Swizzle: application(_:configurationForConnecting:options:)
+        /// captures scene delegate classes that are configured in code.
+        private func hookSceneConfigurationProviderIfNeeded() {
+            guard let delegate = UIApplication.shared.delegate,
+                let delegateClass: AnyClass = object_getClass(delegate)
+            else { return }
+
+            let selector = NSSelectorFromString(
+                "application:configurationForConnectingSceneSession:options:")
+            // Only hook an existing implementation; adding one would change how scenes are configured.
+            guard class_getInstanceMethod(delegateClass, selector) != nil else { return }
+
+            typealias Original =
+                @convention(c) (
+                    AnyObject, Selector, UIApplication, UISceneSession, UIScene.ConnectionOptions
+                ) -> UISceneConfiguration
+
+            let hooked = replaceMethod(on: delegateClass, selector: selector) { originalIMP in
+                let original = unsafeBitCast(originalIMP!, to: Original.self)
+                let block:
+                    @convention(block) (
+                        AnyObject, UIApplication, UISceneSession, UIScene.ConnectionOptions
+                    ) -> UISceneConfiguration = { object, application, session, options in
+                        let configuration = original(object, selector, application, session, options)
+                        if let sceneDelegateClass = configuration.delegateClass {
+                            AppSwizzler.shared.swizzleSceneDelegateMethods(sceneDelegateClass)
+                        }
+                        return configuration
+                    }
+                return imp_implementationWithBlock(block)
+            }
+            Logger.logInternal(
+                hooked
+                    ? "✅ Hooked application(_:configurationForConnecting:options:)."
+                    : "❌ Could not hook application(_:configurationForConnecting:options:).")
         }
 
         /// Swizzle: application(_:continue:restorationHandler:) - Universal Link handling
@@ -142,62 +277,113 @@
 
         /// Swizzle: scene(_:willConnectTo:options:)
         /// fetch URL when app is kill
-        private func swizzleSceneWillConnectTo(_ sceneDelegateClass: NSObject.Type) {
-            let originalSelector = #selector(UISceneDelegate.scene(_:willConnectTo:options:))
-            let swizzledSelector = #selector(
-                sceneDelegateClass.swizzled_scene(_:willConnectTo:options:))
+        private func swizzleSceneWillConnectTo(_ sceneDelegateClass: AnyClass) {
+            let selector = #selector(UISceneDelegate.scene(_:willConnectTo:options:))
+            typealias Original =
+                @convention(c) (AnyObject, Selector, UIScene, UISceneSession, UIScene.ConnectionOptions)
+                -> Void
 
-            guard
-                let originalMethod = class_getInstanceMethod(sceneDelegateClass, originalSelector),
-                let swizzledMethod = class_getInstanceMethod(sceneDelegateClass, swizzledSelector)
-            else {
-                Logger.logInternal(
-                    "Swizzling failed: Could not find methods to swizzle scene(_:willConnectTo:options:)."
-                )
-                return
+            let hooked = replaceMethod(on: sceneDelegateClass, selector: selector) { originalIMP in
+                let original = originalIMP.map { unsafeBitCast($0, to: Original.self) }
+                let block:
+                    @convention(block) (AnyObject, UIScene, UISceneSession, UIScene.ConnectionOptions)
+                        -> Void = { object, scene, session, connectionOptions in
+                        Logger.logInternal("🔥 Swizzled method called: scene(_:willConnectTo:options:)")
+                        // Always call original implementation first to ensure UI setup
+                        original?(object, selector, scene, session, connectionOptions)
+                        AppSwizzler.handleSceneConnectionOptions(connectionOptions)
+                    }
+                return imp_implementationWithBlock(block)
             }
-
-            method_exchangeImplementations(originalMethod, swizzledMethod)
-            Logger.logInternal("✅ Successfully swizzled scene(_:willConnectTo:options:).")
+            Logger.logInternal(
+                hooked
+                    ? "✅ Successfully swizzled scene(_:willConnectTo:options:)."
+                    : "Swizzling failed: Could not swizzle scene(_:willConnectTo:options:).")
         }
 
         /// Swizzle: scene(_:continue:)
         /// fetch URL when app in background
-        private func swizzleSceneContinue(_ sceneDelegateClass: NSObject.Type) {
-            let originalSelector = #selector(UISceneDelegate.scene(_:continue:))
-            let swizzledSelector = #selector(sceneDelegateClass.swizzled_scene(_:continue:))
+        private func swizzleSceneContinue(_ sceneDelegateClass: AnyClass) {
+            let selector = #selector(UISceneDelegate.scene(_:continue:))
+            typealias Original = @convention(c) (AnyObject, Selector, UIScene, NSUserActivity) -> Void
 
-            guard
-                let originalMethod = class_getInstanceMethod(sceneDelegateClass, originalSelector),
-                let swizzledMethod = class_getInstanceMethod(sceneDelegateClass, swizzledSelector)
-            else {
-                Logger.logInternal(
-                    "Swizzling failed: Could not find methods to swizzle scene(_:continue:).")
-                return
+            let hooked = replaceMethod(on: sceneDelegateClass, selector: selector) { originalIMP in
+                let original = originalIMP.map { unsafeBitCast($0, to: Original.self) }
+                let block: @convention(block) (AnyObject, UIScene, NSUserActivity) -> Void = {
+                    object, scene, userActivity in
+                    Logger.logInternal(
+                        "🔥 Swizzled method called: scene(_ scene: UIScene, continue userActivity: NSUserActivity)"
+                    )
+                    if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+                        let url = userActivity.webpageURL
+                    {
+                        AppLinkService.shared.appLinkHandler(inComingURL: url)
+                        return
+                    }
+                    original?(object, selector, scene, userActivity)
+                }
+                return imp_implementationWithBlock(block)
             }
-
-            method_exchangeImplementations(originalMethod, swizzledMethod)
-            Logger.logInternal("✅ Successfully swizzled scene(_:continue:).")
+            Logger.logInternal(
+                hooked
+                    ? "✅ Successfully swizzled scene(_:continue:)."
+                    : "Swizzling failed: Could not swizzle scene(_:continue:).")
         }
 
         /// Swizzle: scene(_:openURLContexts:)
-        private func swizzleSceneOpenURLContexts(_ sceneDelegateClass: NSObject.Type) {
-            let originalSelector = #selector(UISceneDelegate.scene(_:openURLContexts:))
-            let swizzledSelector = #selector(
-                sceneDelegateClass.swizzle_scene_continue(_:openURLContexts:))
+        private func swizzleSceneOpenURLContexts(_ sceneDelegateClass: AnyClass) {
+            let selector = #selector(UISceneDelegate.scene(_:openURLContexts:))
+            typealias Original =
+                @convention(c) (AnyObject, Selector, UIScene, Set<UIOpenURLContext>) -> Void
 
-            guard
-                let originalMethod = class_getInstanceMethod(sceneDelegateClass, originalSelector),
-                let swizzledMethod = class_getInstanceMethod(sceneDelegateClass, swizzledSelector)
-            else {
-                Logger.logInternal(
-                    "Swizzling failed: Could not find methods to swizzle scene(_:openURLContexts:)."
-                )
+            let hooked = replaceMethod(on: sceneDelegateClass, selector: selector) { originalIMP in
+                let original = originalIMP.map { unsafeBitCast($0, to: Original.self) }
+                let block: @convention(block) (AnyObject, UIScene, Set<UIOpenURLContext>) -> Void = {
+                    object, scene, URLContexts in
+                    guard let urlContext = URLContexts.first else { return }
+                    let url = urlContext.url
+
+                    if !(url.scheme?.trimmed.isEmpty ?? false) {
+                        Logger.logInternal("🔥 Custom URL scheme opened: \(url)")
+                        AppLinkService.shared.appLinkHandler(inComingURL: url)
+                        return
+                    }
+                    original?(object, selector, scene, URLContexts)
+                }
+                return imp_implementationWithBlock(block)
+            }
+            Logger.logInternal(
+                hooked
+                    ? "✅ Successfully swizzled scene(_:openURLContexts:)."
+                    : "Swizzling failed: Could not swizzle scene(_:openURLContexts:).")
+        }
+
+        /// Handles a link the app was launched with (killed state).
+        private static func handleSceneConnectionOptions(
+            _ connectionOptions: UIScene.ConnectionOptions
+        ) {
+            // Check for Universal Links
+            if let userActivity = connectionOptions.userActivities.first,
+                userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+                let url = userActivity.webpageURL
+            {
+                Logger.logInternal("🔗 Handling Universal Link from kill state: \(url)")
+                // Add slight delay to ensure UI is fully rendered, especially critical for C++ projects
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    AppLinkService.shared.appLinkHandler(inComingURL: url)
+                }
                 return
             }
 
-            method_exchangeImplementations(originalMethod, swizzledMethod)
-            Logger.logInternal("✅ Successfully swizzled scene(_:openURLContexts:).")
+            // Check for Custom URL Schemes
+            if let urlContext = connectionOptions.urlContexts.first {
+                let url = urlContext.url
+                Logger.logInternal("🔗 Handling Custom URL from kill state: \(url)")
+                // Add slight delay to ensure UI is fully rendered, especially critical for C++ projects
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    AppLinkService.shared.appLinkHandler(inComingURL: url)
+                }
+            }
         }
     }
 
@@ -242,80 +428,4 @@
         }
     }
 
-    // MARK: - Swizzled SceneDelegate Methods
-
-    extension NSObject {
-
-        /// Swizzled: scene(_:willConnectTo:options:)
-        /// for init link when app in kill mode
-        @objc func swizzled_scene(
-            _ scene: UIScene, willConnectTo session: UISceneSession,
-            options connectionOptions: UIScene.ConnectionOptions
-        ) {
-            Logger.logInternal("🔥 Swizzled method called: scene(_:willConnectTo:options:)")
-
-            // Always call original implementation first to ensure UI setup
-            self.swizzled_scene(scene, willConnectTo: session, options: connectionOptions)
-
-            // Then handle deep links after UI is initialized
-            var handledLink = false
-
-            // Check for Universal Links
-            if let userActivity = connectionOptions.userActivities.first,
-                userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-                let url = userActivity.webpageURL
-            {
-
-                Logger.logInternal("🔗 Handling Universal Link from kill state: \(url)")
-                // Add slight delay to ensure UI is fully rendered, especially critical for C++ projects
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    AppLinkService.shared.appLinkHandler(inComingURL: url)
-                }
-                handledLink = true
-            }
-
-            // Check for Custom URL Schemes
-            if !handledLink, let urlContext = connectionOptions.urlContexts.first {
-                let url = urlContext.url
-                Logger.logInternal("🔗 Handling Custom URL from kill state: \(url)")
-                // Add slight delay to ensure UI is fully rendered, especially critical for C++ projects
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    AppLinkService.shared.appLinkHandler(inComingURL: url)
-                }
-            }
-        }
-
-        /// Swizzled: scene(_:continue:)
-        /// for background fetch the link when app in background
-        @objc func swizzled_scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-            Logger.logInternal(
-                "🔥 Swizzled method called: scene(_ scene: UIScene, continue userActivity: NSUserActivity)"
-            )
-            if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-                let url = userActivity.webpageURL
-            {
-                AppLinkService.shared.appLinkHandler(inComingURL: url)
-                return
-            }
-
-            self.swizzled_scene(scene, continue: userActivity)
-        }
-
-        /// Swizzled: scene(_:openURLContexts:)
-        /// for custom URL schema handling
-        @objc func swizzle_scene_continue(
-            _ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>
-        ) {
-            guard let urlContext = URLContexts.first else { return }
-            let url = urlContext.url
-
-            if !(url.scheme?.trimmed.isEmpty ?? false) {
-                Logger.logInternal("🔥 Custom URL scheme opened: \(url)")
-                AppLinkService.shared.appLinkHandler(inComingURL: url)
-                return
-            }
-
-            self.swizzle_scene_continue(scene, openURLContexts: URLContexts)
-        }
-    }
 #endif
