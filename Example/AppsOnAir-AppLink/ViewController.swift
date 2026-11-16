@@ -153,7 +153,7 @@ class ViewController: UIViewController {
         addTextField(nameField, label: "Name", text: "AppsOnAir")
         addTextField(urlField, label: "URL", text: "https://appsonair.com")
         // urlPrefix shouldn't contain http or https
-        addTextField(urlPrefixField, label: "URL Prefix", text: "kashyap.appsonair.link")
+        addTextField(urlPrefixField, label: "URL Prefix", text: "")
         addTextField(shortIdField, label: "Short ID", text: "")
         addTextField(androidFallbackField, label: "Android Fallback URL", text: "")
         addTextField(iosFallbackField, label: "iOS Fallback URL", text: "")
