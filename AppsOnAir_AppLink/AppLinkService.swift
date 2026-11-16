@@ -32,6 +32,12 @@ import Combine
         //Latest link for Dynamic Link
         @Published var latestLink: URL?
 
+        /// Last link passed to `appLinkHandler` and when, used to drop the same link arriving twice
+        /// (the SDK's scene hook plus the app calling `handleAppLink` for the same open).
+        private var lastHandledLink: (url: URL, date: Date)?
+        private let lastHandledLinkLock = NSLock()
+        private static let duplicateLinkInterval: TimeInterval = 2
+
         //Latest link for Referral Link
         @Published var latestReferralURL: URL?
 
@@ -930,6 +936,20 @@ import Combine
         internal func appLinkHandler(
             inComingURL: URL, completion: @escaping ([String: Any]) -> Void = { _ in }
         ) {
+            lastHandledLinkLock.lock()
+            let now = Date()
+            let isDuplicate =
+                lastHandledLink.map {
+                    $0.url == inComingURL
+                        && now.timeIntervalSince($0.date) < Self.duplicateLinkInterval
+                } ?? false
+            if !isDuplicate { lastHandledLink = (inComingURL, now) }
+            lastHandledLinkLock.unlock()
+
+            guard !isDuplicate else {
+                Logger.logInternal("Ignoring duplicate link: \(inComingURL)")
+                return
+            }
             self.latestLink = inComingURL
         }
     }

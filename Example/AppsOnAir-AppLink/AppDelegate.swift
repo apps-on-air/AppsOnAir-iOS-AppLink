@@ -4,7 +4,6 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let appLinkService = AppLinkService.shared
-    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // One call registers every callback. onReferralLinkDetected is deprecated and kept here
@@ -13,22 +12,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize the AppLink to track the deeplink and attribution tracking.
         appLinkService.initialize(
             onDeepLinkProcessed: { url, linkInfo in
-              // write the code for handling onDeepLinkProcessed flow based on url
+                // write the code for handling onDeepLinkProcessed flow based on url
+                var payload = linkInfo
+                payload["url"] = url?.absoluteString
+                AppLinkResultStore.shared[.deepLink] = responseText(payload)
             },
             onReferralLinkDetected: { referralInfo in
-                                 // write the code for handling onReferralLinkDetected flow based on referralInfo
-               },
+                // write the code for handling onReferralLinkDetected flow based on referralInfo
+                AppLinkResultStore.shared[.deprecatedListener] = responseText(referralInfo)
+            },
             onAttributionListener: { attributionInfo in
-                            // write the code for handling onAttributionListener flow based on attributionInfo
-
+                // write the code for handling onAttributionListener flow based on attributionInfo
+                AppLinkResultStore.shared[.attributionListener] = responseText(attributionInfo)
             })
         
         return true
     }
     
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        appLinkService.handleAppLink(incomingURL: url)
-            return true
+    // Links are delivered to SceneDelegate (UIScene lifecycle, required on iOS 27);
+    // AppsOnAir AppLink hooks it automatically.
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

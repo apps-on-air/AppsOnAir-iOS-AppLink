@@ -85,7 +85,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Requirements
 
-Minimum deployment target: 13.0
+Minimum deployment target: 15.0
 
 
 ## USAGE 
@@ -163,6 +163,8 @@ VStack {
     AppLinkService.shared.handleAppLink(incomingURL: url)
 }
 ```
+
+> **iOS 27:** Apps built with the iOS 27 SDK must adopt the UIScene lifecycle (`UIApplicationSceneManifest` in Info.plist with a scene delegate), otherwise they fail to launch. The SDK automatically detects the scene delegate class declared in the scene manifest or returned from `application(_:configurationForConnecting:options:)`, whatever its class name.
 
 **When using Swift with a SceneDelegate, it is necessary to add the following method inside SceneDelegate.swift**
 

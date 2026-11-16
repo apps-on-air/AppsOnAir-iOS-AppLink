@@ -1,3 +1,14 @@
+## 2.1.0
+
+* Added iOS 27 support (UIScene lifecycle is required for apps built with the iOS 27 SDK).
+    * The scene delegate is now detected from the Info.plist scene manifest and from `application(_:configurationForConnecting:options:)`, so custom class names and module names with hyphens work.
+    * Scene delegate methods are hooked per class, and are added when the app does not implement them, so links are no longer missed.
+    * For scene delegates detected this way, the app's own `scene(_:openURLContexts:)` and `scene(_:continue:)` are still called after the SDK handles a link, so other URL handling (e.g. sign-in callbacks) keeps working. Apps already supported in 2.0.2 behave exactly as before.
+    * The same link received twice within 2 seconds (e.g. from the SDK and from a manual `handleAppLink` call) is processed only once.
+* Example app migrated to the UIScene lifecycle.
+* Updated `AppsOnAir-Core` dependency to `>= 1.3.0` (iOS 27 / Xcode 27 support, ReachabilitySwift replaced by `NWPathMonitor`).
+* **Breaking:** Minimum iOS version is now 15.0, as required by `AppsOnAir-Core` 1.3.0 and Xcode 27.
+
 ## 2.0.2
 
 * Updated `AppsOnAir-Core` dependency requirement to `>= 1.1.1`.

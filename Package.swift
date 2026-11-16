@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "AppsOnAir-AppLink",
     platforms: [
-        .iOS(.v13)
+        .iOS(.v15)
     ],
     products: [
         .library(
@@ -15,7 +15,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/apps-on-air/AppsOnAir-iOS-Core.git",
-            exact: "1.2.1"
+            from: "1.3.0"
         )
     ],
     targets: [
